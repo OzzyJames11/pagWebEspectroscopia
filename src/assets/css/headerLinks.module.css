@@ -1,0 +1,65 @@
+/* Estilos para la lista */
+.list {
+    font-size: 14px;
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    color: #FFF;
+}
+
+/* Estilos para los elementos de la lista */
+.listItem {
+    float: left;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    color: #FFF;
+}
+
+/* Estilos para los enlaces de navegación */
+.navLink {
+    position: relative;
+    font-weight: 400;
+    font-size: 12px;
+    border-radius: 4px;
+    display: inline-flex;
+    text-decoration: none;
+    color: #FFF; /* Color del texto */
+    margin: 0 8px; /* Espaciado entre enlaces */
+}
+
+.navLink:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Estilos para los botones */
+.button {
+    color: white !important; /*Color del texto (forzado) */
+    background-color: transparent !important; /* Fondo transparente */
+    border: none; /* Sin borde */
+    padding: 8px 16px; /* Espaciado interno */
+    text-transform: none; /* Evita que el texto se transforme a mayúsculas */
+    font-size: 12px; /* Tamaño de la fuente */
+}
+
+.button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important; /* Fondo al hacer hover */
+}
+
+/* Estilos para los íconos */
+.icons {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px; /* Ajuste para separar el ícono del texto */
+}
+
+/* Estilos para los elementos */
+.items {
+    font-size: 12px;
+}
+
+/* Estilos para los divisores */
+.divider {
+    background-color: white;
+}
