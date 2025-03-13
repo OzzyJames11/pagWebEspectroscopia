@@ -1,0 +1,25 @@
+/* src/assets/css/Elements/UniversityList.css */
+.university-list ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.university-list li {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.3s ease;
+    color: #000; /* Texto negro */
+}
+
+.university-list li:hover {
+    background-color: #e0e0e0;
+}
+
+.funding-text {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #555; /* Texto gris para el mensaje de financiamiento */
+    text-align: center;
+}

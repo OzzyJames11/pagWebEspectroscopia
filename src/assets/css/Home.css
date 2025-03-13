@@ -1,55 +1,18 @@
+/* src/css/Home.css */
 .home {
-    padding: 20px;
-    font-family: Arial, sans-serif;
+    padding: 20px; /* Padding normal para el contenido */
+    background-color: #fff; /* Fondo claro */
     color: #000; /* Texto negro */
     position: relative;
 }
 
-/* .home h1 {
-    color: #000000;
-    text-align: center;
-} */
-
-.nav-tabs {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-    background-color: #f4f4f4;
-    padding: 10px;
-    border-radius: 5px;
-}
-
-.nav-tab {
-    margin: 0 10px;
-    padding: 10px 20px;
-    text-decoration: none;
-    color: #333;
-    font-weight: bold;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-}
-
-.nav-tab:hover {
-    background-color: #007bff;
-    color: white;
-}
-
-.nav-tab.active {
-    background-color: #007bff;
-    color: white;
-}
-
-
-/* src/pages/Home.css */
-/* .home {
-    padding: 20px;
-} */
-
 .background-image {
     position: relative;
-    width: 100%;
+    width: 100vw; /* Ocupa todo el ancho de la ventana */
+    margin-left: calc(-50vw + 50%); /* Centra el contenedor */
     height: 400px; /* Ajusta la altura según tus necesidades */
     overflow: hidden;
+    padding: 0; /* Elimina el padding para la imagen de fondo */
 }
 
 .background-img {
@@ -80,22 +43,24 @@
 .title-text {
     color: white !important; /* Texto blanco */
     font-size: 3rem; /* Tamaño del título */
+    font-weight: 500; /* Peso de la fuente */
     margin-bottom: 20px; /* Espacio entre el título y el subtítulo */
+    text-align: center !important; /* Centra el título */
 }
 
 .subtitle-text {
-    color: white; /* Texto blanco */
-    font-size: 1.25rem; /* Tamaño del subtítulo */
+    color: white !important; /* Texto blanco */
+    font-size: 1.3rem; /* Tamaño del subtítulo */
+    font-weight: 300; /* Peso de la fuente */
     max-width: 800px; /* Ancho máximo del subtítulo */
     margin: 0 auto; /* Centrar el subtítulo */
+    text-align: center !important; /* Centra el subtítulo */
 }
-
-
 
 .grid-container {
     display: grid;
     grid-template-columns: 1fr 1fr; /* Dos columnas de igual tamaño */
-    gap: 0; /* Espacio reducido entre las columnas */
+    gap: 20px; /* Espacio entre las columnas */
     margin-top: 20px;
 }
 
