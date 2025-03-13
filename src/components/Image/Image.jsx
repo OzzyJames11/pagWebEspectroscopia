@@ -1,3 +1,6 @@
+
+// Analizar para borrar proximamente
+
 import React from 'react';
 import classNames from 'classnames'; // Importa classnames para combinar clases
 import styles from '../../assets/css/image.module.css'; // Importa los estilos CSS

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, FormControlLabel, Checkbox, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import DataTable from '../../components/Elements/DataTable.jsx'; // Importar el componente DataTable
+import DataTable from '../../components/Elements/DataTable.jsx'; 
 
 import { PAGE_TITLES, ALERT_MESSAGES, SUBSYSTEM_TITLES } from '../../assets/Strings/Experiments/DataSummaryStrings.jsx';
 import { SUBSISTEMA1_COLUMNS } from '../../assets/Strings/Experiments/Subsistema1Strings.jsx';

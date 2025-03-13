@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Card, CardContent } from '@mui/material';
-import Grid2 from '@mui/material/Grid2'; // Importación correcta y actualizada
+import Grid2 from '@mui/material/Grid2'; 
 import styles from '../../assets/css/experimentsChooser.module.css';
 import {Typography} from '@mui/material';
 import Button from '../../components/Elements/Button';

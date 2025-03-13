@@ -3,7 +3,7 @@ import Subsistema2 from "./Subsistema2";
 import Subsistema3 from "./Subsistema3";
 import Subsistema4 from "./Subsistema4";
 import DataSummary from "./DataSummary";
-import ExperimentChooser from "./experimentChooser";
+import ExperimentChooser from "./ExperimentChooser";
 export{
     Subsistema1,
     Subsistema2,

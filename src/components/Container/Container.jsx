@@ -1,3 +1,6 @@
+
+// BORRAR
+
 import React from 'react';
 import { Container } from '@mui/material'; // Importa Container desde @mui/material
 import { styled } from '@mui/system'; // Importa styled para crear estilos
