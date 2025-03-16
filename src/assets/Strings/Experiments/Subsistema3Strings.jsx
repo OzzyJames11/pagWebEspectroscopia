@@ -1,6 +1,5 @@
 // agregar todas las unidades
-export const SUBSISTEMA1_COLUMNS = [
-    "Zenith Angle (°)",
+export const SUBSISTEMA3_COLUMNS = [
     "Voltage",
     "Current",
     "Efficiency",
