@@ -54,6 +54,12 @@ const Subsistema2 = () => {
         localStorage.setItem("historicalData_subsistema2", JSON.stringify(nuevosDatos));
     };
 
+    const handleEliminar = (index) => {
+        const nuevosDatos = datos.filter((_, i) => i !== index); // Filtra los datos para eliminar el registro seleccionado
+        setDatos(nuevosDatos);
+        localStorage.setItem("historicalData_subsistema2", JSON.stringify(nuevosDatos)); // Actualiza el localStorage
+    };
+
     const handleDescargarGraficos = () => {
         alert('Funcionalidad de descarga pendiente de implementación');
     };
@@ -73,7 +79,7 @@ const Subsistema2 = () => {
                 <Grid item xs={12} md={6}>
                     <SliderComponent value={zenithAngle} label="Zenith Angle" min={0} max={100} step={5} onChange={(e, newValue) => setZenithAngle(newValue)} />
                     <SliderComponent value={azimuthAngle} label="Azimuth Angle" min={0} max={100} step={5} onChange={(e, newValue) => setAzimuthAngle(newValue)} />
-                    <DataTable columns={SUBSISTEMA2_COLUMNS} data={datos} />
+                    <DataTable columns={SUBSISTEMA2_COLUMNS} data={datos} onDelete={handleEliminar}/>
                     <Box mt={2}>
                         <Button variant="contained" color="primary" onClick={handleGuardar} align="right">
                             {SAVE_BUTTON}
