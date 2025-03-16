@@ -1,6 +1,8 @@
 import React from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton } from '@mui/material';
 import styles from '../../assets/css/Elements/DataTable.module.css'
+import Button from '../../components/Elements/Button.jsx';
+import DeleteIcon from '@mui/icons-material/Delete'; // Ícono de basurero
 
 /**
  * Componente de tabla reutilizable para mostrar datos en filas y columnas.
@@ -22,7 +24,7 @@ import styles from '../../assets/css/Elements/DataTable.module.css'
  * @returns {JSX.Element} Tabla de datos renderizada.
  */
 
-const DataTable = ({ columns, data }) => {
+const DataTable = ({ columns, data, onDelete }) => {
     return (
         <TableContainer component={Paper} className={styles.dataTableContainer}>
             <Table>
@@ -33,6 +35,7 @@ const DataTable = ({ columns, data }) => {
                                 {column}
                             </TableCell>
                         ))}
+                        <TableCell className={styles.tableHeader}>Actions</TableCell> {/* Columna para acciones */}
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -43,6 +46,15 @@ const DataTable = ({ columns, data }) => {
                                     {row[column]}
                                 </TableCell>
                             ))}
+                            <TableCell className={styles.tableCell}>
+                                <IconButton
+                                    aria-label="delete"
+                                    onClick={() => onDelete(rowIndex)} // Llama a la función onDelete con el índice de la fila
+                                    color="error"
+                                >
+                                    <DeleteIcon />
+                                </IconButton>
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
