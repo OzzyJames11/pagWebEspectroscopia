@@ -4,7 +4,7 @@ import Map from '../components/Elements/Map';
 import UniversityList from '../components/UniversityList/UniversityList';
 import camaraPanelSolar from '../assets/img/experimentos/camaraPanelesSolares.png';
 import imagenHome from '../assets/img/experimentos/imagenHome01.jpg';
-
+import WeatherComponent from '../components/WeatherComponent';
 import '../assets/css/Home.css';
 
 const Home = () => {
@@ -44,9 +44,13 @@ const Home = () => {
                     </Typography>
                 </div>
             </div>       
-            <Typography variant="h4" marginTop={2} gutterBottom sx={{ textAlign: 'left' }}>{"Our Subsystems"}</Typography>
 
-            {/* Sección de imágenes con Grid */}
+            {/* Componente de Datos Meteorológicos */}
+            <Typography variant="h4" marginTop={2} gutterBottom sx={{ textAlign: 'left' }}>{"Data in real time"}</Typography>
+            <WeatherComponent />
+
+            {/* Sección "Our Subsystems" */}
+            <Typography variant="h4" marginTop={4} gutterBottom sx={{ textAlign: 'left' }}>{"Our Subsystems"}</Typography>
             <Grid container spacing={2} sx={{ marginBottom: 4 }}>
                 <Grid item xs={6}>
                     <Box
@@ -83,7 +87,7 @@ const Home = () => {
             </Grid>
 
             <Typography variant="h4" gutterBottom sx={{ textAlign: 'left' }}>{"EPN Station - Rubén Orellana Campus"}</Typography>
-            <Typography variant="h5" gutterBottom sx={{ textAlign: 'left' }}>{"Data in real time"}</Typography>
+
             <Typography variant="h4" gutterBottom sx={{ textAlign: 'left' }}>{"Partner Labs"}</Typography>
             <div className="grid-container">
                 <div className="map-container">
