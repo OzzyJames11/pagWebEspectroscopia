@@ -4,6 +4,7 @@ import PrivateRoute from './PrivateRoute';
 
 // Importa tus vistas (páginas)
 import Home from '../pages/Home';
+import Login from '../pages/Login';
 // import Dashboard from '../pages/Dashboard';
 // import Login from '../pages/Login';
 // import Admin from '../pages/Admin';
@@ -26,7 +27,7 @@ const AppRouter = () => {
                 <Route path={ROUTES.SUBSISTEMA3} element={<Subsistema3 />} />
                 <Route path={ROUTES.SUBSISTEMA4} element={<Subsistema4 />} />
                 <Route path={ROUTES.DATA_SUMMARY} element={<DataSummary />} />
-
+                <Route path="/login" element={<Login />} />
                 {/* Ruta privada (requiere autenticación) */}
                 {/*
                 <Route
