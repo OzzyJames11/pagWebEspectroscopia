@@ -1,5 +1,5 @@
-import { signInWithEmailAndPassword, signOut, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { auth } from '../../components/firebase/firebaseConfig';
+import { signInWithEmailAndPassword, signOut, signInWithPopup } from 'firebase/auth';
+import { auth, googleProvider } from '../../components/firebase/firebaseConfig';
 
 export const loginSuccess = (user) => ({
     type: 'LOGIN_SUCCESS',
@@ -23,8 +23,8 @@ export const login = (email, password) => async (dispatch) => {
 
 export const loginWithGoogle = () => async (dispatch) => {
     try {
-        const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
+        // USAR LA INSTANCIA EXPORTADA DESDE firebaseConfig.js
+        const result = await signInWithPopup(auth, googleProvider);
         const user = result.user;
         dispatch(loginSuccess(user));
     } catch (error) {

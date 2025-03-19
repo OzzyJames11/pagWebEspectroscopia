@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { login, loginWithGoogle } from '../Redux/Actions/authActions';
 import '../assets/css/Login.css';
+import image from '../assets/img/estudiantes.jpg';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -60,7 +61,7 @@ const Login = () => {
 
             {/* Imagen alineada a la derecha */}
             <div className="login-image">
-                <img src="../assets/img/estudiantes.jpg" alt="Login" />
+                <img src={image} alt="Login" />
             </div>
         </div>
     );
