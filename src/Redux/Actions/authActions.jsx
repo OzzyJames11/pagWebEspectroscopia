@@ -1,9 +1,13 @@
 import { signInWithEmailAndPassword, signOut, signInWithPopup } from 'firebase/auth';
-import { auth, googleProvider } from '../../components/firebase/firebaseConfig';
+import { auth, googleProvider } from '../../components/firebase/firebaseConfig.js';
 
 export const loginSuccess = (user) => ({
     type: 'LOGIN_SUCCESS',
-    payload: user,
+    payload: {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || "", // Evitar undefined
+    },
 });
 
 export const logoutSuccess = () => ({
@@ -12,14 +16,17 @@ export const logoutSuccess = () => ({
 
 export const login = (email, password) => async (dispatch) => {
     try {
+        console.log("Iniciando sesión con:", email);  // Verificar llamadas repetidas
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
+
         dispatch(loginSuccess(user));
     } catch (error) {
         console.error('Error en el inicio de sesión:', error.message);
         alert('Error al iniciar sesión: ' + error.message);
     }
 };
+
 
 export const loginWithGoogle = () => async (dispatch) => {
     try {

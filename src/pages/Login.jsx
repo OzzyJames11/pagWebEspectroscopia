@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { login, loginWithGoogle } from '../Redux/Actions/authActions';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { login, loginWithGoogle } from '../Redux/Actions/authActions.jsx';
+import { useNavigate } from 'react-router-dom'; // Importar
 import '../assets/css/Login.css';
 import image from '../assets/img/estudiantes.jpg';
 
@@ -8,21 +9,28 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const dispatch = useDispatch();
+    const navigate = useNavigate(); // Hook para navegación
+    const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
 
-    // Iniciar sesión con correo y contraseña
+    // Redirigir si el usuario está autenticado
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/'); // Redirigir al home
+        }
+    }, [isAuthenticated, navigate]);
+
     const handleLogin = (e) => {
         e.preventDefault();
         dispatch(login(email, password));
     };
 
-    // Iniciar sesión con Google
     const handleGoogleLogin = () => {
         dispatch(loginWithGoogle());
     };
 
+
     return (
         <div className="login-container">
-            {/* Cuadro de login alineado a la izquierda */}
             <div className="login-form">
                 <h2>Sign in</h2>
                 <input
@@ -45,13 +53,11 @@ const Login = () => {
                     Login
                 </button>
 
-                {/* Crear cuenta */}
                 <div className="create-account">
-                    <span>Don't have an account? </span>
+                    <span style={{ color: '#007bff' }}>Don't you have an account? </span>
                     <a href="/register">Create an account</a>
                 </div>
 
-                {/* Botón para iniciar sesión con Google */}
                 <div className="social-login">
                     <button className="google-button" onClick={handleGoogleLogin}>
                         Sign in with Google
@@ -59,7 +65,6 @@ const Login = () => {
                 </div>
             </div>
 
-            {/* Imagen alineada a la derecha */}
             <div className="login-image">
                 <img src={image} alt="Login" />
             </div>

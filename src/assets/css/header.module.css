@@ -3,9 +3,11 @@
     background-color: #001f3e;
 }
 
-/* Estilos para posición absoluta */
-.absolute {
-    position: absolute;
+/* Eliminar la transparencia */
+.transparent {
+    background-color: #5c9cdd !important;
+    box-shadow: none;
+    color: #ffffff;
 }
 
 /* Estilos para posición fija */
