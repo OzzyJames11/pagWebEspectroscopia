@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { login, loginWithGoogle } from '../Redux/Actions/authActions.jsx';
+import { login, loginWithGoogle, resetPassword } from '../Redux/Actions/authActions.jsx';
 import { useNavigate } from 'react-router-dom'; // Importar
 import { Link } from 'react-router-dom';
 import '../assets/css/Login.css';
@@ -29,6 +29,13 @@ const Login = () => {
         dispatch(loginWithGoogle());
     };
 
+    const handleResetPassword = () => {
+        const emailPrompt = prompt('Enter your email to reset password:');
+        if (emailPrompt) {
+            dispatch(resetPassword(emailPrompt));
+        }
+    };
+
 
     return (
         <div className="login-container">
@@ -53,6 +60,12 @@ const Login = () => {
                 <button type="submit" className="login-button" onClick={handleLogin}>
                     Login
                 </button>
+
+                <div className="forgot-password">
+                    <button className="forgot-password-button" onClick={handleResetPassword}>
+                        Forgot Password?
+                    </button>
+                </div>
 
                 <div className="create-account">
                     <span style={{ color: '#007bff' }}>Don't you have an account? </span>

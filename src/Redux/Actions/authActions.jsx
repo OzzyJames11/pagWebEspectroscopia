@@ -1,6 +1,7 @@
 import { signInWithEmailAndPassword, signOut, signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../../components/firebase/firebaseConfig.js';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { sendPasswordResetEmail } from 'firebase/auth';
 
 export const loginSuccess = (user) => ({
     type: 'LOGIN_SUCCESS',
@@ -75,5 +76,15 @@ export const registerWithEmail = (firstName, lastName, email, password, navigate
     } catch (error) {
         console.error('Error al registrar:', error.message);
         alert('Error al registrar: ' + error.message);
+    }
+};
+
+export const resetPassword = (email) => async () => {
+    try {
+        await sendPasswordResetEmail(auth, email);
+        alert('Se ha enviado un correo para restablecer la contraseña.');
+    } catch (error) {
+        console.error('Error al restablecer la contraseña:', error.message);
+        alert('Error al restablecer la contraseña: ' + error.message);
     }
 };
