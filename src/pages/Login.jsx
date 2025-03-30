@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { login, loginWithGoogle } from '../Redux/Actions/authActions.jsx';
 import { useNavigate } from 'react-router-dom'; // Importar
+import { Link } from 'react-router-dom';
 import '../assets/css/Login.css';
 import image from '../assets/img/estudiantes.jpg';
 
@@ -55,7 +56,7 @@ const Login = () => {
 
                 <div className="create-account">
                     <span style={{ color: '#007bff' }}>Don't you have an account? </span>
-                    <a href="/register">Create an account</a>
+                    <Link to="/register">Create an account</Link>
                 </div>
 
                 <div className="social-login">

@@ -1,5 +1,6 @@
 import { signInWithEmailAndPassword, signOut, signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../../components/firebase/firebaseConfig.js';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
 export const loginSuccess = (user) => ({
     type: 'LOGIN_SUCCESS',
@@ -47,5 +48,32 @@ export const logout = () => async (dispatch) => {
     } catch (error) {
         console.error('Error al cerrar sesión:', error.message);
         alert('Error al cerrar sesión: ' + error.message);
+    }
+};
+
+export const registerWithEmail = (firstName, lastName, email, password, navigate) => async (dispatch) => {
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Actualizar nombre y apellido en Firebase
+        await updateProfile(user, {
+            displayName: `${firstName} ${lastName}`,
+        });
+
+        // Solo enviar los datos mínimos del usuario a Redux para evitar exceso de información
+        const userData = {
+            uid: user.uid,
+            email: user.email,
+            displayName: `${firstName} ${lastName}`,
+        };
+
+        dispatch({ type: 'LOGIN_SUCCESS', payload: userData });
+
+        // Redirigir al home de manera segura
+        navigate('/');
+    } catch (error) {
+        console.error('Error al registrar:', error.message);
+        alert('Error al registrar: ' + error.message);
     }
 };
