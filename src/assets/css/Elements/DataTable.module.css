@@ -1,0 +1,29 @@
+.dataTableContainer {
+    margin-top: 20px;
+    overflow-x: auto;
+}
+
+.tableHeader {
+    /* font-weight: bold; */
+    background-color: #f0f0f0;
+    white-space: normal; /* Permite el salto de línea */
+    word-wrap: break-word; /* Rompe palabras largas si es necesario */
+    max-width: 100px; /* Ancho fijo para las celdas del encabezado */
+    text-align: center; /* Centra el texto */
+    /* height: 10px ; */
+}
+
+/* Separaciones verticales en la tabla */
+/* .tableHeader, .tableCell {
+    border: 1px solid #e0e0e0; 
+} */
+
+.tableRow:hover {
+    background-color: #f1f1f1; /* Color de fondo al hacer hover */
+    transition: background-color 0.3s ease; /* Transición suave */
+}
+
+.tableCell {
+    border: 1px solid #e0e0e0; /* lineas verticales en el contenido */
+    text-align: center;
+}

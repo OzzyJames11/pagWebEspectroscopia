@@ -1,0 +1,61 @@
+#root {
+  width: 100%; /* Ocupa todo el ancho */
+  margin: 0 auto;
+  padding: 0; /* Elimina el padding */
+  text-align: center;
+  padding-top: 25px; /* Agrega espaciado para que el header no tape contenido*/
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* Estilos globales para la página */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ocupa toda la altura de la ventana */
+  width: 100%; /* Ocupa todo el ancho */
+  margin: 0; /* Elimina márgenes */
+  padding: 0; /* Elimina padding */
+  box-shadow: none; /* Elimina la sombra si no es necesaria */
+}
+
+.main-content {
+  flex: 1; /* Hace que el contenido principal ocupe el espacio restante */
+  width: 100%; /* Ocupa todo el ancho */
+  margin: 0; /* Elimina márgenes */
+  padding: 0; /* Elimina padding */
+}
