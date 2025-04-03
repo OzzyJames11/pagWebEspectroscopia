@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Box, Paper, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 
 import imagen_subsistema1 from "../../assets/img/experimentos/imagen_subsistema1.png";
 import imagen_subsistema1V2 from "../../assets/img/experimentos/imagen_subsistema1V2.png";
-import camaraPanelSolar from "../../assets/img/experimentos/camaraPanelesSolares.png";
+
+import Hls from 'hls.js';
 
 // Importación de componentes
 import DataTable from "../../components/Elements/DataTable";
@@ -73,6 +74,11 @@ const Subsistema3 = () => {
   } = PAGE_TITLES;
 
   //Estados para salir de pagina
+
+  //Estados para video 
+  const videoRef = useRef(null);
+  const [isStreamActive, setIsStreamActive] = useState(false);
+  const [streamError, setStreamError] = useState('');
 
   //Estados para gráficos
   const [contadorValue, setContadorValue] = useState("");
@@ -234,6 +240,99 @@ const Subsistema3 = () => {
     const datosGuardados =
       JSON.parse(localStorage.getItem("historicalData_subsistema3")) || [];
     setDatos(datosGuardados);
+
+    const initVideoStream = async () => {
+      try {
+          // Intenta conexión WebRTC primero
+          const pc = new RTCPeerConnection({
+              iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+          });
+
+          pc.ontrack = (event) => {
+              if (videoRef.current && !videoRef.current.srcObject) {
+                  videoRef.current.srcObject = event.streams[0];
+                  setIsStreamActive(true);
+                  setStreamError('');
+              }
+          };
+
+          const streamId = "mystream";
+          const response = await fetch(
+              `http://172.17.103.80:5080/WebRTCApp/rest/v2/broadcasts/${streamId}/websocket`,
+              {
+                  headers: {
+                      'Content-Type': 'application/json'
+                  }
+              }
+          );
+
+          if (!response.ok) {
+              throw new Error('No se pudo conectar al servidor de streaming');
+          }
+
+          const offer = await response.json();
+          await pc.setRemoteDescription(offer);
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+
+          await fetch(
+              `http://172.17.103.80:5080/WebRTCApp/rest/v2/broadcasts/${streamId}/answer`,
+              {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(answer)
+              }
+          );
+
+          // Fallback a HLS si WebRTC falla después de 5 segundos
+          const fallbackTimer = setTimeout(() => {
+              if (!isStreamActive) {
+                  initHLSFallback();
+              }
+          }, 5000);
+
+          return () => clearTimeout(fallbackTimer);
+
+      } catch (error) {
+          console.error("Error WebRTC:", error);
+          initHLSFallback();
+      }
+  };
+
+  const initHLSFallback = () => {
+      if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource('http://172.17.103.80:5080/WebRTCApp/streams/mystream.m3u8');
+          hls.attachMedia(videoRef.current);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+              setIsStreamActive(true);
+              setStreamError('');
+          });
+          hls.on(Hls.Events.ERROR, (event, data) => {
+              if (data.fatal) {
+                  setStreamError('Error cargando la transmisión HLS');
+              }
+          });
+      } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
+          // Soporte nativo para Safari
+          videoRef.current.src = 'http://172.17.103.80:5080/WebRTCApp/streams/mystream.m3u8';
+          videoRef.current.addEventListener('loadedmetadata', () => {
+              setIsStreamActive(true);
+              setStreamError('');
+          });
+      } else {
+          setStreamError('Tu navegador no soporta la reproducción de video en vivo');
+      }
+  };
+
+  initVideoStream();
+
+  return () => {
+      if (videoRef.current?.srcObject) {
+          videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+      }
+  };
+
   }, []);
 
   // Función para generar valores aleatorios
@@ -514,18 +613,46 @@ const Subsistema3 = () => {
           md={6}
           sx={{ display: "flex", flexDirection: "column" }}
         >
-          <Box
-            sx={{ display: "flex", justifyContent: "center", width: "100%" }}
-          >
-            <Paper className="paper-camera">
-              <Typography variant="h5">{CAMERA_TITLE}</Typography>
-              <img
-                src={camaraPanelSolar}
-                alt="Gráfico 1"
-                className="paper-image"
-              />
-            </Paper>
+          
+          <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+              <Paper className="paper-camera" sx={{ p: 2, width: '100%' }}>
+                  <Typography variant="h5" gutterBottom>
+                      {CAMERA_TITLE}
+                      {isStreamActive && (
+                          <Typography component="span" variant="caption" color="success.main" sx={{ ml: 1 }}>
+                              ● En vivo
+                          </Typography>
+                      )}
+                  </Typography>
+                  {streamError ? (
+                      <Box sx={{ 
+                          height: 300,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: '#f5f5f5',
+                          borderRadius: 1
+                      }}>
+                          <Typography color="error">{streamError}</Typography>
+                      </Box>
+                  ) : (
+                      <video
+                          ref={videoRef}
+                          autoPlay
+                          playsInline
+                          muted
+                          controls
+                          style={{
+                              width: '100%',
+                              maxHeight: '400px',
+                              borderRadius: '4px',
+                              backgroundColor: '#000'
+                          }}
+                      />
+                  )}
+              </Paper>
           </Box>
+
           <Box
             sx={{ display: "flex", justifyContent: "center", width: "100%" }}
           >
