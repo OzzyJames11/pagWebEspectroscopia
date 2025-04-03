@@ -257,7 +257,7 @@ const Subsistema1 = () => {
 
           const streamId = "mystream";
           const response = await fetch(
-              `http://172.17.103.80:5080/WebRTCApp/rest/v2/broadcasts/${streamId}/websocket`,
+              `http://172.30.43.173:5080/WebRTCApp/rest/v2/broadcasts/${streamId}/websocket`,
               {
                   headers: {
                       'Content-Type': 'application/json'
@@ -275,7 +275,7 @@ const Subsistema1 = () => {
           await pc.setLocalDescription(answer);
 
           await fetch(
-              `http://172.17.103.80:5080/WebRTCApp/rest/v2/broadcasts/${streamId}/answer`,
+              `http://172.30.43.173:5080/WebRTCApp/rest/v2/broadcasts/${streamId}/answer`,
               {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
@@ -301,7 +301,7 @@ const Subsistema1 = () => {
   const initHLSFallback = () => {
       if (Hls.isSupported()) {
           const hls = new Hls();
-          hls.loadSource('http://172.17.103.80:5080/WebRTCApp/streams/mystream.m3u8');
+          hls.loadSource('http://172.30.43.173:5080/WebRTCApp/streams/mystream.m3u8');
           hls.attachMedia(videoRef.current);
           hls.on(Hls.Events.MANIFEST_PARSED, () => {
               setIsStreamActive(true);
@@ -314,7 +314,7 @@ const Subsistema1 = () => {
           });
       } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
           // Soporte nativo para Safari
-          videoRef.current.src = 'http://172.17.103.80:5080/WebRTCApp/streams/mystream.m3u8';
+          videoRef.current.src = 'http://172.30.43.173:5080/WebRTCApp/streams/mystream.m3u8';
           videoRef.current.addEventListener('loadedmetadata', () => {
               setIsStreamActive(true);
               setStreamError('');
