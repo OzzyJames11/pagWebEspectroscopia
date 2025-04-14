@@ -108,7 +108,7 @@ const Subsistema2 = () => {
   useEffect(() => {
     //Enviar mensaje de inicio a los arduinos
     change5sec();
-    hacerCambio();
+    //hacerCambio();
   }, []);
 
   // 🔹 Obtener ángulo del panel una sola vez al montar el componente
@@ -214,15 +214,18 @@ const Subsistema2 = () => {
         console.log("Mensaje recibidooo:", mensaje);
         if (mensaje === "EndMov") {
           setIsSliderDisabled_1(false);
+          setIsSliderDisabled_2(false);
           setIsMoveButtonDisabled_1(false);
           setIsTextDisabled_1(false);
           setIsGuardarLecturaDisabled_1(false);
         } else if (mensaje === "PITCH:") {
           console.log(mensaje);
           setEnviarAngulo(true);
+          console.log(enviarAngulo);
         } else if (mensaje === "ROLL:") {
           console.log(mensaje);
           setEnviarAngulo2(true);
+          console.log(enviarAngulo2);
         }
 
         //change5sec(); //enviar mensaje de mover de nuevo
@@ -284,7 +287,7 @@ const Subsistema2 = () => {
 
   const handleBack = () => {
     noEnviarNuevoAngulo();
-    change1hour();
+    //change1hour();
     navigate("/experiments/experimentChooser");
     eliminarDatos();
   };
@@ -292,8 +295,9 @@ const Subsistema2 = () => {
   //Acciones al presionar el Boton Move (Envío de dato de ángulo)
   const envioDatos = async () => {
     if (enviarAngulo) {
+      console.log(enviarAngulo);
       setIsSliderDisabled_1(true);
-      setIsSliderDisabled_Zenith(true);
+      setIsSliderDisabled_2(true);
       setIsMoveButtonDisabled_1(true);
       setIsGuardarLecturaDisabled_1(true);
       setIsTextDisabled_1(true);
@@ -301,7 +305,7 @@ const Subsistema2 = () => {
       try {
         const msg = "p" + angulo; // Mensaje a enviar
         const db = getDatabase(app);
-        const docRef = ref(db, "Exp1/FrontToBack"); // Ruta correcta en la BD
+        const docRef = ref(db, "Exp2/FrontToBack"); // Ruta correcta en la BD
 
         set(docRef, msg).catch((error) => {
           alert("Error: " + error.message);
@@ -312,44 +316,28 @@ const Subsistema2 = () => {
       } catch (error) {
         console.error("Error al enviar datos a Firebase:", error);
       }
-      let intervalo = setInterval(() => {
-        console.log("Verificando...");
-        if (enviarAngulo2 === "PITCH:") {
-          // Condición que esperamos
-          console.log("Condición cumplida, ejecutando acción...");
-          clearInterval(intervalo); // Detiene la verificación
-          try {
-            //const msg = anguloZenith
-            const msg = "r" + angulo;
-            const db = getDatabase(app);
-            const docRef = ref(db, "Exp1/FrontToBack");
-            set(docRef, msg).catch((error) => {
-              alert("Error: " + error.message);
-            });
-            console.log(`Mensaje enviado: ${messageToSend}`);
-          } catch (error) {
-            console.error("Error al enviar datos seriales:", error);
-          }
-        }
-      }, 200); // Verifica cada 0.2 segundos
     }
-
-    // try {
-    //   //const msg = anguloZenith
-    //   const msg = "r" + angulo;
-    //   const db = getDatabase(app);
-    //   const docRef = ref(db, "Exp1/FrontToBack");
-    //   set(docRef, msg)
-    //     .catch((error) => {
-    //       alert("Error: " + error.message);
-    //     });
-    //   console.log(`Mensaje enviado: ${messageToSend}`);
-    // } catch (error) {
-    //   console.error("Error al enviar datos seriales:", error);
-    // }
-    //change5sec();
-    //hacerCambio();
   };
+  useEffect(() => {
+    // if (isFirstRender.current) {
+    //   isFirstRender.current = false; // Lo marcamos como que ya se hizo el primer render
+    //   return;
+    // }
+    if (enviarAngulo2) {
+    try {
+      const msg = "r" + angulo2;
+      const db = getDatabase(app);
+      const docRef = ref(db, "Exp2/FrontToBack");
+      set(docRef, msg).catch((error) => {
+        alert("Error: " + error.message);
+      });
+      console.log(`Mensaje enviado: ${msg}`);
+      setEnviarAngulo2(false);
+    } catch (error) {
+      console.error("Error al enviar datos seriales:", error);
+    }
+  }
+  }, [enviarAngulo2]);
 
   //Envio de señal para 1 hora
   const change1hour = async () => {
@@ -380,7 +368,7 @@ const Subsistema2 = () => {
     } catch (error) {
       console.error("Error al enviar datos seriales:", error);
     }
-    hacerCambio();
+    //hacerCambio();
   };
 
   //Envío de señal para parar de enviar ángulos
@@ -480,8 +468,8 @@ const Subsistema2 = () => {
           <SliderComponent
             value={angulo}
             label="Actual Azimuth Angle"
-            min={-45}
-            max={45}
+            min={-30}
+            max={30}
             step={5}
             actualAngle={actualPanelAngle}
             onChange={(e, newValue) => setAngulo(newValue)}
@@ -490,8 +478,8 @@ const Subsistema2 = () => {
           <SliderComponent
             value={angulo2}
             label="Actual Azimuth Angle"
-            min={-45}
-            max={45}
+            min={-30}
+            max={30}
             step={5}
             actualAngle={actualPanelAngle2}
             onChange={(e, newValue) => setAngulo2(newValue)}

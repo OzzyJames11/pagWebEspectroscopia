@@ -27,10 +27,6 @@ import '../../assets/css/Elements/SliderComponent.css';
 const SliderComponent = ({ value, onChange, label, min, max, step, disabled, actualAngle }) => {
     const marks = [
         {
-          value: -45,
-          label: '-45°',
-        },
-        {
           value: -30,
           label: '-30°',
         },
@@ -49,10 +45,6 @@ const SliderComponent = ({ value, onChange, label, min, max, step, disabled, act
         {
           value: 30,
           label: '30°',
-        },
-        {
-          value: 45,
-          label: '45°',
         },
       ];
       

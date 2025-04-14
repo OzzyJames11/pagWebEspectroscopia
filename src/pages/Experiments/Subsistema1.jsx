@@ -284,7 +284,6 @@ const Subsistema1 = () => {
   const envioDatos = async () => {
     if (enviarAngulo) {
       setIsSliderDisabled_1(true);
-      setIsSliderDisabled_Zenith(true);
       setIsMoveButtonDisabled_1(true);
       setIsGuardarLecturaDisabled_1(true);
       setIsTextDisabled_1(true);
@@ -452,8 +451,8 @@ const Subsistema1 = () => {
           <SliderComponent
             value={angulo}
             label="Actual Azimuth Angle"
-            min={-45}
-            max={45}
+            min={-30}
+            max={30}
             step={5}
             actualAngle={actualPanelAngle}
             onChange={(e, newValue) => setAngulo(newValue)}
