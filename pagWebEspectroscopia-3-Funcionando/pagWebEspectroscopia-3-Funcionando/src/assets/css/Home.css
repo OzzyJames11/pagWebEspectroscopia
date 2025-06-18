@@ -1,0 +1,79 @@
+/* src/css/Home.css */
+.home {
+    padding: 20px; /* Padding normal para el contenido */
+    background-color: #fff; /* Fondo claro */
+    color: #000; /* Texto negro */
+    position: relative;
+}
+
+.background-image {
+    position: relative;
+    width: 100vw; /* Ocupa todo el ancho de la ventana */
+    margin-left: calc(-50vw + 50%); /* Centra el contenedor */
+    height: 400px; /* Ajusta la altura según tus necesidades */
+    overflow: hidden;
+    padding: 0; /* Elimina el padding para la imagen de fondo */
+}
+
+.background-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Asegura que la imagen cubra todo el espacio */
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Capa opaca (negro con 50% de opacidad) */
+}
+
+.text-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    width: 100%;
+    z-index: 1; /* Asegura que el texto esté encima de la capa opaca */
+}
+
+.title-text {
+    color: white !important; /* Texto blanco */
+    font-size: 3rem; /* Tamaño del título */
+    font-weight: 500; /* Peso de la fuente */
+    margin-bottom: 20px; /* Espacio entre el título y el subtítulo */
+    text-align: center !important; /* Centra el título */
+}
+
+.subtitle-text {
+    color: white !important; /* Texto blanco */
+    font-size: 1.3rem; /* Tamaño del subtítulo */
+    font-weight: 300; /* Peso de la fuente */
+    max-width: 800px; /* Ancho máximo del subtítulo */
+    margin: 0 auto; /* Centrar el subtítulo */
+    text-align: center !important; /* Centra el subtítulo */
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Dos columnas de igual tamaño */
+    gap: 20px; /* Espacio entre las columnas */
+    margin-top: 20px;
+}
+
+.map-container {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 300px; /* Altura fija para el mapa */
+}
+
+.list-container {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #f9f9f9;
+}

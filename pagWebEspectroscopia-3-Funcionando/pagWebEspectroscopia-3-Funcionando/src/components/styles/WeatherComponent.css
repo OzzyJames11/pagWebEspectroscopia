@@ -1,0 +1,89 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px; /* Añade padding para que el contenido no quede pegado a los bordes */
+    background: rgb(249, 249, 249);
+    color: black;
+    width: 100%; /* Ocupa todo el ancho disponible */
+    max-width: 1200px; /* Mismo ancho máximo que .nav-tabs */
+    margin: 0 auto; /* Centrar el contenedor */
+}
+
+.card {
+    padding: 20px;
+    background-color: rgb(255, 255, 255);
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgb(0, 0, 0);
+    text-align: center;
+    width: 95%;
+    max-width: 1200px;
+    margin: 0 auto; /* Centrar el contenedor */
+}
+
+.weatherGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.weatherBox {
+    padding: 20px;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: black;
+}
+
+.data-name {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.icon {
+    margin-bottom: 10px;
+    font-size: 24px;
+}
+
+.data-value {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.icon-temperature {
+    color: #ff8c00; /* Naranja */
+}
+
+.icon-humidity {
+    color: #007BFF; /* Azul */
+}
+
+.icon-wind {
+    color: #28a745; /* Verde */
+}
+
+.icon-precipitation {
+    color: #6f42c1; /* Morado */
+}
+
+.icon-cloudiness {
+    color: #6c757d; /* Gris */
+}
+
+.icon-pressure {
+    color: #dc3545; /* Rojo */
+}
+
+.icon-uv {
+    color: #ffc107; /* Amarillo */
+}
+
+.icon-weather {
+    color: #17a2b8; /* Turquesa */
+}

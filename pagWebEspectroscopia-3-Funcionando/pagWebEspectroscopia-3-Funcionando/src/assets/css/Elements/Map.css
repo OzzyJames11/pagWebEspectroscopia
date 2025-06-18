@@ -1,0 +1,14 @@
+/* src/components/Map/Map.css
+.map-container {
+    flex: 2;
+    margin-right: 20px;
+} */
+
+/* src/components/MinimalistMap/MinimalistMap.css */
+.map-container {
+    flex: 1;
+    margin-right: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+}

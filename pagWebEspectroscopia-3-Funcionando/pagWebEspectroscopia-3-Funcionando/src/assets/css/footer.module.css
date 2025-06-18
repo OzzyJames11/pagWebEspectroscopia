@@ -1,0 +1,70 @@
+/* Estilos para el footer */
+.footer {
+    width: 100%; /* Ocupa todo el ancho */
+    padding: 1rem 0; /* Reducimos el padding vertical */
+    color: #FFF;
+    background-color: #001f3e;
+    position: relative; /* Cambia a relative para que esté en el flujo normal */
+    z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    margin-top: auto; /* Empuja el footer al final */
+    box-sizing: border-box; /* Asegura que el padding no afecte el ancho */
+    min-width: 360px; /* Ancho mínimo */
+}
+
+
+/* Estilos para el logo */
+.logo {
+    display: flex;
+    justify-content: center;
+}
+
+/* Estilos para el elemento init */
+/* .init {
+    display: inline-block;
+    bottom: -4px;
+} */
+
+/* Estilos para el contenido */
+.content {
+    background-color: #ffffffcc;
+    box-shadow: 0px 3px 6px #00000029;
+    padding: 24px 0;
+    color: black;
+    width: 90%; /* Ancho ligeramente menor que el footer */
+    max-width: 1200px; /* Ancho máximo del contenido */
+    margin: 0 auto; /* Centrar el contenido */
+    box-sizing: border-box; /* Asegura que el padding no afecte el ancho */
+    border-radius: 8px; /* Bordes redondeados para mejor estética */
+}
+
+/* Estilos para el copyright */
+.coppyRight {
+    padding: 0.4rem 0; /* Reducimos el padding vertical */
+    background-color: #001f3e; /* Fondo del copyright */
+    color: white; /* Color del texto */
+    width: 100%; /* Ocupa todo el ancho */
+    text-align: center; /* Centrar el texto */
+    box-sizing: border-box; /* Asegura que el padding no afecte el ancho */
+}
+
+/* .footer p,
+.footer h1,
+.footer h2,
+.footer h3,
+.footer h4,
+.footer h5,
+.footer h6,
+.footer a,
+.footer span {
+    font-family: 'Poppins', Arial, sans-serif;
+} */
+
+
+/* Estilos para el contenido del footer */
+/* .footer .content {
+    background-color: #FFF; 
+    box-shadow: 0px 3px 6px #00000029; 
+    padding: 24px 0;
+    color: black;
+} */
+

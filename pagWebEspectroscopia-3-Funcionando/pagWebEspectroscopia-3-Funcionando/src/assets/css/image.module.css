@@ -1,0 +1,22 @@
+/* Estilos para la clase .img */
+.img {
+    background-size: cover;
+    background-position: center center;
+}
+
+/* Estilos para la clase .blue */
+.blue {
+    background-color: rgba(0, 31, 62, 0.5);
+    height: 100%;
+}
+
+/* Estilos para la clase .black */
+.black {
+    background-color: rgba(0, 0, 0, 0.5);
+    height: 100%;
+}
+
+/* Estilos para la clase .none */
+.none {
+    height: 100%;
+}

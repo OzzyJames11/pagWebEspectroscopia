@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Reset básico para eliminar márgenes y paddings predeterminados */
+
+
+body {
+    font-family: 'Poppins', Arial, sans-serif;
+    font-size: 1rem;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /*background-color: #8f10ba89;*/  /* Fondo suave */
+    line-height: 1.6;  /* Mejorando la legibilidad con un mayor espacio entre líneas */
+}
+  
+
+html {
+  font-family: 'Poppins', Arial, sans-serif; /* Aplica Poppins a los títulos */
+  font-size: 18px;  /* Tamaño base de 16px */
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+h1 {
+    font-family: 'Poppins', Arial, sans-serif; /* Aplica Poppins a los títulos */
+    font-size: 3rem;  /* Tamaño grande para los títulos */
+    font-weight: 600;  /* Hacer que el texto sea más negrita */
+}
+
+p {
+    /* font-family: 'Poppins', Arial, sans-serif; Aplica Poppins a los títulos */
+    font-size: 1rem;  /* Tamaño de letra para los párrafos */
+}
+
+/* estilos para la navegación*/
+
+nav {
+    background-color: #f4f4f4;
+    padding: 1rem;
+    text-align: center;
+  }
+  
+nav a {
+  margin: 0 1rem;
+  text-decoration: none;
+  color: #333;
+}
+
+nav a:hover {
+  color: #007bff;
+}
+  
+
+/* h1, h2, h3, h4, h5, h6, p, a, span, button, input, textarea, label {
+  font-family: 'Poppins', Arial, sans-serif;
+} */
