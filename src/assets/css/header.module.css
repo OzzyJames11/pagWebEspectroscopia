@@ -1,31 +1,142 @@
-/* Estilos para el AppBar */
+/* --- AppBar y comportamiento general --- */
 .appBar {
-    background-color: #001f3e;
+  background-color: #001f3e;
 }
 
-/* Estilos para posición absoluta */
 .absolute {
-    position: absolute;
+  position: absolute;
 }
 
-/* Estilos para posición fija */
 .fixed {
-    position: fixed;
+  position: fixed;
 }
 
-/* Estilos para el contenedor */
-.container {
-    min-height: 48px;
-    flex: 1;
-    align-items: center;
-    justify-content: space-between;
-    display: flex;
-    flex-wrap: nowrap;
-}
-
-/* Estilos para el AppBar transparente */
 .transparent {
-    background-color: transparent !important;
-    box-shadow: none;
-    color: #FFFFFF;
+  background-color: transparent !important;
+  box-shadow: none;
+  color: #ffffff;
+}
+
+/* --- Layout principal del header --- */
+.container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+/* Logo a la izquierda */
+.logoSection {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 1;
+}
+
+/* Menú móvil a la derecha */
+.mobileMenu {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
+}
+
+/* --- Navegación horizontal --- */
+.navContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+/* Botones de navegación */
+.navLinks {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5rem;
+  flex: 1;
+}
+
+/* Cada enlace */
+.navLink {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Botón visual */
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  color: white;
+  font-weight: 600;
+  text-transform: none;
+  padding: 6px 12px;
+  background: transparent;
+}
+
+/* Iconos */
+.icons {
+  font-size: 20px;
+}
+
+/* Texto del ítem */
+.items {
+  font-size: 15px;
+}
+
+/* Divider solo en Drawer */
+.divider {
+  display: none;
+}
+
+/* Usuario autenticado */
+.userSection {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+/* Avatar */
+.avatar {
+  background-color: gray;
+}
+
+/* Info del usuario */
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  color: white;
+  font-size: 13px;
+}
+
+.userName {
+  font-weight: bold;
+}
+
+.userEmail {
+  opacity: 0.8;
+  font-size: 12px;
+}
+
+.logoutButton {
+  color: white;
+}
+
+/* Forzar comportamiento horizontal limpio */
+.navLink,
+.navLink > button {
+  display: inline-flex !important;
+  width: auto !important;
+  padding: 0;
+  margin: 0;
 }

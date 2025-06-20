@@ -19,14 +19,17 @@
 
 /* Estilos para los enlaces de navegación */
 .navLink {
-    position: relative;
-    font-weight: 400;
-    font-size: 12px;
-    border-radius: 4px;
-    display: inline-flex;
-    text-decoration: none;
+    /*position: relative;*/
+    justify-content: space-between;
+    /*font-weight: 400;*/
+    /*font-size: 12px;*/
+    /*border-radius: 4px;*/
+    display: /*inline-*/flex;
+    /*text-decoration: none;*/
     color: #FFF; /* Color del texto */
-    margin: 0 8px; /* Espaciado entre enlaces */
+    /*margin: 0 8px;*/ /* Espaciado entre enlaces */
+    padding: 1rem;
+    align-items: center;
 }
 
 .navLink:hover {

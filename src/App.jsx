@@ -99,6 +99,11 @@ import './App.css';
 
 
 import { Box } from '@mui/material'; // Importa Box de Material-UI
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { loginSuccess, logoutSuccess } from './Redux/Actions/authActions';
+import { auth } from './components/firebase/firebaseConfig';
+import { onAuthStateChanged } from 'firebase/auth';
 
 // const App = () => {
 //   return (
@@ -138,6 +143,22 @@ import { Box } from '@mui/material'; // Importa Box de Material-UI
 // };
 
 const App = () => {
+
+  const dispatch = useDispatch();
+
+    useEffect(() => {
+        // Verifica si hay un usuario autenticado al iniciar la aplicación
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                dispatch(loginSuccess(user)); // Si hay usuario, actualiza Redux
+            } else {
+                dispatch(logoutSuccess()); // Si no hay usuario, limpia el estado
+            }
+        });
+
+        return () => unsubscribe(); // Limpia el listener al desmontar el componente
+    }, [dispatch]);
+    
     return (
       <Router>
         <ThemeProvider theme={theme}>

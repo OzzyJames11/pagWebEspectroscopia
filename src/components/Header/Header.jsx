@@ -31,28 +31,28 @@ const Header = (props) => {
         <AppBar className={appBarClasses}>
             <Toolbar>
                 <Container className={styles.container}>
-                    <Box display="flex" alignItems="center">
-                        {/* <img src={epnLogo} alt="Logotipo EPN" style={{ height: '50px', maxWidth: '75px' }} /> */}
+                {/* Logo */}
+                    <Box className={styles.logoSection}>
                         <Link to="/" style={{ textDecoration: 'none' }}>
-                            <img src={euGPLogo} alt="Logotipo EU-GP" style={{ width: '70%', maxWidth: '500px', minWidth: '45px', maxHeight: '64px' }} />
+                        <img src={euGPLogo} alt="Logotipo EU-GP" style={{ width: '70%', maxWidth: '500px', minWidth: '45px', maxHeight: '64px' }} />
                         </Link>
                     </Box>
-                    {/* Enlaces (versión escritorio) */}
-                    <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-                        <HeaderLinks />
-                    </Box>
-
-                    {/* Menú móvil */}
-                    <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+                {/* Enlaces (versión escritorio) */}
+                <Box className={styles.navLinks}>
+                    <HeaderLinks />
+                </Box>
+                {/* Menú móvil */}
+                <Box className={styles.mobileMenu}>
                         <Dehaze onClick={() => setOpen(true)} />
                         <Drawer open={open} anchor="right" onClose={() => setOpen(false)}>
-                            <Box bgcolor="#001f3e" height="100%" width="225px" display="flex" flexDirection="column">
-                                <img src={headerLogo} alt="Logotipo Scinergy" style={{ width: '100%', padding: '1rem' }} />
-                                <HeaderLinks divider closeDrawer={() => setOpen(false)} />
-                            </Box>
+                        <Box bgcolor="#001f3e" height="100%" width="225px" display="flex" flexDirection="column">
+                        <img src={headerLogo} alt="Logotipo Scinergy" style={{ width: '100%', padding: '1rem' }} />
+                        <HeaderLinks divider closeDrawer={() => setOpen(false)} />
+                </Box>
                         </Drawer>
-                    </Box>
-                </Container>
+                </Box>
+            </Container>
+
             </Toolbar>
         </AppBar>
     );
