@@ -553,7 +553,7 @@ const Subsistema1 = () => {
       </Typography>
 
       {/* Boton para controlar arduinos */}
-      <Button variant="contained" marginTop={-2} marginBottom={3}>Controlar Arduino</Button>
+      {/*<Button variant="contained" marginTop={-2} marginBottom={3}>Controlar Arduino</Button>*/}
 
       {/* Contenedor con dos columnas */}
       <Grid container spacing={4} alignItems="flex-start">

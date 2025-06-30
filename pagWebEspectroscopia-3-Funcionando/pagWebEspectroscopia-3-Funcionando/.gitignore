@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Ignorar credenciales sensibles de Firebase
+pgConFirebaseBACK_3/pgConFirebaseBACK/*.json
+pgConFirebaseBACK_3/pgConFirebaseBACK/pruebaerasmus-d80e8-firebase-adminsdk-fbsvc-33644752a7.json
