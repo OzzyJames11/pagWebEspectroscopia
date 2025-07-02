@@ -6,6 +6,7 @@ import PrivateRoute from './PrivateRoute';
 import Home from '../pages/Home';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
+import Calendarizacion from '../pages/Calendarizacion'
 // import Dashboard from '../pages/Dashboard';
 // import Login from '../pages/Login';
 // import Admin from '../pages/Admin';
@@ -30,6 +31,8 @@ const AppRouter = () => {
                 <Route path={ROUTES.DATA_SUMMARY} element={<DataSummary />} />
                 <Route path="/login" element={<Login />} />
                 <Route path= "/register" element = {<Register />} />
+                <Route path= "/calendarizacion" element = {<Calendarizacion />} />
+
                 {/* Ruta privada (requiere autenticación) */}
                 {/*
                 <Route
