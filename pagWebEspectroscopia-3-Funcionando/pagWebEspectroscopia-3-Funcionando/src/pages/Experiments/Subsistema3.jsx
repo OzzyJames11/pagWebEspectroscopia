@@ -58,6 +58,9 @@ ChartJS.register(
   Legend
 );
 
+// exportacion de datos
+import { generateTXT } from "../../../src/components/Elements/generateTXT.jsx";
+
 const Subsistema3 = () => {
   const navigate = useNavigate();
   const {
@@ -388,8 +391,57 @@ const Subsistema3 = () => {
   };
 
   // Función para descargar gráficos (pendiente de implementación)
-  const handleDescargarGraficos = () => {
+  /*const handleDescargarGraficos = () => {
     alert("Funcionalidad de descarga pendiente de implementación");
+  };*/
+
+  // Descargar ambos gráficos en un solo archivo
+  const handleDownloadBothData = () => {
+    generateTXT({
+      filename: "subsystem3_all_data.txt",
+      metadata: [
+        { label: "Panel Status", value: estado }, // "clean" o "dirty"
+      ],
+      sections: [
+        {
+          title: "Voltage (V) vs Time (s)",
+          headers: ["Time (s)", "Voltage (V)"],
+          data: contadorLabels.map((label, i) => [label, voltajeData[i]]),
+        },
+        {
+          title: "Current (A) vs Time (s)",
+          headers: ["Time (s)", "Current (A)"],
+          data: contadorLabels.map((label, i) => [label, corrienteData[i]]),
+        },
+      ],
+    });
+  };
+   // Descargar solo voltaje
+   const handleDownloadVoltageData = () => {
+    generateTXT({
+      filename: "voltage_vs_time.txt",
+      sections: [
+        {
+          title: "Voltage (V) vs Time (s)",
+          headers: ["Time (s)", "Voltage (V)"],
+          data: contadorLabels.map((label, i) => [label, voltajeData[i]]),
+        },
+      ],
+    });
+  };
+
+  // Descargar solo corriente
+  const handleDownloadCurrentData = () => {
+    generateTXT({
+      filename: "current_vs_time.txt",
+      sections: [
+        {
+          title: "Current (A) vs Time (s)",
+          headers: ["Time (s)", "Current (A)"],
+          data: contadorLabels.map((label, i) => [label, corrienteData[i]]),
+        },
+      ],
+    });
   };
 
   // Función para volver al menú anterior
@@ -679,7 +731,7 @@ const Subsistema3 = () => {
           <Button
             variant="contained"
             color="secondary"
-            onClick={handleDescargarGraficos}
+            onClick={handleDownloadVoltageData}
             align="right"
             marginTop={-1}
           >
@@ -706,7 +758,7 @@ const Subsistema3 = () => {
           <Button
             variant="contained"
             color="secondary"
-            onClick={handleDescargarGraficos}
+            onClick={handleDownloadCurrentData}
             align="right"
             marginTop={-1}
           >
@@ -715,7 +767,7 @@ const Subsistema3 = () => {
           <Button
             variant="contained"
             color="pink"
-            onClick={handleDescargarGraficos}
+            onClick={handleDownloadBothData}
             fullWidth
             align="center"
             marginTop={2}
