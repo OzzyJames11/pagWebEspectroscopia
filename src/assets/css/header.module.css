@@ -38,8 +38,9 @@
 /* Menú móvil a la derecha */
 .mobileMenu {
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  flex-direction: column; /* Esta línea cambia la orientación a vertical */
+  align-items: flex-end;   /* Opcional: alinea los botones al lado derecho */
+  justify-content: flex-start; /* Opcional: comienza desde la parte superior */
   flex: 1;
 }
 
@@ -57,8 +58,8 @@
 .navLinks {
   display: flex;
   flex-direction: row;
-  align-items: center;
-  justify-content: center;
+  /*align-items: center;*/
+  /*justify-content: center;*/
   gap: 2.5rem;
   flex: 1;
 }

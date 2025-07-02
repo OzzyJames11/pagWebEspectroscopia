@@ -30,7 +30,7 @@ const HeaderLinks = ({ closeDrawer }) => {
   return (
     <Box className={styles.navContainer}>
       {/* 🧭 Botones horizontales */}
-      <Box className={styles.navLinks}>
+      <Box className={styles.navLink}>
         <Link onClick={closeDrawer} to="/" className={styles.navLink}>
           <Button className={styles.button}>
             <Home className={styles.icons} />
