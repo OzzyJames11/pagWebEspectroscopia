@@ -32,36 +32,24 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  flex: 1;
+  /*flex: 1;*/
 }
 
-/* Menú móvil a la derecha */
-.mobileMenu {
-  display: flex;
-  flex-direction: column; /* Esta línea cambia la orientación a vertical */
-  align-items: flex-end;   /* Opcional: alinea los botones al lado derecho */
-  justify-content: flex-start; /* Opcional: comienza desde la parte superior */
-  flex: 1;
-}
 
 /* --- Navegación horizontal --- */
 .navContainer {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 2rem;
+  justify-content: space-between;
   width: 100%;
-  flex-wrap: nowrap;
 }
 
 /* Botones de navegación */
 .navLinks {
   display: flex;
-  flex-direction: row;
-  /*align-items: center;*/
-  /*justify-content: center;*/
-  gap: 2.5rem;
-  flex: 1;
+  align-items: center;
+  gap: 20px;
+  margin-right: auto;
 }
 
 /* Cada enlace */
@@ -70,67 +58,70 @@
   color: inherit;
 }
 
-/* Botón visual */
+/* Estilos generales para los botones */
 .button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  color: white;
-  font-weight: 600;
-  text-transform: none;
-  padding: 6px 12px;
-  background: transparent;
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    color: #fff !important;  /* Asegura que el texto siempre sea blanco */
+    background-color: #007bff;  /* Fondo sólido para el botón */
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-size: 1rem;  /* Tamaño de la fuente en el botón */
+    font-weight: 500;  /* Asegura que el texto sea más legible */
+    transition: none;  /* Desactiva cualquier transición */
 }
 
 /* Iconos */
 .icons {
+  margin-right: 8px;
   font-size: 20px;
 }
 
 /* Texto del ítem */
 .items {
-  font-size: 15px;
+  font-size: 1rem;
+  font-weight: 500;
 }
 
-/* Divider solo en Drawer */
-.divider {
-  display: none;
-}
 
 /* Usuario autenticado */
 .userSection {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 1rem;
-  flex-shrink: 0;
+  gap: 10px;
 }
 
 /* Avatar */
 .avatar {
-  background-color: gray;
+    background-color: #007bff;
+    color: #fff;
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+    cursor: pointer;
 }
 
 /* Info del usuario */
 .userInfo {
   display: flex;
   flex-direction: column;
-  color: white;
-  font-size: 13px;
+  align-items: flex-start;
 }
 
 .userName {
   font-weight: bold;
+  color: #fff;
 }
 
 .userEmail {
-  opacity: 0.8;
-  font-size: 12px;
+  opacity: 0.875rem;
+  color: #ccc;
 }
 
 .logoutButton {
   color: white;
+  transition: none;
 }
 
 /* Forzar comportamiento horizontal limpio */
@@ -140,4 +131,14 @@
   width: auto !important;
   padding: 0;
   margin: 0;
+}
+
+/* Estilos para el divider */
+.divider {
+    background-color: #ffffff !important;
+    margin: 8px 0;
+}
+
+.logoutButton:hover {
+    color: #ff5555 !important; /* Color en hover */
 }
