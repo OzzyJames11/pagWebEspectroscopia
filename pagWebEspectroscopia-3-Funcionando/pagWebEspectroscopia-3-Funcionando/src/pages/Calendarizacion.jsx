@@ -148,16 +148,16 @@ const Calendarizacion = () => {
       <Typography variant="h4" gutterBottom>Calendar</Typography>
 
       <Alert severity="info" sx={{ mb: 3 }}>
-        Solo puedes agendar turnos de lunes a viernes entre las 06:00 y 18:00. Los lunes de 07:00 a 09:00 no están disponibles por mantenimiento. Puedes agendar máximo 2 horas consecutivas si el horario está libre. Haz clic en un horario disponible para iniciar tu reserva.
+        You can only schedule appointments Monday through Friday between 6:00 AM and 6:00 PM. Mondays between 7:00 AM and 9:00 AM are unavailable due to maintenance. You can schedule a maximum of two consecutive hours if the time is available. Click on an available time to start your reservation.
       </Alert>
 
       <Alert severity="info" sx={{ mb: 3 }}>
-        <strong>Leyenda:</strong> <span style={{ backgroundColor: '#aed581', padding: '0 8px' }}>available</span> = Disponible, <span style={{ backgroundColor: '#4fc3f7', padding: '0 8px' }}>reserved</span> = Reservado, <span style={{ backgroundColor: '#b0bec5', padding: '0 8px' }}>maintenance</span> = Mantenimiento
+        <strong>Legend:</strong> <span style={{ backgroundColor: '#aed581', padding: '0 8px' }}>available</span> = Disponible, <span style={{ backgroundColor: '#4fc3f7', padding: '0 8px' }}>reserved</span> = Reservado, <span style={{ backgroundColor: '#b0bec5', padding: '0 8px' }}>maintenance</span> = Mantenimiento
       </Alert>
 
       <Stack direction="row" spacing={2} justifyContent="center" sx={{ mb: 2 }}>
-        <Button variant="outlined" onClick={() => setWeekOffset(weekOffset - 1)}>Semana anterior</Button>
-        <Button variant="outlined" onClick={() => setWeekOffset(weekOffset + 1)}>Semana siguiente</Button>
+        <Button variant="outlined" onClick={() => setWeekOffset(weekOffset - 1)}>Previous Week</Button>
+        <Button variant="outlined" onClick={() => setWeekOffset(weekOffset + 1)}>Next Week</Button>
       </Stack>
 
       <Grid container spacing={3}>
@@ -211,7 +211,7 @@ const Calendarizacion = () => {
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Typography variant="h6" gutterBottom>Mis Turnos Agendados</Typography>
+          <Typography variant="h6" gutterBottom>My Scheduled Appointments</Typography>
           <Paper>
             <List>
               {userTurnos.map((turno, i) => (
@@ -219,7 +219,7 @@ const Calendarizacion = () => {
                   <ListItem>
                     <ListItemText
                       primary={`📅 ${turno.fecha} | ⏰ ${turno.horaInicio} - ${turno.horaFin}`}
-                      secondary={`🧪 ${turno.description || 'Sin descripción'}`}
+                      secondary={`🧪 ${turno.description || 'No description'}`}
                     />
                   </ListItem>
                   <Divider />
@@ -227,7 +227,7 @@ const Calendarizacion = () => {
               ))}
               {userTurnos.length === 0 && (
                 <ListItem>
-                  <ListItemText primary="No tienes turnos agendados." />
+                  <ListItemText primary="You have no scheduled appointments." />
                 </ListItem>
               )}
             </List>

@@ -56,7 +56,7 @@ const HeaderLinks = ({ divider, closeDrawer }) => {
             <Link onClick={closeDrawer} to="/calendarizacion" className={styles.navLink}>
               <Button className={styles.button}>
                 <Event className={styles.icons} />
-                <span className={styles.items}>Calendarización</span>
+                <span className={styles.items}>Scheduling</span>
               </Button>
             </Link>
             {divider && <Divider className={styles.divider} />}

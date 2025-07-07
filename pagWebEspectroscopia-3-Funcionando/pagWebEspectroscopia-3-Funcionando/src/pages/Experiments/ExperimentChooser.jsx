@@ -85,7 +85,7 @@ const ExperimentChooser = () => {
                                             color="error"
                                             sx={{ mt: 1 }}
                                         >
-                                            ⚠ Debes iniciar sesión y tener un turno agendado para hoy para acceder a este experimento.
+                                            ⚠ You must be logged in and have a scheduled appointment for today to access this experiment.
                                         </Typography>
                                     )}
                                 </CardContent>
