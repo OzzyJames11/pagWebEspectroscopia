@@ -49,7 +49,7 @@ const HeaderLinks = ({ divider, closeDrawer }) => {
         {/* Solo mostrar si el usuario está autenticado */}
         {isAuthenticated && (
           <>
-            <Link onClick={closeDrawer} to="/calendar" className={styles.navLink}>
+            <Link onClick={closeDrawer} to="/calendarizacion" className={styles.navLink}>
               <Button className={styles.button}>
                 <Event className={styles.icons} />
                 <span className={styles.items}>Calendarización</span>
