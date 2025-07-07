@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Divider, Avatar, IconButton, Tooltip, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { Home, LocalHospital, Login, Logout, Event } from '@mui/icons-material';
@@ -10,6 +11,7 @@ const HeaderLinks = ({ divider, closeDrawer }) => {
   const user = useSelector((state) => state.auth.user);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const getInitials = () => {
     if (user?.displayName) {
@@ -23,9 +25,11 @@ const HeaderLinks = ({ divider, closeDrawer }) => {
   };
 
   const handleLogout = () => {
-    dispatch(logout());
-    closeDrawer?.();
+  dispatch(logout());
+  closeDrawer?.();
+  navigate('/'); // Redirige al Home
   };
+
 
   return (
     <Box className={styles.navContainer}>

@@ -1,151 +1,284 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import {
-  Box, Typography, TextField, Button, MenuItem, Alert
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc
+} from 'firebase/firestore';
+import {
+  Box,
+  Typography,
+  Button,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
+  Paper,
+  Alert,
+  Stack,
+  List,
+  ListItem,
+  ListItemText,
+  Divider
 } from '@mui/material';
 
-const horasDisponibles = [
-  '06:00', '07:00', '08:00', '09:00', '10:00',
-  '11:00', '12:00', '13:00', '14:00', '15:00',
-  '16:00'
-]; // últimas dos horas disponibles: 16:00–18:00
+const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+const times = Array.from({ length: 13 }, (_, i) => `${6 + i}:00`);
+const maxDuration = 2;
+const referenceMonday = new Date('2025-07-07');
 
 const Calendarizacion = () => {
   const user = useSelector(state => state.auth.user);
-  const [fecha, setFecha] = useState('');
-  const [horaInicio, setHoraInicio] = useState('');
-  const [duracion, setDuracion] = useState(1);
-  const [horasOcupadas, setHorasOcupadas] = useState([]);
-  const [mensaje, setMensaje] = useState('');
+  const [availability, setAvailability] = useState({});
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    institution: '',
+    country: '',
+    description: ''
+  });
+  const [confirmDialog, setConfirmDialog] = useState(false);
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [weekDates, setWeekDates] = useState([]);
+  const [userTurnos, setUserTurnos] = useState([]);
 
   useEffect(() => {
-    const cargarHorasOcupadas = async () => {
-      if (!fecha) return;
-      const q = query(collection(db, 'turnos'), where('fecha', '==', fecha));
-      const snap = await getDocs(q);
-      const ocupadas = [];
+    const baseMonday = new Date(referenceMonday);
+    baseMonday.setDate(referenceMonday.getDate() + (weekOffset * 7));
 
-      snap.forEach(doc => {
-        const { horaInicio, horaFin } = doc.data();
-        const ini = parseInt(horaInicio.split(':')[0]);
-        const fin = parseInt(horaFin.split(':')[0]);
-        for (let h = ini; h < fin; h++) {
-          ocupadas.push(`${String(h).padStart(2, '0')}:00`);
+    const week = Array.from({ length: 5 }, (_, i) => {
+      const date = new Date(baseMonday);
+      date.setDate(baseMonday.getDate() + i);
+      return date;
+    });
+
+    setWeekDates(week);
+
+    const fetchAvailability = async () => {
+      const newAvailability = {};
+
+      for (let i = 0; i < 5; i++) {
+        const date = week[i];
+        const dateStr = date.toISOString().split('T')[0];
+        newAvailability[dateStr] = {};
+
+        for (let t = 0; t < times.length; t++) {
+          const hour = parseInt(times[t]);
+          if (hour < 6 || hour >= 18 || (i === 0 && hour >= 7 && hour < 9)) {
+            newAvailability[dateStr][times[t]] = 'maintenance';
+            continue;
+          }
+          newAvailability[dateStr][times[t]] = 'available';
         }
-      });
 
-      setHorasOcupadas(ocupadas);
+        const q = query(collection(db, 'turnos'), where('fecha', '==', dateStr));
+        const snap = await getDocs(q);
+        snap.forEach(doc => {
+          const { horaInicio, horaFin } = doc.data();
+          const ini = parseInt(horaInicio);
+          const fin = parseInt(horaFin);
+          for (let h = ini; h < fin; h++) {
+            const hStr = `${h}:00`;
+            newAvailability[dateStr][hStr] = 'reserved';
+          }
+        });
+      }
+
+      setAvailability(newAvailability);
     };
 
-    cargarHorasOcupadas();
-  }, [fecha]);
+    fetchAvailability();
+  }, [weekOffset]);
 
-  const validar = () => {
-    if (!fecha || !horaInicio || !duracion) return false;
+  useEffect(() => {
+    const fetchUserTurnos = async () => {
+      if (!user) return;
+      const q = query(collection(db, 'turnos'), where('uid', '==', user.uid));
+      const snap = await getDocs(q);
+      const results = snap.docs.map(doc => doc.data());
+      setUserTurnos(results);
+    };
+    fetchUserTurnos();
+  }, [user]);
 
-    const fechaObj = new Date(fecha);
-    const dia = fechaObj.getDay(); // lunes = 1, domingo = 0
-    const hora = parseInt(horaInicio.split(':')[0]);
-    const fin = hora + duracion;
+  const handleSlotClick = (dateStr, time) => {
+    if (!user) return alert('Inicia sesión para agendar.');
+    if (availability[dateStr][time] !== 'available') return;
 
-    if (dia === 0 || dia === 6) {
-      setMensaje('Solo se puede agendar de lunes a viernes.');
-      return false;
-    }
-
-    if (dia === 1 && hora >= 7 && hora < 9) {
-      setMensaje('Los lunes entre 07:00 y 09:00 está reservado por mantenimiento.');
-      return false;
-    }
-
-    if (hora < 6 || fin > 18) {
-      setMensaje('El horario debe estar entre 06:00 y 18:00.');
-      return false;
-    }
-
-    for (let i = 0; i < duracion; i++) {
-      const h = `${String(hora + i).padStart(2, '0')}:00`;
-      if (horasOcupadas.includes(h)) {
-        setMensaje(`El horario ${h} ya está ocupado.`);
-        return false;
-      }
-    }
-
-    return true;
+    setSelectedSlot({ date: dateStr, time });
+    setOpenDialog(true);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!user) return alert('Inicia sesión para agendar.');
-    setMensaje('');
+  const handleChange = e => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
-    if (!validar()) return;
+  const handleSubmit = () => {
+    setOpenDialog(false);
+    setConfirmDialog(true);
+  };
 
+  const handleConfirm = async () => {
+    const hourStart = parseInt(selectedSlot.time);
+    const hourEnd = hourStart + maxDuration;
     try {
-      const horaFin = `${String(parseInt(horaInicio) + duracion).padStart(2, '0')}:00`;
-
       await addDoc(collection(db, 'turnos'), {
         uid: user.uid,
-        fecha,
-        horaInicio,
-        horaFin
+        ...formData,
+        fecha: selectedSlot.date,
+        horaInicio: `${hourStart}:00`,
+        horaFin: `${hourEnd}:00`
       });
-
-      setMensaje('✅ Turno agendado correctamente.');
-      setHoraInicio('');
-      setDuracion(1);
-    } catch (err) {
-      console.error(err);
-      setMensaje('❌ Error al agendar el turno.');
+      setConfirmDialog(false);
+      alert('Turno confirmado');
+    } catch (e) {
+      console.error(e);
     }
   };
 
   return (
     <Box sx={{ p: 4 }}>
-      <Typography variant="h4" gutterBottom>Calendarización de Experimentos</Typography>
-      {mensaje && <Alert severity={mensaje.startsWith('✅') ? 'success' : 'warning'}>{mensaje}</Alert>}
-      <form onSubmit={handleSubmit}>
-        <TextField
-          label="Fecha"
-          type="date"
-          fullWidth
-          required
-          value={fecha}
-          onChange={e => setFecha(e.target.value)}
-          margin="normal"
-        />
-        <TextField
-          select
-          label="Hora de inicio"
-          fullWidth
-          required
-          value={horaInicio}
-          onChange={e => setHoraInicio(e.target.value)}
-          margin="normal"
-        >
-          {horasDisponibles.map(h =>
-            <MenuItem key={h} value={h} disabled={horasOcupadas.includes(h)}>
-              {h}
-            </MenuItem>
-          )}
-        </TextField>
-        <TextField
-          select
-          label="Duración (máx. 2 horas)"
-          fullWidth
-          required
-          value={duracion}
-          onChange={e => setDuracion(Number(e.target.value))}
-          margin="normal"
-        >
-          {[1, 2].map(n => <MenuItem key={n} value={n}>{n} hora(s)</MenuItem>)}
-        </TextField>
-        <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
-          Agendar Turno
-        </Button>
-      </form>
+      <Typography variant="h4" gutterBottom>Calendar</Typography>
+
+      <Alert severity="info" sx={{ mb: 3 }}>
+        Solo puedes agendar turnos de lunes a viernes entre las 06:00 y 18:00. Los lunes de 07:00 a 09:00 no están disponibles por mantenimiento. Puedes agendar máximo 2 horas consecutivas si el horario está libre. Haz clic en un horario disponible para iniciar tu reserva.
+      </Alert>
+
+      <Alert severity="info" sx={{ mb: 3 }}>
+        <strong>Leyenda:</strong> <span style={{ backgroundColor: '#aed581', padding: '0 8px' }}>available</span> = Disponible, <span style={{ backgroundColor: '#4fc3f7', padding: '0 8px' }}>reserved</span> = Reservado, <span style={{ backgroundColor: '#b0bec5', padding: '0 8px' }}>maintenance</span> = Mantenimiento
+      </Alert>
+
+      <Stack direction="row" spacing={2} justifyContent="center" sx={{ mb: 2 }}>
+        <Button variant="outlined" onClick={() => setWeekOffset(weekOffset - 1)}>Semana anterior</Button>
+        <Button variant="outlined" onClick={() => setWeekOffset(weekOffset + 1)}>Semana siguiente</Button>
+      </Stack>
+
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={8}>
+          <Paper>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  {weekDates.map((date, i) => {
+                    const dateStr = date.toISOString().split('T')[0];
+                    return <th key={i}>{days[i]}<br />{dateStr}</th>;
+                  })}
+                </tr>
+              </thead>
+              <tbody>
+                {times.map((time, i) => (
+                  <tr key={i}>
+                    <td>{time}</td>
+                    {weekDates.map((date, dayIdx) => {
+                      const dateStr = date.toISOString().split('T')[0];
+                      const status = availability[dateStr]?.[time] || 'loading';
+
+                      const bgColor = {
+                        available: '#aed581',
+                        reserved: '#4fc3f7',
+                        maintenance: '#b0bec5',
+                        loading: '#eeeeee'
+                      }[status];
+
+                      return (
+                        <td
+                          key={dayIdx}
+                          onClick={() => status === 'available' && handleSlotClick(dateStr, time)}
+                          style={{
+                            backgroundColor: bgColor,
+                            padding: 8,
+                            textAlign: 'center',
+                            cursor: status === 'available' ? 'pointer' : 'not-allowed'
+                          }}
+                        >
+                          {status}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Typography variant="h6" gutterBottom>Mis Turnos Agendados</Typography>
+          <Paper>
+            <List>
+              {userTurnos.map((turno, i) => (
+                <React.Fragment key={i}>
+                  <ListItem>
+                    <ListItemText
+                      primary={`📅 ${turno.fecha} | ⏰ ${turno.horaInicio} - ${turno.horaFin}`}
+                      secondary={`🧪 ${turno.description || 'Sin descripción'}`}
+                    />
+                  </ListItem>
+                  <Divider />
+                </React.Fragment>
+              ))}
+              {userTurnos.length === 0 && (
+                <ListItem>
+                  <ListItemText primary="No tienes turnos agendados." />
+                </ListItem>
+              )}
+            </List>
+          </Paper>
+        </Grid>
+      </Grid>
+
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Reservation Form</DialogTitle>
+        <DialogContent>
+          {['name', 'email', 'institution', 'country'].map((field, i) => (
+            <TextField
+              key={i}
+              label={field[0].toUpperCase() + field.slice(1)}
+              name={field}
+              fullWidth
+              margin="dense"
+              value={formData[field]}
+              onChange={handleChange}
+            />
+          ))}
+          <TextField
+            label="Describe your experiment"
+            name="description"
+            fullWidth
+            margin="dense"
+            multiline
+            rows={2}
+            value={formData.description}
+            onChange={handleChange}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleSubmit} variant="contained">Send</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={confirmDialog} onClose={() => setConfirmDialog(false)}>
+        <DialogTitle>Confirmed reservation</DialogTitle>
+        <DialogContent>
+          <Typography>Reservation Data:</Typography>
+          <Typography>Name: {formData.name}</Typography>
+          <Typography>Institution: {formData.institution}</Typography>
+          <Typography>Date: {selectedSlot?.date}</Typography>
+          <Typography>Time: {selectedSlot?.time} - {parseInt(selectedSlot?.time) + maxDuration}:00</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="outlined" onClick={() => { setConfirmDialog(false); setOpenDialog(true); }}>Edit</Button>
+          <Button variant="contained" color="error" onClick={handleConfirm}>Confirm</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
