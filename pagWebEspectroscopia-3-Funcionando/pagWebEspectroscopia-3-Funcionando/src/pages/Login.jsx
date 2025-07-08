@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { login, loginWithGoogle, resetPassword } from '../Redux/Actions/authActions.jsx';
-import { useNavigate } from 'react-router-dom'; // Importar
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import '../assets/css/Login.css';
 import image from '../assets/img/estudiantes.jpg';
@@ -9,20 +9,30 @@ import image from '../assets/img/estudiantes.jpg';
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [alertMessage, setAlertMessage] = useState('');
     const dispatch = useDispatch();
-    const navigate = useNavigate(); // Hook para navegación
+    const navigate = useNavigate();
     const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
 
-    // Redirigir si el usuario está autenticado
     useEffect(() => {
         if (isAuthenticated) {
-            navigate('/'); // Redirigir al home
+            navigate('/');
         }
     }, [isAuthenticated, navigate]);
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        dispatch(login(email, password));
+        try {
+            // Usamos una función wrapper para capturar errores personalizados
+            await dispatch(login(email, password));
+        } catch (error) {
+            // Mensaje personalizado si no ha verificado su correo
+            if (error.code === 'auth/email-not-verified') {
+                setAlertMessage('Please verify your email before logging in.');
+            } else {
+                setAlertMessage('Login failed. Please check your credentials or try again later.');
+            }
+        }
     };
 
     const handleGoogleLogin = () => {
@@ -36,11 +46,18 @@ const Login = () => {
         }
     };
 
-
     return (
         <div className="login-container">
             <div className="login-form">
                 <h2>Sign in</h2>
+
+                {/* Alerta visual */}
+                {alertMessage && (
+                    <div className="login-alert">
+                        <p style={{ color: 'red', marginBottom: '1rem' }}>{alertMessage}</p>
+                    </div>
+                )}
+
                 <input
                     type="email"
                     placeholder="Email"

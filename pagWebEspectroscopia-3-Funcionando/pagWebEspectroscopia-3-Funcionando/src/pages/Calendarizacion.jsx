@@ -6,7 +6,9 @@ import {
   query,
   where,
   getDocs,
-  addDoc
+  addDoc,
+  deleteDoc,
+  doc
 } from 'firebase/firestore';
 import {
   Box,
@@ -24,13 +26,24 @@ import {
   List,
   ListItem,
   ListItemText,
-  Divider
+  Divider,
+  Snackbar,
+  IconButton
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 const times = Array.from({ length: 13 }, (_, i) => `${6 + i}:00`);
 const maxDuration = 2;
-const referenceMonday = new Date('2025-07-07');
+
+const getCurrentMonday = () => {
+  const today = new Date();
+  const day = today.getDay();
+  const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+  const monday = new Date(today.setDate(diff));
+  monday.setHours(0, 0, 0, 0);
+  return monday;
+};
 
 const Calendarizacion = () => {
   const user = useSelector(state => state.auth.user);
@@ -45,67 +58,77 @@ const Calendarizacion = () => {
     description: ''
   });
   const [confirmDialog, setConfirmDialog] = useState(false);
-  const [weekOffset, setWeekOffset] = useState(0);
   const [weekDates, setWeekDates] = useState([]);
   const [userTurnos, setUserTurnos] = useState([]);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  useEffect(() => {
-    const baseMonday = new Date(referenceMonday);
-    baseMonday.setDate(referenceMonday.getDate() + (weekOffset * 7));
+  const currentMonday = getCurrentMonday();
 
+  const fetchAvailability = async () => {
     const week = Array.from({ length: 5 }, (_, i) => {
-      const date = new Date(baseMonday);
-      date.setDate(baseMonday.getDate() + i);
+      const date = new Date(currentMonday);
+      date.setDate(currentMonday.getDate() + i);
       return date;
     });
 
     setWeekDates(week);
 
-    const fetchAvailability = async () => {
-      const newAvailability = {};
+    const newAvailability = {};
+    for (let i = 0; i < 5; i++) {
+      const date = week[i];
+      const dateStr = date.toISOString().split('T')[0];
+      newAvailability[dateStr] = {};
 
-      for (let i = 0; i < 5; i++) {
-        const date = week[i];
-        const dateStr = date.toISOString().split('T')[0];
-        newAvailability[dateStr] = {};
-
-        for (let t = 0; t < times.length; t++) {
-          const hour = parseInt(times[t]);
-          if (hour < 6 || hour >= 18 || (i === 0 && hour >= 7 && hour < 9)) {
-            newAvailability[dateStr][times[t]] = 'maintenance';
-            continue;
-          }
-          newAvailability[dateStr][times[t]] = 'available';
+      for (let t = 0; t < times.length; t++) {
+        const hour = parseInt(times[t]);
+        if (hour < 6 || (i === 0 && hour >= 7 && hour < 9)) {
+          newAvailability[dateStr][times[t]] = 'maintenance';
+          continue;
         }
-
-        const q = query(collection(db, 'turnos'), where('fecha', '==', dateStr));
-        const snap = await getDocs(q);
-        snap.forEach(doc => {
-          const { horaInicio, horaFin } = doc.data();
-          const ini = parseInt(horaInicio);
-          const fin = parseInt(horaFin);
-          for (let h = ini; h < fin; h++) {
-            const hStr = `${h}:00`;
-            newAvailability[dateStr][hStr] = 'reserved';
-          }
-        });
+        newAvailability[dateStr][times[t]] = 'available';
       }
 
-      setAvailability(newAvailability);
-    };
+      const q = query(collection(db, 'turnos'), where('fecha', '==', dateStr));
+      const snap = await getDocs(q);
+      snap.forEach(doc => {
+        const { horaInicio, horaFin } = doc.data();
+        const ini = parseInt(horaInicio);
+        const fin = parseInt(horaFin);
+        for (let h = ini; h < fin; h++) {
+          const hStr = `${h}:00`;
+          newAvailability[dateStr][hStr] = 'reserved';
+        }
+      });
+    }
+    setAvailability(newAvailability);
+  };
 
-    fetchAvailability();
-  }, [weekOffset]);
+  const fetchUserTurnos = async () => {
+    if (!user) return;
+    const q = query(collection(db, 'turnos'), where('uid', '==', user.uid));
+    const snap = await getDocs(q);
+    const results = snap.docs.map(doc => {
+      const data = doc.data();
+      const turnoDate = new Date(`${data.fecha}T${data.horaFin}`);
+      const isCompleted = new Date() >= turnoDate;
+      return { id: doc.id, ...data, isCompleted };
+    });
+    setUserTurnos(results);
+  };
 
   useEffect(() => {
-    const fetchUserTurnos = async () => {
-      if (!user) return;
-      const q = query(collection(db, 'turnos'), where('uid', '==', user.uid));
-      const snap = await getDocs(q);
-      const results = snap.docs.map(doc => doc.data());
-      setUserTurnos(results);
-    };
-    fetchUserTurnos();
+    fetchAvailability();
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.displayName || '',
+        email: user.email || ''
+      }));
+      fetchUserTurnos();
+    }
   }, [user]);
 
   const handleSlotClick = (dateStr, time) => {
@@ -137,9 +160,22 @@ const Calendarizacion = () => {
         horaFin: `${hourEnd}:00`
       });
       setConfirmDialog(false);
-      alert('Turno confirmado');
+      await fetchAvailability();
+      await fetchUserTurnos();
+      setSnackbarOpen(true);
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteDoc(doc(db, 'turnos', id));
+      await fetchAvailability();
+      await fetchUserTurnos();
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Error deleting turno:', error);
     }
   };
 
@@ -154,11 +190,6 @@ const Calendarizacion = () => {
       <Alert severity="info" sx={{ mb: 3 }}>
         <strong>Legend:</strong> <span style={{ backgroundColor: '#aed581', padding: '0 8px' }}>available</span> = Disponible, <span style={{ backgroundColor: '#4fc3f7', padding: '0 8px' }}>reserved</span> = Reservado, <span style={{ backgroundColor: '#b0bec5', padding: '0 8px' }}>maintenance</span> = Mantenimiento
       </Alert>
-
-      <Stack direction="row" spacing={2} justifyContent="center" sx={{ mb: 2 }}>
-        <Button variant="outlined" onClick={() => setWeekOffset(weekOffset - 1)}>Previous Week</Button>
-        <Button variant="outlined" onClick={() => setWeekOffset(weekOffset + 1)}>Next Week</Button>
-      </Stack>
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
@@ -216,10 +247,16 @@ const Calendarizacion = () => {
             <List>
               {userTurnos.map((turno, i) => (
                 <React.Fragment key={i}>
-                  <ListItem>
+                  <ListItem
+                    secondaryAction={!turno.isCompleted && (
+                      <IconButton edge="end" onClick={() => handleDelete(turno.id)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    )}
+                  >
                     <ListItemText
                       primary={`📅 ${turno.fecha} | ⏰ ${turno.horaInicio} - ${turno.horaFin}`}
-                      secondary={`🧪 ${turno.description || 'No description'}`}
+                      secondary={`🧪 ${turno.description || 'No description'} ${turno.isCompleted ? '✅ Completed' : ''}`}
                     />
                   </ListItem>
                   <Divider />
@@ -238,7 +275,18 @@ const Calendarizacion = () => {
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Reservation Form</DialogTitle>
         <DialogContent>
-          {['name', 'email', 'institution', 'country'].map((field, i) => (
+          {['name', 'email'].map((field, i) => (
+            <TextField
+              key={i}
+              label={field[0].toUpperCase() + field.slice(1)}
+              name={field}
+              fullWidth
+              margin="dense"
+              value={formData[field]}
+              InputProps={{ readOnly: true }}
+            />
+          ))}
+          {['institution', 'country'].map((field, i) => (
             <TextField
               key={i}
               label={field[0].toUpperCase() + field.slice(1)}
@@ -279,6 +327,14 @@ const Calendarizacion = () => {
           <Button variant="contained" color="error" onClick={handleConfirm}>Confirm</Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        message="Operación realizada exitosamente"
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
     </Box>
   );
 };
