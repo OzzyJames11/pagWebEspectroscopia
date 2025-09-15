@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { db } from '../firebaseConfig';
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  addDoc,
-  deleteDoc,
-  doc
-} from 'firebase/firestore';
+// import { db } from '../firebaseConfig';  // 🔥 Firebase
+// import {
+//   collection,
+//   query,
+//   where,
+//   getDocs,
+//   addDoc,
+//   deleteDoc,
+//   doc
+// } from 'firebase/firestore';  // 🔥 Firebase
 import {
   Box,
   Typography,
@@ -88,32 +88,34 @@ const Calendarizacion = () => {
         newAvailability[dateStr][times[t]] = 'available';
       }
 
-      const q = query(collection(db, 'turnos'), where('fecha', '==', dateStr));
-      const snap = await getDocs(q);
-      snap.forEach(doc => {
-        const { horaInicio, horaFin } = doc.data();
-        const ini = parseInt(horaInicio);
-        const fin = parseInt(horaFin);
-        for (let h = ini; h < fin; h++) {
-          const hStr = `${h}:00`;
-          newAvailability[dateStr][hStr] = 'reserved';
-        }
-      });
+      // 🔥 Firebase
+      // const q = query(collection(db, 'turnos'), where('fecha', '==', dateStr));
+      // const snap = await getDocs(q);
+      // snap.forEach(doc => {
+      //   const { horaInicio, horaFin } = doc.data();
+      //   const ini = parseInt(horaInicio);
+      //   const fin = parseInt(horaFin);
+      //   for (let h = ini; h < fin; h++) {
+      //     const hStr = `${h}:00`;
+      //     newAvailability[dateStr][hStr] = 'reserved';
+      //   }
+      // });
     }
     setAvailability(newAvailability);
   };
 
   const fetchUserTurnos = async () => {
     if (!user) return;
-    const q = query(collection(db, 'turnos'), where('uid', '==', user.uid));
-    const snap = await getDocs(q);
-    const results = snap.docs.map(doc => {
-      const data = doc.data();
-      const turnoDate = new Date(`${data.fecha}T${data.horaFin}`);
-      const isCompleted = new Date() >= turnoDate;
-      return { id: doc.id, ...data, isCompleted };
-    });
-    setUserTurnos(results);
+    // 🔥 Firebase
+    // const q = query(collection(db, 'turnos'), where('uid', '==', user.uid));
+    // const snap = await getDocs(q);
+    // const results = snap.docs.map(doc => {
+    //   const data = doc.data();
+    //   const turnoDate = new Date(`${data.fecha}T${data.horaFin}`);
+    //   const isCompleted = new Date() >= turnoDate;
+    //   return { id: doc.id, ...data, isCompleted };
+    // });
+    // setUserTurnos(results);
   };
 
   useEffect(() => {
@@ -152,13 +154,14 @@ const Calendarizacion = () => {
     const hourStart = parseInt(selectedSlot.time);
     const hourEnd = hourStart + maxDuration;
     try {
-      await addDoc(collection(db, 'turnos'), {
-        uid: user.uid,
-        ...formData,
-        fecha: selectedSlot.date,
-        horaInicio: `${hourStart}:00`,
-        horaFin: `${hourEnd}:00`
-      });
+      // 🔥 Firebase
+      // await addDoc(collection(db, 'turnos'), {
+      //   uid: user.uid,
+      //   ...formData,
+      //   fecha: selectedSlot.date,
+      //   horaInicio: `${hourStart}:00`,
+      //   horaFin: `${hourEnd}:00`
+      // });
       setConfirmDialog(false);
       await fetchAvailability();
       await fetchUserTurnos();
@@ -170,7 +173,8 @@ const Calendarizacion = () => {
 
   const handleDelete = async (id) => {
     try {
-      await deleteDoc(doc(db, 'turnos', id));
+      // 🔥 Firebase
+      // await deleteDoc(doc(db, 'turnos', id));
       await fetchAvailability();
       await fetchUserTurnos();
       setSnackbarOpen(true);

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { registerWithEmail } from '../Redux/Actions/authActions.jsx';
+import { register } from '../Redux/Actions/authActions'; // ✅ ahora usamos register del backend
 import { useNavigate } from 'react-router-dom';
 import '../assets/css/Register.css';
 
@@ -10,24 +10,42 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      setAlertMessage('Passwords do not match');
       return;
     }
 
-    dispatch(registerWithEmail(firstName, lastName, email, password, navigate));
+    try {
+      const name = `${firstName} ${lastName}`;
+      await dispatch(register(name, email, password));
+      navigate('/login'); // ✅ redirige al login después de registrarse
+    } catch (error) {
+      console.error('Error en el registro:', error);
+      setAlertMessage(
+        error.response?.data?.error || 'Registration failed. Please try again.'
+      );
+    }
   };
 
   return (
     <div className="register-container">
       <div className="register-form">
         <h2 style={{ color: '#000000' }}>Create an Account</h2>
+
+        {/* Mensaje de error */}
+        {alertMessage && (
+          <div className="register-alert">
+            <p style={{ color: 'red', marginBottom: '1rem' }}>{alertMessage}</p>
+          </div>
+        )}
+
         <input
           type="text"
           placeholder="First Name"
@@ -68,7 +86,11 @@ const Register = () => {
           required
           className="register-input"
         />
-        <button type="submit" className="register-button" onClick={handleRegister}>
+        <button
+          type="submit"
+          className="register-button"
+          onClick={handleRegister}
+        >
           Register
         </button>
       </div>

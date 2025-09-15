@@ -1,99 +1,79 @@
-import {
-  signInWithEmailAndPassword,
-  signOut,
-  signInWithPopup,
-  createUserWithEmailAndPassword,
-  updateProfile,
-  sendEmailVerification,
-  sendPasswordResetEmail
-} from 'firebase/auth';
-import { auth, googleProvider } from '../../firebaseConfig.js';
+// src/Redux/Actions/authActions.jsx
+import axios from "axios";
 
-// Acción login exitoso
-export const loginSuccess = (user) => ({
-  type: 'LOGIN_SUCCESS',
-  payload: {
-    uid: user.uid,
-    email: user.email,
-    displayName: user.displayName || '',
-  },
-});
-
-// Acción logout
-export const logoutSuccess = () => ({
-  type: 'LOGOUT_SUCCESS',
-});
-
-// LOGIN CON CORREO Y CONTRASEÑA
 export const login = (email, password) => async (dispatch) => {
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-
-    if (!user.emailVerified) {
-      alert('Please verify your email before logging in.');
-      await signOut(auth);
-      return;
-    }
-
-    dispatch(loginSuccess(user));
-  } catch (error) {
-    console.error('Error en el inicio de sesión:', error.message);
-    alert('Error al iniciar sesión: ' + error.message);
-  }
-};
-
-// LOGIN CON GOOGLE
-export const loginWithGoogle = () => async (dispatch) => {
-  try {
-    const result = await signInWithPopup(auth, googleProvider);
-    const user = result.user;
-    dispatch(loginSuccess(user));
-  } catch (error) {
-    console.error('Error al iniciar sesión con Google:', error.message);
-    alert('Error al iniciar sesión con Google: ' + error.message);
-  }
-};
-
-// LOGOUT
-export const logout = () => async (dispatch) => {
-  try {
-    await signOut(auth);
-    dispatch(logoutSuccess());
-  } catch (error) {
-    console.error('Error al cerrar sesión:', error.message);
-    alert('Error al cerrar sesión: ' + error.message);
-  }
-};
-
-// REGISTRO CON EMAIL (requiere verificación)
-export const registerWithEmail = (firstName, lastName, email, password, navigate) => async () => {
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-
-    await updateProfile(user, {
-      displayName: `${firstName} ${lastName}`,
+    const res = await axios.post("http://localhost:3000/api/users/login", {
+      email,
+      password,
     });
 
-    await sendEmailVerification(user);
-    alert('A verification email has been sent. Please check your inbox.');
+    const { token, user } = res.data; // 👈 el backend debe devolver { token, user }
 
-    await signOut(auth); // Salir para forzar verificación previa
-    navigate('/login');
+    // Guardamos el token y el user en localStorage
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
+
+    dispatch({
+      type: "LOGIN_SUCCESS",
+      payload: { user, token },
+    });
   } catch (error) {
-    console.error('Error al registrar:', error.message);
-    alert('Error al registrar: ' + error.message);
+    dispatch({
+      type: "LOGIN_FAIL",
+      payload: error.response?.data?.error || "Error en login", // 👈 tu backend devuelve "error", no "msg"
+    });
   }
 };
 
-// RESET PASSWORD
-export const resetPassword = (email) => async () => {
+export const register = (name, email, password) => async (dispatch) => {
   try {
-    await sendPasswordResetEmail(auth, email);
-    alert('Se ha enviado un correo para restablecer la contraseña.');
+    const res = await axios.post("http://localhost:3000/api/users/register", {
+      name,
+      email,
+      password,
+    });
+
+    // 👇 si tu backend devuelve { token, user } al registrar, guarda también
+    if (res.data.token && res.data.user) {
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      dispatch({
+        type: "REGISTER_SUCCESS",
+        payload: { user: res.data.user, token: res.data.token },
+      });
+    } else {
+      // Si solo devuelve mensaje de éxito
+      dispatch({
+        type: "REGISTER_SUCCESS",
+        payload: res.data,
+      });
+    }
   } catch (error) {
-    console.error('Error al restablecer la contraseña:', error.message);
-    alert('Error al restablecer la contraseña: ' + error.message);
+    dispatch({
+      type: "REGISTER_FAIL",
+      payload: error.response?.data?.msg || "Error en registro",
+    });
+  }
+};
+
+export const logout = () => (dispatch) => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user"); // 👈 limpiar también el usuario
+  dispatch({ type: "LOGOUT" });
+};
+
+export const loadUserFromStorage = () => (dispatch) => {
+  const token = localStorage.getItem("token");
+  const user = localStorage.getItem("user");
+
+  if (token && user) {
+    dispatch({
+      type: "LOGIN_SUCCESS",
+      payload: { token, user: JSON.parse(user) },
+    });
+  } else {
+    dispatch({ type: "LOGOUT" });
   }
 };

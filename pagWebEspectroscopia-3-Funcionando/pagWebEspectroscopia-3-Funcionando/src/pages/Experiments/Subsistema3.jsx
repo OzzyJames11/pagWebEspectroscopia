@@ -23,17 +23,17 @@ import {
 // Importación de estilos
 import "../../assets/css/Elements/PaperStyles.css";
 
-//Importación envío de datos
-import {
-  getDatabase,
-  ref,
-  set,
-  get,
-  onValue,
-  onChildAdded,
-  remove,
-} from "firebase/database";
-import app from "../../firebaseConfig.js";
+//Importación envío de datos - COMENTADO PARA MIGRACIÓN
+// import {
+//   getDatabase,
+//   ref,
+//   set,
+//   get,
+//   onValue,
+//   onChildAdded,
+//   remove,
+// } from "firebase/database";
+// import app from "../../firebaseConfig.js";
 
 // Importar el componente de gráficos
 import { Line } from "react-chartjs-2";
@@ -108,129 +108,92 @@ const Subsistema3 = () => {
   const [isTextDisabled_1, setIsTextDisabled_1] = useState(false); // Estado para habilitar/deshabilitar el mensaje de movimiento
   const [messageToSend, setMessageToSend] = useState(``); // Estado para el mensaje que se enviará
 
-  //Lectura de datos desde Firebase
-  const db = getDatabase(app);
+  //Lectura de datos desde Firebase - COMENTADO PARA MIGRACIÓN
+  // const db = getDatabase(app);
 
   useEffect(() => {
-    //Enviar mensaje de inicio a los arduinos
-    change5sec();
+    //Enviar mensaje de inicio a los arduinos - COMENTADO PARA MIGRACIÓN
+    // change5sec();
     //hacerCambio();
   }, []);
 
-  // 🔹 Obtener ángulo del panel una sola vez al montar el componente
+  // 🔹 Obtener ángulo del panel una sola vez al montar el componente - COMENTADO PARA MIGRACIÓN
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const dbRef = ref(db, "Exp3/FrontToBack");
-        const snapshot = await get(dbRef);
-        if (snapshot.exists()) {
-          setactualPanelAngle(snapshot.val() || "");
-        } else {
-          console.warn("No se encontraron datos para 'anguloObjetivo'");
-        }
-      } catch (error) {
-        console.error("Error al obtener datos de Firebase:", error);
-      }
-    };
+    // const fetchData = async () => {
+    //   try {
+    //     const dbRef = ref(db, "Exp3/FrontToBack");
+    //     const snapshot = await get(dbRef);
+    //     if (snapshot.exists()) {
+    //       setactualPanelAngle(snapshot.val() || "");
+    //     } else {
+    //       console.warn("No se encontraron datos para 'anguloObjetivo'");
+    //     }
+    //   } catch (error) {
+    //     console.error("Error al obtener datos de Firebase:", error);
+    //   }
+    // };
 
-    fetchData();
-  }, [db]); // ✅ Se ejecuta solo al montar el componente
+    // fetchData();
+  }, []); // ✅ Se ejecuta solo al montar el componente
 
-  // 🔹 Obtener inputs una sola vez al montar el componente
+  // 🔹 Obtener inputs una sola vez al montar el componente - COMENTADO PARA MIGRACIÓN
   useEffect(() => {
-    const fetchDataInputs = async () => {
-      try {
-        const dbRef = ref(db, "Lectures");
-        const snapshot = await get(dbRef);
-        if (snapshot.exists()) {
-          setInputs(snapshot.val() || "");
-        } else {
-          console.warn("No se encontraron datos para 'Lectures'");
-        }
-      } catch (error) {
-        console.error("Error al obtener datos de Firebase:", error);
-      }
-    };
+    // const fetchDataInputs = async () => {
+    //   try {
+    //     const dbRef = ref(db, "Lectures");
+    //     const snapshot = await get(dbRef);
+    //     if (snapshot.exists()) {
+    //       setInputs(snapshot.val() || "");
+    //     } else {
+    //       console.warn("No se encontraron datos para 'Lectures'");
+    //     }
+    //   } catch (error) {
+    //     console.error("Error al obtener datos de Firebase:", error);
+    //   }
+    // };
 
-    fetchDataInputs();
-  }, [db]); // ✅ Se ejecuta solo una vez
+    // fetchDataInputs();
+  }, []); // ✅ Se ejecuta solo una vez
 
-  // 🔹 Escuchar cambios en Firebase en tiempo real
+  // 🔹 Escuchar cambios en Firebase en tiempo real - COMENTADO PARA MIGRACIÓN
   useEffect(() => {
-    const dbRef = ref(db, "Exp3/data"); // Escucha todo el nodo "Lectures"
+    // const dbRef = ref(db, "Exp3/data"); // Escucha todo el nodo "Lectures"
 
-    const unsubscribe = onChildAdded(dbRef, (snapshot) => {
-      console.log(
-        `Nuevo valor agregado - Clave: ${snapshot.key}`,
-        snapshot.val()
-      );
-      const newData = snapshot.val();
-      setCorrienteData((prev) => [...prev.slice(-20), newData.data1.current]); // Solo los últimos 20 valores
-      setVoltajeData((prev) => [...prev.slice(-20), newData.data1.voltage]);
-      setContadorLabels((prev) => [...prev.slice(-20), newData.data1.cont]);
-      setvoltajeValue_1(newData.data1.voltage);
-      setcorrienteValue_1(newData.data1.current);
-    });
-    // const dbRef = ref(db, "Lectures");
+    // const unsubscribe = onChildAdded(dbRef, (snapshot) => {
+    //   console.log(
+    //     `Nuevo valor agregado - Clave: ${snapshot.key}`,
+    //     snapshot.val()
+    //   );
+    //   const newData = snapshot.val();
+    //   setCorrienteData((prev) => [...prev.slice(-20), newData.data1.current]); // Solo los últimos 20 valores
+    //   setVoltajeData((prev) => [...prev.slice(-20), newData.data1.voltage]);
+    //   setContadorLabels((prev) => [...prev.slice(-20), newData.data1.cont]);
+    //   setvoltajeValue_1(newData.data1.voltage);
+    //   setcorrienteValue_1(newData.data1.current);
+    // });
+    
+    // return () => unsubscribe(); // 🔄 Limpieza del listener cuando el componente se desmonta
+  }, []); // ✅ Se ejecuta al montar el componente
+
+  //Lectura de BackToFront - COMENTADO PARA MIGRACIÓN
+  useEffect(() => {
+    // const dbRef = ref(db, "Exp3/BackToFront");
 
     // const unsubscribe = onValue(dbRef, (snapshot) => {
     //   if (snapshot.exists()) {
     //     const mensaje = snapshot.val();
-    //     console.log("Mensaje recibido:", mensaje);
-
-    //     const choose = mensaje.slice(0, 1);
-    //     const valor = parseFloat(mensaje.slice(1));
-
-    //     console.log("choose recibido:", choose);
-    //     console.log("valor recibido:", valor);
-
-    //     if (mensaje === "EndMov") {
-    //       console.log("Activando controles");
-    //       setIsSliderDisabled_1(false);
-    //       setIsMoveButtonDisabled_1(false);
-    //       setIsTextDisabled_1(false);
-    //       setIsGuardarLecturaDisabled_1(false);
-    //       change5sec();//enviar mensaje de mover de nuevo
-    //       hacerCambio();
-    //     } else if (choose === "I") {
-    //       setcorrienteValue_1(valor);
-    //       setCorrienteData((prev) => [...prev.slice(-20), valor]); // Solo los últimos 20 valores
-    //     } else if (choose === "V") {
-    //       setvoltajeValue_1(valor);
-    //       setVoltajeData((prev) => [...prev.slice(-20), valor]);
-    //     } else if (choose === "C") {
-    //       setContadorValue(valor);
-    //       setContadorLabels((prev) => [...prev.slice(-20), valor]);
-    //     }
-    //   } else {
-    //     console.warn("No se encontraron datos en Firebase.");
+    //     console.log("Mensaje recibidooo:", mensaje);
+    //     setIsSliderDisabled_1(false);
+    //     setIsMoveButtonDisabled_1(false);
+    //     setIsTextDisabled_1(false);
+    //     setIsGuardarLecturaDisabled_1(false);
+    //     change5sec(); //enviar mensaje de mover de nuevo
+    //     hacerCambio();
+    //     setEstado('dirty');
     //   }
     // });
-
-    return () => unsubscribe(); // 🔄 Limpieza del listener cuando el componente se desmonta
-  }, [db]); // ✅ Se ejecuta al montar el componente y escucha cambios en Firebase
-
-  //Lectura de BackToFront
-  useEffect(() => {
-    const dbRef = ref(db, "Exp3/BackToFront");
-
-    const unsubscribe = onValue(dbRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const mensaje = snapshot.val();
-        console.log("Mensaje recibidooo:", mensaje);
-        setIsSliderDisabled_1(false);
-        setIsMoveButtonDisabled_1(false);
-        setIsTextDisabled_1(false);
-        setIsGuardarLecturaDisabled_1(false);
-        change5sec(); //enviar mensaje de mover de nuevo
-        hacerCambio();
-        setEstado('dirty');
-
-      }
-    });
-    return () => unsubscribe(); // 🔄 Limpieza del listener cuando el componente se desmonta
-  }, [db]); // ✅ Se ejecuta al montar el componente y escucha cambios en Firebase
-
+    // return () => unsubscribe(); // 🔄 Limpieza del listener cuando el componente se desmonta
+  }, []); // ✅ Se ejecuta al montar el componente
 
   // Estado del subsistema
   const [estado, setEstado] = useState("dirty"); // Por defecto, el subsistema está sucio
@@ -372,28 +335,23 @@ const Subsistema3 = () => {
     ); // Actualiza el localStorage
   };
 
-  // Función para limpiar el subsistema
+  // Función para limpiar el subsistema - COMENTADO PARA MIGRACIÓN
   const handleLimpiar = () => {
     setEstado("clean");
-    try {
-        const msg = "c"; // Mensaje a enviar
-        const db = getDatabase(app);
-        const docRef = ref(db, "Exp3/FrontToBack"); // Ruta correcta en la BD
+    // try {
+    //     const msg = "c"; // Mensaje a enviar
+    //     const db = getDatabase(app);
+    //     const docRef = ref(db, "Exp3/FrontToBack"); // Ruta correcta en la BD
   
-        set(docRef, msg).catch((error) => {
-          alert("Error: " + error.message);
-        });
+    //     set(docRef, msg).catch((error) => {
+    //       alert("Error: " + error.message);
+    //     });
   
-        console.log(`Mensaje enviado: ${msg}`);
-      } catch (error) {
-        console.error("Error al enviar datos a Firebase:", error);
-      }
+    //     console.log(`Mensaje enviado: ${msg}`);
+    //   } catch (error) {
+    //     console.error("Error al enviar datos a Firebase:", error);
+    //   }
   };
-
-  // Función para descargar gráficos (pendiente de implementación)
-  /*const handleDescargarGraficos = () => {
-    alert("Funcionalidad de descarga pendiente de implementación");
-  };*/
 
   // Descargar ambos gráficos en un solo archivo
   const handleDownloadBothData = () => {
@@ -444,14 +402,15 @@ const Subsistema3 = () => {
     });
   };
 
-  // Función para volver al menú anterior
+  // Función para volver al menú anterior - COMENTADO PARA MIGRACIÓN
   const handleBack = () => {
-    noEnviarNuevoAngulo();
-    change1hour();
+    // noEnviarNuevoAngulo();
+    // change1hour();
     navigate("/experiments/experimentChooser");
-    eliminarDatos();
+    // eliminarDatos();
   };
-  //Acciones al presionar el Boton Move (Envío de dato de ángulo)
+  
+  //Acciones al presionar el Boton Move (Envío de dato de ángulo) - COMENTADO PARA MIGRACIÓN
   const envioDatos = async () => {
     setIsSliderDisabled_1(true);
     setIsSliderDisabled_Zenith(true);
@@ -459,97 +418,86 @@ const Subsistema3 = () => {
     setIsGuardarLecturaDisabled_1(true);
     setIsTextDisabled_1(true);
     setactualPanelAngle(angulo);
-    try {
-      const msg = "p" + angulo; // Mensaje a enviar
-      const db = getDatabase(app);
-      const docRef = ref(db, "Exp3/FrontToBack"); // Ruta correcta en la BD
-
-      set(docRef, msg).catch((error) => {
-        alert("Error: " + error.message);
-      });
-
-      console.log(`Mensaje enviado: ${msg}`);
-    } catch (error) {
-      console.error("Error al enviar datos a Firebase:", error);
-    }
-
+    
     // try {
-    //   //const msg = anguloZenith
-    //   const msg = "r" + angulo;
+    //   const msg = "p" + angulo; // Mensaje a enviar
+    //   const db = getDatabase(app);
+    //   const docRef = ref(db, "Exp3/FrontToBack"); // Ruta correcta en la BD
+
+    //   set(docRef, msg).catch((error) => {
+    //     alert("Error: " + error.message);
+    //   });
+
+    //   console.log(`Mensaje enviado: ${msg}`);
+    // } catch (error) {
+    //   console.error("Error al enviar datos a Firebase:", error);
+    // }
+
+    // change5sec();
+    // hacerCambio();
+  };
+
+  //Envio de señal para 1 hora - COMENTADO PARA MIGRACIÓN
+  const change1hour = async () => {
+    // try {
+    //   const msg = "s";
     //   const db = getDatabase(app);
     //   const docRef = ref(db, "Exp3/FrontToBack");
-    //   set(docRef, msg)
-    //     .catch((error) => {
-    //       alert("Error: " + error.message);
-    //     });
+    //   set(docRef, msg).catch((error) => {
+    //     alert("Error: " + error.message);
+    //   });
     //   console.log(`Mensaje enviado: ${messageToSend}`);
     // } catch (error) {
     //   console.error("Error al enviar datos seriales:", error);
     // }
-    change5sec();
-    hacerCambio();
+    // hacerCambio();
   };
 
-  //Envio de señal para 1 hora
-  const change1hour = async () => {
-    try {
-      const msg = "s";
-      const db = getDatabase(app);
-      const docRef = ref(db, "Exp3/FrontToBack");
-      set(docRef, msg).catch((error) => {
-        alert("Error: " + error.message);
-      });
-      console.log(`Mensaje enviado: ${messageToSend}`);
-    } catch (error) {
-      console.error("Error al enviar datos seriales:", error);
-    }
-    hacerCambio();
-  };
-
-  //Envío de señal de envío cada 5 segundos / recibir nuevo ángulo
+  //Envío de señal de envío cada 5 segundos / recibir nuevo ángulo - COMENTADO PARA MIGRACIÓN
   const change5sec = async () => {
-    try {
-      const msg = "y";
-      const db = getDatabase(app);
-      const docRef = ref(db, "Exp3/FrontToBack");
-      set(docRef, msg).catch((error) => {
-        alert("Error: " + error.message);
-      });
-      console.log(`Mensaje enviado: ${msg}`);
-    } catch (error) {
-      console.error("Error al enviar datos seriales:", error);
-    }
-    hacerCambio();
+    // try {
+    //   const msg = "y";
+    //   const db = getDatabase(app);
+    //   const docRef = ref(db, "Exp3/FrontToBack");
+    //   set(docRef, msg).catch((error) => {
+    //     alert("Error: " + error.message);
+    //   });
+    //   console.log(`Mensaje enviado: ${msg}`);
+    // } catch (error) {
+    //   console.error("Error al enviar datos seriales:", error);
+    // }
+    // hacerCambio();
   };
 
-  //Envío de señal para parar de enviar ángulos
+  //Envío de señal para parar de enviar ángulos - COMENTADO PARA MIGRACIÓN
   const noEnviarNuevoAngulo = async () => {
-    try {
-      const signal1hour = "n";
-      const db = getDatabase(app);
-      const docRef = ref(db, "Exp3/FrontToBack");
-      set(docRef, signal1hour).catch((error) => {
-        alert("Error: " + error.message);
-      });
-      console.log(`Mensaje enviado: ${messageToSend}`);
-    } catch (error) {
-      console.error("Error al enviar datos seriales:", error);
-    }
-    hacerCambio();
+    // try {
+    //   const signal1hour = "n";
+    //   const db = getDatabase(app);
+    //   const docRef = ref(db, "Exp3/FrontToBack");
+    //   set(docRef, signal1hour).catch((error) => {
+    //     alert("Error: " + error.message);
+    //   });
+    //   console.log(`Mensaje enviado: ${messageToSend}`);
+    // } catch (error) {
+    //   console.error("Error al enviar datos seriales:", error);
+    // }
+    // hacerCambio();
   };
-  //Envío de señal para parar de enviar ángulos
+  
+  //Envío de señal para parar de enviar ángulos - COMENTADO PARA MIGRACIÓN
   const hacerCambio = async () => {
-    try {
-      const msg = "x";
-      const db = getDatabase(app);
-      const docRef = ref(db, "Exp3/FrontToBack");
-      set(docRef, msg).catch((error) => {
-        alert("Error: " + error.message);
-      });
-      console.log(`Mensaje enviado: ${messageToSend}`);
-    } catch (error) {
-      console.error("Error al enviar datos seriales:", error);
-    }
+    // try {
+    //   const msg = "x";
+    //   const db = getDatabase(app);
+    //   const docRef = ref(db, "Exp3/FrontToBack");
+    //   set(docRef, msg).catch((error) => {
+    //     alert("Error: " + error.message);
+    //   });
+    //   console.log(`Mensaje enviado: ${messageToSend}`);
+    // } catch (error) {
+    //   console.error("Error al enviar datos seriales:", error);
+    // }
   };
 
   // Configuración de los gráficos
@@ -591,18 +539,17 @@ const Subsistema3 = () => {
   //Acciones al cerrer la pagina o recargar
   //Pendiente
 
-
-  //Eliminar datos
-    const eliminarDatos = async () => {
-      const dbRef = ref(db, "Exp3/data"); // Obtén la referencia a la clave
+  //Eliminar datos - COMENTADO PARA MIGRACIÓN
+  const eliminarDatos = async () => {
+    // const dbRef = ref(db, "Exp3/data"); // Obtén la referencia a la clave
   
-      try {
-        await remove(dbRef); // Usa remove() correctamente en Firebase v9+
-        console.log("Datos eliminados exitosamente.");
-      } catch (error) {
-        console.error("Error al eliminar los datos: ", error);
-      }
-    };
+    // try {
+    //   await remove(dbRef); // Usa remove() correctamente en Firebase v9+
+    //   console.log("Datos eliminados exitosamente.");
+    // } catch (error) {
+    //   console.error("Error al eliminar los datos: ", error);
+    // }
+  };
 
 
   return (

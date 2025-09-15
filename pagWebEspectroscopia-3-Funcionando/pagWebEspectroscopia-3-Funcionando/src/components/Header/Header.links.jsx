@@ -14,15 +14,18 @@ const HeaderLinks = ({ divider, closeDrawer }) => {
   const navigate = useNavigate();
 
   const getInitials = () => {
-    if (user?.displayName) {
-      const [firstName, lastName] = user.displayName.split(' ');
-      return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
+    if (user?.name) {
+      const parts = user.name.trim().split(" ");
+      const firstName = parts[0] || "";
+      const lastName = parts[1] || "";
+      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
     }
     if (user?.email) {
       return user.email.charAt(0).toUpperCase();
     }
-    return 'U';
+    return "U";
   };
+
 
   const handleLogout = () => {
   dispatch(logout());
@@ -63,15 +66,14 @@ const HeaderLinks = ({ divider, closeDrawer }) => {
           </>
         )}
       </Box>
-
       {/* Sección de usuario o login */}
       {isAuthenticated ? (
         <Box className={styles.userSection}>
-          <Tooltip title={user?.displayName || user?.email}>
+          <Tooltip title={user?.name || user?.email}>
             <Avatar className={styles.avatar}>{getInitials()}</Avatar>
           </Tooltip>
           <div className={styles.userInfo}>
-            <span className={styles.userName}>{user?.displayName || 'Usuario'}</span>
+            <span className={styles.userName}>{user?.name || "Usuario"}</span>
             <span className={styles.userEmail}>{user?.email}</span>
           </div>
           <Tooltip title="Cerrar sesión">
@@ -80,14 +82,14 @@ const HeaderLinks = ({ divider, closeDrawer }) => {
             </IconButton>
           </Tooltip>
         </Box>
-      ) : (
+        ) : (
         <Link onClick={closeDrawer} to="/login" className={styles.navLink}>
-          <Button className={styles.button}>
-            <Login className={styles.icons} />
-            <span className={styles.items}>Login</span>
-          </Button>
+        <Button className={styles.button}>
+          <Login className={styles.icons} />
+          <span className={styles.items}>Login</span>
+        </Button>
         </Link>
-      )}
+        )}
     </Box>
   );
 };

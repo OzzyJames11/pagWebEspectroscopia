@@ -6,8 +6,10 @@ import Grid2 from '@mui/material/Grid2';
 import styles from '../../assets/css/experimentsChooser.module.css';
 import Button from '../../components/Elements/Button';
 import { PAGE_TITLES, SUBSYSTEMS } from '../../assets/Strings/Experiments/ExperimentChooserStrings.jsx';
-import { db } from '../../firebaseConfig.js';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+
+// 🔴 Comentado porque ya no usamos Firebase
+// import { db } from '../../firebaseConfig.js';
+// import { collection, query, where, getDocs } from 'firebase/firestore';
 
 const ExperimentChooser = () => {
   const navigate = useNavigate();
@@ -22,58 +24,60 @@ const ExperimentChooser = () => {
   };
 
   useEffect(() => {
-  const verificarTurnoActual = async () => {
-    if (!user) {
-      setHabilitado(false);
-      setMensajeTurno('');
-      return;
-    }
+    // 🔴 Comentamos la lógica de Firebase temporalmente
+    /*
+    const verificarTurnoActual = async () => {
+      if (!user) {
+        setHabilitado(false);
+        setMensajeTurno('');
+        return;
+      }
 
-    const ahora = new Date();
-    const hoyStr = ahora.toISOString().split('T')[0];
-    const horaActual = ahora.getHours();
+      const ahora = new Date();
+      const hoyStr = ahora.toISOString().split('T')[0];
+      const horaActual = ahora.getHours();
 
-    try {
-      const q = query(
-        collection(db, 'turnos'),
-        where('uid', '==', user.uid),
-        where('fecha', '==', hoyStr)
-      );
-      const snapshot = await getDocs(q);
+      try {
+        const q = query(
+          collection(db, 'turnos'),
+          where('uid', '==', user.uid),
+          where('fecha', '==', hoyStr)
+        );
+        const snapshot = await getDocs(q);
 
-      let turnoActivo = false;
-      let mensajesActivos = [];
-      let mensajesFuturos = [];
+        let turnoActivo = false;
+        let mensajesActivos = [];
+        let mensajesFuturos = [];
 
-      snapshot.forEach(doc => {
-        const turno = doc.data();
-        const horaInicio = parseInt(turno.horaInicio.split(':')[0], 10);
-        const horaFin = parseInt(turno.horaFin.split(':')[0], 10);
+        snapshot.forEach(doc => {
+          const turno = doc.data();
+          const horaInicio = parseInt(turno.horaInicio.split(':')[0], 10);
+          const horaFin = parseInt(turno.horaFin.split(':')[0], 10);
 
-        if (horaActual >= horaInicio && horaActual < horaFin) {
-          turnoActivo = true;
-          mensajesActivos.push(`🟢 Turno activo: ${turno.horaInicio} - ${turno.horaFin}`);
-        } else {
-          mensajesFuturos.push(`📅 Turno agendado: ${turno.horaInicio} - ${turno.horaFin}`);
-        }
-      });
+          if (horaActual >= horaInicio && horaActual < horaFin) {
+            turnoActivo = true;
+            mensajesActivos.push(`🟢 Turno activo: ${turno.horaInicio} - ${turno.horaFin}`);
+          } else {
+            mensajesFuturos.push(`📅 Turno agendado: ${turno.horaInicio} - ${turno.horaFin}`);
+          }
+        });
 
-      setHabilitado(turnoActivo);
-      setMensajeTurno([...mensajesActivos, ...mensajesFuturos].join(' | '));
-    } catch (error) {
-      console.error('Error al verificar turno del usuario:', error);
-      setHabilitado(false);
-      setMensajeTurno('');
-    }
-  };
+        setHabilitado(turnoActivo);
+        setMensajeTurno([...mensajesActivos, ...mensajesFuturos].join(' | '));
+      } catch (error) {
+        console.error('Error al verificar turno del usuario:', error);
+        setHabilitado(false);
+        setMensajeTurno('');
+      }
+    };
 
-  verificarTurnoActual();
-  const interval = setInterval(verificarTurnoActual, 60000); // verifica cada minuto
+    verificarTurnoActual();
+    const interval = setInterval(verificarTurnoActual, 60000); // verifica cada minuto
 
-  return () => clearInterval(interval);
-}, [user]);
+    return () => clearInterval(interval);
+    */
+  }, [user]);
 
- 
   const mostrarMensaje = !user || !habilitado;
 
   return (
