@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { register } from '../Redux/Actions/authActions'; // ✅ ahora usamos register del backend
+import { register } from '../Redux/Actions/authActions';
 import { useNavigate } from 'react-router-dom';
 import '../assets/css/Register.css';
 
@@ -10,7 +10,10 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [institution, setInstitution] = useState(''); // opcional
+  const [country, setCountry] = useState('');         // opcional
   const [alertMessage, setAlertMessage] = useState('');
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -18,18 +21,29 @@ const Register = () => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      setAlertMessage('Passwords do not match');
+      setAlertMessage("Passwords do not match");
       return;
     }
 
     try {
       const name = `${firstName} ${lastName}`;
-      await dispatch(register(name, email, password));
-      navigate('/login'); // ✅ redirige al login después de registrarse
+
+      // 🔹 role_id fijo para "estudiante"
+      const userData = {
+        name,
+        email,
+        password,
+        institution: institution || null,
+        country: country || null,
+        role_id: 2, // 👈 siempre será estudiante
+      };
+
+      await dispatch(register(userData));
+      navigate("/login");
     } catch (error) {
-      console.error('Error en el registro:', error);
+      console.error("Error en el registro:", error);
       setAlertMessage(
-        error.response?.data?.error || 'Registration failed. Please try again.'
+        error.response?.data?.error || "Registration failed. Please try again."
       );
     }
   };
@@ -86,6 +100,25 @@ const Register = () => {
           required
           className="register-input"
         />
+
+        {/* Campos opcionales */}
+        <input
+          type="text"
+          placeholder="Institution (optional)"
+          value={institution}
+          onChange={(e) => setInstitution(e.target.value)}
+          className="register-input"
+        />
+        <input
+          type="text"
+          placeholder="Country (optional)"
+          value={country}
+          onChange={(e) => setCountry(e.target.value)}
+          className="register-input"
+        />
+
+        {/* 👇 Se eliminó el campo de selección de rol */}
+
         <button
           type="submit"
           className="register-button"
