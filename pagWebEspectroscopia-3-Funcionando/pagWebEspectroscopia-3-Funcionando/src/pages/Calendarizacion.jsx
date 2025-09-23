@@ -43,8 +43,46 @@ const Calendarizacion = () => {
   const [confirmDialog, setConfirmDialog] = useState(false);
   const [weekDates, setWeekDates] = useState([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const currentMonday = getCurrentMonday();
+
+  // ✅ Función segura para formatear fecha
+  const formatDateSafe = (dateString) => {
+    if (!dateString) return "Fecha no disponible";
+    try {
+      const date = new Date(dateString);
+      return isNaN(date.getTime()) ? "Fecha inválida" : date.toLocaleDateString();
+    } catch (error) {
+      return "Error en fecha";
+    }
+  };
+
+  // ✅ Función segura para formatear hora
+  const formatTimeSafe = (timeString) => {
+    if (!timeString) return "Hora no disponible";
+    try {
+      const date = new Date(timeString);
+      return isNaN(date.getTime()) ? "Hora inválida" : date.toLocaleTimeString([], { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+    } catch (error) {
+      return "Error en hora";
+    }
+  };
+
+  // ✅ Función para recargar reservas
+  const reloadReservations = async () => {
+    if (user && user.user_id) {
+      try {
+        await dispatch(fetchReservations(user.user_id));
+      } catch (error) {
+        console.error("Error recargando reservas:", error);
+      }
+    }
+  };
 
   // ✅ Generar grilla semanal
   const fetchAvailability = async () => {
@@ -70,33 +108,45 @@ const Calendarizacion = () => {
         newAvailability[dateStr][times[t]] = "available";
       }
 
-      // Bloquear horas ya reservadas
-      reservations.forEach((res) => {
-        const resDate = new Date(res.reservation_date).toISOString().split("T")[0];
-        const resHour = new Date(res.reservation_time).getHours();
-        if (resDate === dateStr) {
-          newAvailability[dateStr][`${resHour}:00`] = "reserved";
-        }
-      });
+      // Bloquear horas ya reservadas (solo si reservations es un array)
+      if (Array.isArray(reservations)) {
+        reservations.forEach((res) => {
+          if (res && res.reservation_date) {
+            try {
+              const resDate = new Date(res.reservation_date).toISOString().split("T")[0];
+              const resTime = res.reservation_time ? new Date(res.reservation_time) : null;
+              if (resTime && !isNaN(resTime.getTime()) && resDate === dateStr) {
+                const resHour = resTime.getHours();
+                newAvailability[dateStr][`${resHour}:00`] = "reserved";
+              }
+            } catch (error) {
+              console.error("Error procesando reserva:", error);
+            }
+          }
+        });
+      }
     }
     setAvailability(newAvailability);
   };
 
-  // ✅ Cargar reservas del usuario
+  // ✅ Cargar reservas del usuario al iniciar
   useEffect(() => {
-    if (user) {
+    if (user && user.user_id) {
       dispatch(fetchReservations(user.user_id));
     }
   }, [dispatch, user]);
 
-  // ✅ Regenerar disponibilidad cuando cambien reservas
+  // ✅ Regenerar disponibilidad cuando cambien las reservas
   useEffect(() => {
     fetchAvailability();
   }, [reservations]);
 
   const handleSlotClick = (dateStr, time) => {
-    if (!user) return alert("Inicia sesión para agendar.");
-    if (availability[dateStr][time] !== "available") return;
+    if (!user) {
+      alert("Inicia sesión para agendar.");
+      return;
+    }
+    if (availability[dateStr] && availability[dateStr][time] !== "available") return;
 
     setSelectedSlot({ date: dateStr, time });
     setOpenDialog(true);
@@ -107,36 +157,69 @@ const Calendarizacion = () => {
   };
 
   const handleSubmit = () => {
+    if (!selectedSlot) return;
     setOpenDialog(false);
     setConfirmDialog(true);
   };
 
   const handleConfirm = async () => {
+    if (!selectedSlot || !user) return;
+
+    setLoading(true);
     const hourStart = parseInt(selectedSlot.time);
     const reservationData = {
       user_id: user.user_id,
       experiment_description: formData.description,
       reservation_date: selectedSlot.date,
-      reservation_time: `${selectedSlot.date}T${hourStart}:00:00Z`,
+      reservation_time: `${selectedSlot.date}T${hourStart.toString().padStart(2, '0')}:00:00Z`,
+      institution: formData.institution,
+      country: formData.country
     };
 
     try {
+      // ✅ Crear la reserva
       await dispatch(createReservation(reservationData));
+      
+      // ✅ Recargar las reservas después de crear una nueva
+      await reloadReservations();
+      
       setConfirmDialog(false);
+      setSnackbarMessage("Reserva creada exitosamente");
       setSnackbarOpen(true);
+      setFormData({ institution: "", country: "", description: "" });
+      setSelectedSlot(null);
     } catch (e) {
-      console.error(e);
+      console.error("Error creando reserva:", e);
+      setSnackbarMessage("Error al crear la reserva");
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
+    if (!user || !id) return;
+
+    setLoading(true);
     try {
       await dispatch(deleteReservation(id, user.user_id));
+      
+      // ✅ Recargar las reservas después de eliminar
+      await reloadReservations();
+      
+      setSnackbarMessage("Reserva eliminada exitosamente");
       setSnackbarOpen(true);
     } catch (error) {
       console.error("Error eliminando reserva:", error);
+      setSnackbarMessage("Error al eliminar la reserva");
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
     }
   };
+
+  // ✅ Obtener reservas seguras (si no es array, devolver array vacío)
+  const safeReservations = Array.isArray(reservations) ? reservations : [];
 
   return (
     <Box sx={{ p: 4 }}>
@@ -177,7 +260,7 @@ const Calendarizacion = () => {
                       return (
                         <td
                           key={dayIdx}
-                          onClick={() => status === "available" && handleSlotClick(dateStr, time)}
+                          onClick={() => handleSlotClick(dateStr, time)}
                           style={{
                             backgroundColor: bgColor,
                             padding: 8,
@@ -200,24 +283,42 @@ const Calendarizacion = () => {
           <Typography variant="h6" gutterBottom>My Scheduled Appointments</Typography>
           <Paper>
             <List>
-              {reservations.map((res, i) => (
-                <React.Fragment key={i}>
-                  <ListItem
-                    secondaryAction={
-                      <IconButton edge="end" onClick={() => handleDelete(res.reservation_id)}>
-                        <DeleteIcon />
-                      </IconButton>
-                    }
-                  >
-                    <ListItemText
-                      primary={`📅 ${new Date(res.reservation_date).toLocaleDateString()} | ⏰ ${new Date(res.reservation_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
-                      secondary={`🧪 ${res.experiment_description || "No description"}`}
-                    />
-                  </ListItem>
-                  <Divider />
-                </React.Fragment>
-              ))}
-              {reservations.length === 0 && (
+              {/* ✅ MAP SEGURO DE RESERVATIONS */}
+              {safeReservations.length > 0 ? (
+                safeReservations.map((res, index) => {
+                  // ✅ Validación completa de cada reserva
+                  if (!res || typeof res !== 'object') {
+                    return null;
+                  }
+
+                  const reservationId = res.reservation_id || `temp-${index}`;
+                  const reservationDate = res.reservation_date;
+                  const reservationTime = res.reservation_time;
+                  const description = res.experiment_description || "No description";
+
+                  return (
+                    <React.Fragment key={reservationId}>
+                      <ListItem
+                        secondaryAction={
+                          <IconButton 
+                            edge="end" 
+                            onClick={() => res.reservation_id && handleDelete(res.reservation_id)}
+                            disabled={!res.reservation_id || loading}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        }
+                      >
+                        <ListItemText
+                          primary={`📅 ${formatDateSafe(reservationDate)} | ⏰ ${formatTimeSafe(reservationTime)}`}
+                          secondary={`🧪 ${description}`}
+                        />
+                      </ListItem>
+                      <Divider />
+                    </React.Fragment>
+                  );
+                })
+              ) : (
                 <ListItem>
                   <ListItemText primary="You have no scheduled appointments." />
                 </ListItem>
@@ -268,15 +369,18 @@ const Calendarizacion = () => {
         </DialogContent>
         <DialogActions>
           <Button variant="outlined" onClick={() => { setConfirmDialog(false); setOpenDialog(true); }}>Edit</Button>
-          <Button variant="contained" color="error" onClick={handleConfirm}>Confirm</Button>
+          <Button variant="contained" color="error" onClick={handleConfirm} disabled={loading}>
+            {loading ? "Processing..." : "Confirm"}
+          </Button>
         </DialogActions>
       </Dialog>
 
+      {/* Snackbar mejorado */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={() => setSnackbarOpen(false)}
-        message="Operación realizada exitosamente"
+        message={snackbarMessage}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       />
     </Box>
