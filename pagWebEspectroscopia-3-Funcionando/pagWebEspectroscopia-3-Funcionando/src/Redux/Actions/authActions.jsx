@@ -3,7 +3,6 @@ import {
   signOut,
   signInWithPopup,
   createUserWithEmailAndPassword,
-  updateProfile,
   sendEmailVerification,
   sendPasswordResetEmail
 } from 'firebase/auth';
@@ -67,24 +66,39 @@ export const logout = () => async (dispatch) => {
 };
 
 // REGISTRO CON EMAIL (requiere verificación)
-export const registerWithEmail = (firstName, lastName, email, password, navigate) => async () => {
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
+export const registerWithEmail = (firstName, lastName, email, password, navigate) => {
+  return async (dispatch) => {
+    try {
+      // Crear usuario
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-    await updateProfile(user, {
-      displayName: `${firstName} ${lastName}`,
-    });
+      // Enviar correo de verificación
+      await sendEmailVerification(user);
 
-    await sendEmailVerification(user);
-    alert('A verification email has been sent. Please check your inbox.');
+      // Cerrar sesión hasta que verifique
+      await signOut(auth);
 
-    await signOut(auth); // Salir para forzar verificación previa
-    navigate('/login');
-  } catch (error) {
-    console.error('Error al registrar:', error.message);
-    alert('Error al registrar: ' + error.message);
-  }
+      alert("Account created successfully. Please verify your email before logging in.");
+
+      // Opcional: guardar datos en Redux o Firestore si lo usas
+      dispatch({
+        type: "REGISTER_SUCCESS",
+        payload: { email: user.email, firstName, lastName }
+      });
+
+      // Redirigir al login
+      navigate("/login");
+
+    } catch (error) {
+      if (error.code === "auth/email-already-in-use") {
+        alert("This email is already registered. Try another one.");
+      } else {
+        alert("Error creating account: " + error.message);
+      }
+      dispatch({ type: "REGISTER_FAIL", payload: error.message });
+    }
+  };
 };
 
 // RESET PASSWORD

@@ -31,6 +31,7 @@ import {
   IconButton
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 const times = Array.from({ length: 13 }, (_, i) => `${6 + i}:00`);
@@ -61,6 +62,8 @@ const Calendarizacion = () => {
   const [weekDates, setWeekDates] = useState([]);
   const [userTurnos, setUserTurnos] = useState([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [horaLocal, setHoraLocal] = useState('');
+  const [horaPaises, setHoraPaises] = useState({});
 
   const currentMonday = getCurrentMonday();
 
@@ -74,10 +77,21 @@ const Calendarizacion = () => {
     setWeekDates(week);
 
     const newAvailability = {};
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     for (let i = 0; i < 5; i++) {
       const date = week[i];
       const dateStr = date.toISOString().split('T')[0];
       newAvailability[dateStr] = {};
+
+      // ✅ Bloquear días pasados
+      if (date < today) {
+        times.forEach(t => {
+          newAvailability[dateStr][t] = 'unavailable';
+        });
+        continue;
+      }
 
       for (let t = 0; t < times.length; t++) {
         const hour = parseInt(times[t]);
@@ -116,6 +130,45 @@ const Calendarizacion = () => {
     setUserTurnos(results);
   };
 
+  const obtenerHoraLocal = () => {
+    return new Date().toLocaleTimeString('es-EC', {
+      timeZone: 'America/Guayaquil',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
+
+  const obtenerHoraPaises = () => {
+    const paises = {
+      Bolivia: 'America/La_Paz',
+      Guatemala: 'America/Guatemala',
+      Peru: 'America/Lima',
+      España: 'Europe/Madrid',
+      Francia: 'Europe/Paris'
+    };
+
+    // Offset de Ecuador en minutos
+    const offsetEcuador = new Date().toLocaleString('en-US', { timeZone: 'America/Guayaquil' });
+    const horaEcuador = new Date(offsetEcuador);
+
+    let horas = {};
+    for (const [pais, zona] of Object.entries(paises)) {
+      const fechaPais = new Date(new Date().toLocaleString('en-US', { timeZone: zona }));
+      const diferenciaHoras = Math.round((fechaPais - horaEcuador) / (1000 * 60 * 60));
+      const signo = diferenciaHoras >= 0 ? `+${diferenciaHoras}` : `${diferenciaHoras}`;
+      horas[pais] = {
+        hora: fechaPais.toLocaleTimeString('es-EC', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }),
+        diff: signo
+      };
+    }
+    return horas;
+  };
+
   useEffect(() => {
     fetchAvailability();
   }, []);
@@ -130,6 +183,18 @@ const Calendarizacion = () => {
       fetchUserTurnos();
     }
   }, [user]);
+
+    useEffect(() => {
+    setHoraLocal(obtenerHoraLocal());
+    setHoraPaises(obtenerHoraPaises());
+
+    const intervalo = setInterval(() => {
+      setHoraLocal(obtenerHoraLocal());
+      setHoraPaises(obtenerHoraPaises());
+    }, 1000);
+
+    return () => clearInterval(intervalo);
+  }, []);
 
   const handleSlotClick = (dateStr, time) => {
     if (!user) return alert('Inicia sesión para agendar.');
@@ -187,8 +252,42 @@ const Calendarizacion = () => {
         You can only schedule appointments Monday through Friday between 6:00 AM and 6:00 PM. Mondays between 7:00 AM and 9:00 AM are unavailable due to maintenance. You can schedule a maximum of two consecutive hours if the time is available. Click on an available time to start your reservation.
       </Alert>
 
+      <Box display="flex" justifyContent="center" alignItems="center" mt={3}>
+        <Alert severity="success" icon={<AccessTimeIcon fontSize="inherit" />} sx={{
+          width: "100%",
+          maxWidth: 500,
+          textAlign: "center",
+          background: "linear-gradient(135deg, #d4fc79, #96e6a1)", // degradado verde
+          color: "#1b4332",
+          borderRadius: 3,
+          boxShadow: 3,
+          p: 3,
+        }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom>
+            🕑 Hora en tiempo real
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            <strong>Ecuador:</strong> {horaLocal}
+          </Typography>
+          {Object.entries(horaPaises).map(([pais, data]) => (
+          <Typography key={pais} variant="body2" sx={{ mt: 0.5 }}>
+            <strong>{pais}:</strong> {data.hora}{" "}
+            <span style={{ color: data.diff === 0 ? "green" : "gray" }}>
+              ({data.diff === 0
+               ? "Misma hora"
+               : `${data.diff > 0 ? "+" : ""}${data.diff}h respecto a Ecuador`})
+            </span>
+          </Typography>
+           ))}
+        </Alert>
+     </Box>
+
       <Alert severity="info" sx={{ mb: 3 }}>
-        <strong>Legend:</strong> <span style={{ backgroundColor: '#aed581', padding: '0 8px' }}>available</span> = Disponible, <span style={{ backgroundColor: '#4fc3f7', padding: '0 8px' }}>reserved</span> = Reservado, <span style={{ backgroundColor: '#b0bec5', padding: '0 8px' }}>maintenance</span> = Mantenimiento
+        <strong>Legend:</strong> 
+        <span style={{ backgroundColor: '#aed581', padding: '0 8px' }}>available</span> = Disponible, 
+        <span style={{ backgroundColor: '#4fc3f7', padding: '0 8px' }}>reserved</span> = Reservado, 
+        <span style={{ backgroundColor: '#b0bec5', padding: '0 8px' }}>maintenance</span> = Mantenimiento, 
+        <span style={{ backgroundColor: '#ef9a9a', padding: '0 8px' }}>unavailable</span> = Día pasado
       </Alert>
 
       <Grid container spacing={3}>
@@ -216,7 +315,8 @@ const Calendarizacion = () => {
                         available: '#aed581',
                         reserved: '#4fc3f7',
                         maintenance: '#b0bec5',
-                        loading: '#eeeeee'
+                        loading: '#eeeeee',
+                        unavailable: '#ef9a9a'
                       }[status];
 
                       return (
