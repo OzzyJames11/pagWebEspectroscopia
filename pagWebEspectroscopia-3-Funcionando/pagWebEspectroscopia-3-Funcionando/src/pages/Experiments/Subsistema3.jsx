@@ -3,11 +3,6 @@ import { Box, Paper, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 
-import imagen_subsistema1 from "../../assets/img/experimentos/imagen_subsistema1.png";
-import imagen_subsistema1V2 from "../../assets/img/experimentos/imagen_subsistema1V2.png";
-
-import Hls from 'hls.js';
-
 // Importación de componentes
 import DataTable from "../../components/Elements/DataTable";
 import Button from "../../components/Elements/Button.jsx";
@@ -240,105 +235,15 @@ const Subsistema3 = () => {
   const [isGuardarLecturaDisabled_1, setIsGuardarLecturaDisabled_1] =
       useState(false); // Estado para habilitar/deshabilitar el boton de guardar datos
   
+  
+  const [youtubeVideoId] = useState("nAQz4RMaHVA");
+
 
   // Cargar datos guardados al montar el componente
   useEffect(() => {
     const datosGuardados =
       JSON.parse(localStorage.getItem("historicalData_subsistema3")) || [];
     setDatos(datosGuardados);
-
-    const initVideoStream = async () => {
-      try {
-          // Intenta conexión WebRTC primero
-          const pc = new RTCPeerConnection({
-              iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-          });
-
-          pc.ontrack = (event) => {
-              if (videoRef.current && !videoRef.current.srcObject) {
-                  videoRef.current.srcObject = event.streams[0];
-                  setIsStreamActive(true);
-                  setStreamError('');
-              }
-          };
-
-          const streamId = "mystream";
-          const response = await fetch(
-              `http://172.30.43.173:5080/WebRTCApp/rest/v2/broadcasts/${streamId}/websocket`,
-              {
-                  headers: {
-                      'Content-Type': 'application/json'
-                  }
-              }
-          );
-
-          if (!response.ok) {
-              throw new Error('No se pudo conectar al servidor de streaming');
-          }
-
-          const offer = await response.json();
-          await pc.setRemoteDescription(offer);
-          const answer = await pc.createAnswer();
-          await pc.setLocalDescription(answer);
-
-          await fetch(
-              `http://172.30.43.173:5080/WebRTCApp/rest/v2/broadcasts/${streamId}/answer`,
-              {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(answer)
-              }
-          );
-
-          // Fallback a HLS si WebRTC falla después de 5 segundos
-          const fallbackTimer = setTimeout(() => {
-              if (!isStreamActive) {
-                  initHLSFallback();
-              }
-          }, 5000);
-
-          return () => clearTimeout(fallbackTimer);
-
-      } catch (error) {
-          console.error("Error WebRTC:", error);
-          initHLSFallback();
-      }
-  };
-
-  const initHLSFallback = () => {
-      if (Hls.isSupported()) {
-          const hls = new Hls();
-          hls.loadSource('http://172.30.43.173:5080/WebRTCApp/streams/mystream.m3u8');
-          hls.attachMedia(videoRef.current);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => {
-              setIsStreamActive(true);
-              setStreamError('');
-          });
-          hls.on(Hls.Events.ERROR, (event, data) => {
-              if (data.fatal) {
-                  setStreamError('Error cargando la transmisión HLS');
-              }
-          });
-      } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
-          // Soporte nativo para Safari
-          videoRef.current.src = 'http://172.30.43.173:5080/WebRTCApp/streams/mystream.m3u8';
-          videoRef.current.addEventListener('loadedmetadata', () => {
-              setIsStreamActive(true);
-              setStreamError('');
-          });
-      } else {
-          setStreamError('Tu navegador no soporta la reproducción de video en vivo');
-      }
-  };
-
-  initVideoStream();
-
-  return () => {
-      if (videoRef.current?.srcObject) {
-          videoRef.current.srcObject.getTracks().forEach(track => track.stop());
-      }
-  };
-
 
   }, []);
 
@@ -673,42 +578,57 @@ const Subsistema3 = () => {
           sx={{ display: "flex", flexDirection: "column" }}
         >
           <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-              <Paper className="paper-camera" sx={{ p: 2, width: '100%' }}>
-                  <Typography variant="h5" gutterBottom>
-                      {CAMERA_TITLE}
-                      {isStreamActive && (
-                          <Typography component="span" variant="caption" color="success.main" sx={{ ml: 1 }}>
-                              ● En vivo
-                          </Typography>
-                      )}
-                  </Typography>
-                  {streamError ? (
-                      <Box sx={{ 
-                          height: 300,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundColor: '#f5f5f5',
-                          borderRadius: 1
-                      }}>
-                          <Typography color="error">{streamError}</Typography>
-                      </Box>
-                  ) : (
-                      <video
-                          ref={videoRef}
-                          autoPlay
-                          playsInline
-                          muted
-                          controls
-                          style={{
-                              width: '100%',
-                              maxHeight: '400px',
-                              borderRadius: '4px',
-                              backgroundColor: '#000'
-                          }}
-                      />
-                  )}
-              </Paper>
+            <Paper
+              className="paper-camera"
+              sx={{
+                p: 2,
+                width: "100%",
+                backgroundColor: "#121212",
+                color: "#fff",
+                borderRadius: "12px",
+                boxShadow: "0px 4px 10px rgba(0,0,0,0.4)",
+              }}
+            >
+              <Typography
+                variant="h5"
+                gutterBottom
+                sx={{ fontWeight: "bold", display: "flex", alignItems: "center" }}
+              >
+                {CAMERA_TITLE}
+                <Typography
+                  component="span"
+                  variant="caption"
+                  sx={{
+                    color: "#e53935",
+                    fontWeight: "bold",
+                    ml: 1,
+                  }}
+                >
+                  ● En vivo
+                </Typography>
+              </Typography>
+              <Box
+                sx={{
+                  width: "100%",
+                  height: "400px",
+                  mt: 1,
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  backgroundColor: "#000",
+                }}
+              >
+                <iframe
+                  width="100%"
+                  height="400"
+                  src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1`}
+                  title="Transmisión en vivo de YouTube"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  style={{ borderRadius: "8px" }}
+                ></iframe>
+              </Box>
+            </Paper>
           </Box>
 
           <Box
