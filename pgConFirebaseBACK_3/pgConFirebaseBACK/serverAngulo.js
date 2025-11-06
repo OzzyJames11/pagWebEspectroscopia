@@ -61,6 +61,7 @@ parser1.on("data", (line) => {
   } else if (choose === "V") {
     data1.voltage = valor;
     data1.cont = cont;
+    /* Desactivado temporalmente por OzzyJames11
     lecturesRef
       .push({
         data1: data1,
@@ -73,6 +74,24 @@ parser1.on("data", (line) => {
         console.error("Error al enviar los datos: ", error);
       });
     cont += 1;
+    */
+
+
+    /*} else if (mensaje === "EndMov") {
+    EndMovRef.set(mensaje, (error) => {
+      if (error) console.error("Error al escribir en Firebase:", error);
+      else console.log("-------------EndMov");
+    });
+  
+    // Esperar 1 segundo antes de limpiar el valor
+    setTimeout(() => {
+      EndMovRef.set('x', (error) => {
+        if (error) console.error("Error al limpiar:", error);
+        else console.log("-------------Valor limpiado");
+      });
+    }, 1000);
+  }*/
+
   } else if (mensaje === "EndMov") {
     EndMovRef.set(mensaje, (error) => {
       if (error) {
@@ -166,6 +185,8 @@ parser2.on("data", (line) => {
   } else if (choose === "V") {
     data2.voltage = valor;
     data2.cont = cont2;
+    // Desactivado temporalmente por OzzyJames11
+    /*
     lecturesRef2
       .push({
         data1: data2,
@@ -178,6 +199,7 @@ parser2.on("data", (line) => {
         console.error("Error al enviar los datos: ", error);
       });
     cont2 += 1;
+    */
   } else if (mensaje2 === "EndMov") {
     EndMovRef2.set(mensaje2, (error) => {
       if (error) {
@@ -279,6 +301,8 @@ port3.on("open", () => {
    } else if (choose === "V") {
      data3.voltage = valor;
      data3.cont = cont3;
+     // Desactivado temporalmente por OzzyJames11
+     /*
      lecturesRef3
        .push({
          data1: data3,
@@ -291,6 +315,7 @@ port3.on("open", () => {
          console.error("Error al enviar los datos: ", error);
        });
      cont3 += 1;
+     */
    } else if (mensaje3 === "EndMov") {
      EndMovRef3.set(mensaje3, (error) => {
        if (error) {

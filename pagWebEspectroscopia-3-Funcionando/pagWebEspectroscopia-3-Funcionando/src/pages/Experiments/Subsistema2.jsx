@@ -3,6 +3,9 @@ import { Box, Paper, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 
+//import imagen_subsistema1 from "../../assets/img/experimentos/imagen_subsistema1.png";
+//import imagen_subsistema1V2 from "../../assets/img/experimentos/imagen_subsistema1V2.png"; 
+
 import Hls from 'hls.js';
 
 //Importación de componentes
@@ -649,12 +652,13 @@ const Subsistema2 = () => {
                 title={VOLTAGE_VS_TIME_TITLE} 
                 description={GRAPH_DESCRIPTIONS.VOLTAGE_VS_TIME}
               />
+              {/* Desactivado temporalmente por OzzyJames11 
               <div style={styles.smallGraph}>
                 <Line
                   data={voltajeChart}
                   options={{ responsive: true, maintainAspectRatio: false }} 
                 />
-              </div>
+              </div>*/}
             </Paper>
           </Box>
 
@@ -677,12 +681,13 @@ const Subsistema2 = () => {
                 title={CURRENT_VS_TIME_TITLE} 
                 description={GRAPH_DESCRIPTIONS.CURRENT_VS_TIME}
               />
+              {/* Desactivado temporalmente por OzzyJames11 
               <div style={styles.smallGraph}>
                 <Line
                   data={corrienteChart}
                   options={{ responsive: true, maintainAspectRatio: false }} 
                 />
-              </div>
+              </div>*/}
             </Paper>
           </Box>
           <Button

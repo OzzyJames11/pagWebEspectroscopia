@@ -639,12 +639,13 @@ const Subsistema3 = () => {
                 title={VOLTAGE_VS_TIME_TITLE} 
                 description={GRAPH_DESCRIPTIONS.VOLTAGE_VS_TIME}
               />
+              {/* Desactivado temporalmente por OzzyJames11 
               <div style={styles.smallGraph}>
                 <Line
                   data={voltajeChart}
                   options={{ responsive: true, maintainAspectRatio: false }} 
                 />
-              </div>
+              </div>*/}
             </Paper>
           </Box>
 
@@ -667,12 +668,13 @@ const Subsistema3 = () => {
                 title={CURRENT_VS_TIME_TITLE} 
                 description={GRAPH_DESCRIPTIONS.CURRENT_VS_TIME}
               />
+              {/* Desactivado temporalmente por OzzyJames11 
               <div style={styles.smallGraph}>
                 <Line
                   data={corrienteChart}
                   options={{ responsive: true, maintainAspectRatio: false }} 
                 />
-              </div>
+              </div>*/}
             </Paper>
           </Box>
           <Button

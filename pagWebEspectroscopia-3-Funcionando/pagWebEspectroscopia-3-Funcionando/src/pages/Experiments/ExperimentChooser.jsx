@@ -74,7 +74,8 @@ const ExperimentChooser = () => {
 }, [user]);
 
  
-  const mostrarMensaje = !user || !habilitado;
+  //const mostrarMensaje = !user || !habilitado;
+  const mostrarMensaje = false; 
 
   return (
     <div>

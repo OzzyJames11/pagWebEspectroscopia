@@ -25,7 +25,8 @@ dist-ssr
 
 
 # Ignorar variables de entorno
-pgConFirebaseBACK_3/pgConFirebaseBACK/.env
+*.env
+#pgConFirebaseBACK_3/pgConFirebaseBACK/.env
 
 # Ignorar archivos .json sensibles del backend
 pgConFirebaseBACK_3/pgConFirebaseBACK/*.json

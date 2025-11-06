@@ -3,6 +3,9 @@ import { Box, Paper, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 
+//import imagen_subsistema1 from "../../assets/img/experimentos/imagen_subsistema1.png";
+//import imagen_subsistema1V2 from "../../assets/img/experimentos/imagen_subsistema1V2.png";
+
 import Hls from 'hls.js';
 
 //Importación de componentes
@@ -105,7 +108,10 @@ const Subsistema1 = () => {
   //Lectura de datos desde Firebase
   const db = getDatabase(app);
 
-  //Uso de los Tooltips
+  // Agregado manualmente por OzzyJames11 
+  //setInputs para fetchDataInputs
+  const [inputs, setInputs] = useState("");
+
 
 
   useEffect(() => {
@@ -152,6 +158,25 @@ const Subsistema1 = () => {
     fetchDataInputs();
   }, [db]); // ✅ Se ejecuta solo una vez
 
+  /*useEffect(() => {
+    const fetchDataInputs = async () => {
+      try {
+        const dbRef = ref(db, "Lectures");
+        const snapshot = await get(dbRef);
+        if (snapshot.exists()) {
+          console.log("Datos obtenidos de Lectures:", snapshot.val());
+        } else {
+          console.warn("No se encontraron datos para 'Lectures'");
+        }
+      } catch (error) {
+        console.error("Error al obtener datos de Firebase:", error);
+      }
+    };
+  
+    fetchDataInputs();
+  }, [db]);*/
+  
+  /* Desactivado temporalmente por OzzyJames11 
   // 🔹 Escuchar cambios en Firebase en tiempo real
   useEffect(() => {
     const dbRef = ref(db, "Exp1/data"); // Escucha todo el nodo "Lectures"
@@ -206,6 +231,7 @@ const Subsistema1 = () => {
 
     return () => unsubscribe(); // 🔄 Limpieza del listener cuando el componente se desmonta
   }, [db]); // ✅ Se ejecuta al montar el componente y escucha cambios en Firebase
+  */
 
   //Lectura de BackToFront
   useEffect(() => {
@@ -626,12 +652,13 @@ const Subsistema1 = () => {
                 title={VOLTAGE_VS_TIME_TITLE} 
                 description={GRAPH_DESCRIPTIONS.VOLTAGE_VS_TIME}
               />
+              {/* Desactivado temporalmente por OzzyJames11
               <div style={styles.smallGraph}>
                 <Line
                   data={voltajeChart}
                   options={{ responsive: true, maintainAspectRatio: false }} 
                 />
-              </div>
+              </div>*/}
             </Paper>
           </Box>
 
@@ -655,12 +682,13 @@ const Subsistema1 = () => {
                 title={CURRENT_VS_TIME_TITLE} 
                 description={GRAPH_DESCRIPTIONS.CURRENT_VS_TIME}
               />
+              {/* Desactivado temporalmente por OzzyJames11 
               <div style={styles.smallGraph}>
                 <Line
                   data={corrienteChart}
                   options={{ responsive: true, maintainAspectRatio: false }} 
                 />
-              </div>
+              </div>*/}
             </Paper>
           </Box>
           <Button
