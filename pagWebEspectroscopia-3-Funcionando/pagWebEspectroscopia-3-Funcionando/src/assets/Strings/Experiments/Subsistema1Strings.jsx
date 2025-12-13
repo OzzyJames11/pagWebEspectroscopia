@@ -1,6 +1,6 @@
 // agregar todas las unidades
 export const SUBSISTEMA1_COLUMNS = [
-    "Zenith Angle (°)",
+    "Angle (°)",
     "Voltage",
     "Current",
     "Efficiency",
@@ -11,7 +11,7 @@ export const PAGE_TITLES = {
     MAIN_TITLE: "Panel Subsystem (1 Rotation)",
     DESCRIPTION: "This subsystem controls the rotation of a solar panel along a single axis. It measures real-time voltage (V) and current (A) outputs at each angle position, then calculates two key performance metrics: Energy conversion efficiency (%) and Fill Factor (quality indicator of the solar cells).",
     SAVE_BUTTON: "Save",
-    MOVE_BUTTON: "Move",
+    MOVE_BUTTON: "Start Sweep",
     DOWNLOAD_GRAPHS_BUTTON: "Download All Graphs",
     DOWNLOAD_1_GRAPH: "Download Graph",
     BACK_BUTTON: "Go Back",

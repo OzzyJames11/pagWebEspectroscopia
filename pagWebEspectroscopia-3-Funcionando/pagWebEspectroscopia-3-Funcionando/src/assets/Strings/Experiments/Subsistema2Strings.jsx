@@ -24,7 +24,7 @@ export const PAGE_TITLES = {
     MAIN_TITLE: "Panel Subsystem (2 Rotations)",
     DESCRIPTION: "This subsystem manages dual-axis rotation of solar panels to optimize sun tracking. It measures real-time voltage (V) and current (A) outputs at each angle position, then calculates two key performance metrics: Energy conversion efficiency (%) and Fill Factor (quality indicator of the solar cells).",
     SAVE_BUTTON: "Save",
-    MOVE_BUTTON: "Move",
+    MOVE_BUTTON: "Start Sweep",
     DOWNLOAD_GRAPHS_BUTTON: "Download All Graphs",
     DOWNLOAD_1_GRAPH: "Download Graph",
     BACK_BUTTON: "Go Back",
