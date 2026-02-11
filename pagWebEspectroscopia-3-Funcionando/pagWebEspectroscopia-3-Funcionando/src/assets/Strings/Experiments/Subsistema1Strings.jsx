@@ -12,7 +12,7 @@ export const PAGE_TITLES = {
     DESCRIPTION: "This subsystem controls the rotation of a solar panel along a single axis. It measures real-time voltage (V) and current (A) outputs at each angle position, then calculates two key performance metrics: Energy conversion efficiency (%) and Fill Factor (quality indicator of the solar cells).",
     SAVE_BUTTON: "Save",
     MOVE_BUTTON: "Start Sweep",
-    DOWNLOAD_GRAPHS_BUTTON: "Download All Graphs",
+    DOWNLOAD_GRAPHS_BUTTON: "Download full report",
     DOWNLOAD_1_GRAPH: "Download Graph",
     BACK_BUTTON: "Go Back",
     CAMERA_TITLE: "Live Camera",

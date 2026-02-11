@@ -2745,7 +2745,7 @@ export default Subsistema2;*/
 
 
 
-
+// Version funcional sin usuarios
 /*
 import React, { useState, useEffect, useRef } from "react";
 import { Box, Paper, Typography } from "@mui/material";
@@ -3428,7 +3428,11 @@ const Subsistema2 = () => {
   );
 };
 
-export default Subsistema2;*/
+export default Subsistema2;
+
+
+
+*/
 
 
 
@@ -3456,12 +3460,8 @@ export default Subsistema2;*/
 
 
 
-
-
-
-
-
-
+// Usuarios
+/*
 import React, { useState, useEffect, useRef } from "react";
 import { Box, Paper, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -3903,9 +3903,9 @@ const Subsistema2 = () => {
         {DESCRIPTION}
       </Typography>
 
-      <Grid container spacing={4} alignItems="flex-start">
+      <Grid container spacing={4} alignItems="flex-start">*/
         {/* ===================== COLUMNA IZQUIERDA ===================== */}
-        <Grid item xs={12} md={6}>
+       /* <Grid item xs={12} md={6}>
           <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
             🚀 Automatic sweeping control (2-axis)
           </Typography>
@@ -4031,9 +4031,9 @@ const Subsistema2 = () => {
             </Button>
           </Box>
         </Grid>
-
+*/
         {/* ===================== COLUMNA DERECHA ===================== */}
-        <Grid item xs={12} md={6} sx={{ display: "flex", flexDirection: "column" }}>
+       /* <Grid item xs={12} md={6} sx={{ display: "flex", flexDirection: "column" }}>
           <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
             <Paper
               className="paper-camera"
@@ -4148,3 +4148,1064 @@ const Subsistema2 = () => {
 };
 
 export default Subsistema2;
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Usuarios version final
+// ozzyjames11: comentado por ozzy, la nueva versión incluye una similitud al subsistema1
+// import React, { useState, useEffect, useRef } from "react";
+// import { Box, Paper, Typography } from "@mui/material";
+// import { useNavigate } from "react-router-dom";
+// import Grid from "@mui/material/Grid";
+// import { useSelector } from "react-redux"; // ✅ UID real
+
+// import SliderComponent from "../../components/Elements/SliderComponent";
+// import DataTable from "../../components/Elements/DataTable";
+// import Button from "../../components/Elements/Button.jsx";
+// import GraphTitleWithTooltip from "../../components/Elements/GraphTitleWithTooltip";
+
+// import {
+//   SUBSISTEMA2_COLUMNS,
+//   PAGE_TITLES,
+//   GRAPH_DESCRIPTIONS,
+// } from "../../assets/Strings/Experiments/Subsistema2Strings.jsx";
+
+// import "../../assets/css/Elements/PaperStyles.css";
+
+// import { getDatabase, ref, set, update, onValue, onChildAdded, remove } from "firebase/database";
+// import app from "../../firebaseConfig.js";
+
+// import { generateTXT } from "../../../src/components/Elements/generateTXT.jsx";
+
+// const Subsistema2 = () => {
+//   const navigate = useNavigate();
+//   const db = getDatabase(app);
+
+//   // ✅ UID del usuario logeado
+//   const user = useSelector((state) => state.auth.user);
+//   const userId = user?.uid;
+
+//   const {
+//     MAIN_TITLE,
+//     DESCRIPTION,
+//     SAVE_BUTTON,
+//     MOVE_BUTTON,
+//     DOWNLOAD_GRAPHS_BUTTON,
+//     DOWNLOAD_1_GRAPH,
+//     BACK_BUTTON,
+//     CAMERA_TITLE,
+//     VOLTAGE_VS_TIME_TITLE,
+//     CURRENT_VS_TIME_TITLE,
+//   } = PAGE_TITLES;
+
+//   const [azimuthStart, setAzimuthStart] = useState(0);
+//   const [azimuthEnd, setAzimuthEnd] = useState(20);
+//   const [zenithStart, setZenithStart] = useState(0);
+//   const [zenithEnd, setZenithEnd] = useState(20);
+
+//   const [barridoEnProgreso, setBarridoEnProgreso] = useState(false);
+//   const [azimuthAngles, setAzimuthAngles] = useState([]);
+//   const [zenithAngles, setZenithAngles] = useState([]);
+//   const [faseBarrido, setFaseBarrido] = useState("azimuth");
+//   const [anguloActualIndex, setAnguloActualIndex] = useState(0);
+//   const [sweepIdActual, setSweepIdActual] = useState(null);
+//   const [datosTemporales, setDatosTemporales] = useState([]);
+
+//   const azimuthAnglesRef = useRef([]);
+//   const zenithAnglesRef = useRef([]);
+//   const anguloActualIndexRef = useRef(0);
+//   const faseBarridoRef = useRef("azimuth");
+//   const sweepIdActualRef = useRef(null);
+//   const barridoEnProgresoRef = useRef(false);
+//   const lastMsgRef = useRef(null);
+
+//   useEffect(() => {
+//     azimuthAnglesRef.current = azimuthAngles;
+//     zenithAnglesRef.current = zenithAngles;
+//     anguloActualIndexRef.current = anguloActualIndex;
+//     faseBarridoRef.current = faseBarrido;
+//     sweepIdActualRef.current = sweepIdActual;
+//     barridoEnProgresoRef.current = barridoEnProgreso;
+//   }, [azimuthAngles, zenithAngles, anguloActualIndex, faseBarrido, sweepIdActual, barridoEnProgreso]);
+
+//   // ✅ Guard: requiere login
+//   useEffect(() => {
+//     if (!userId) {
+//       alert("Debes iniciar sesión para usar este experimento");
+//       navigate("/login");
+//     }
+//   }, [userId, navigate]);
+
+//   const calcularAngulosBarrido = (inicio, fin, paso = 5) => {
+//     const angulos = [];
+//     if (inicio <= fin) for (let a = inicio; a <= fin; a += paso) angulos.push(a);
+//     else for (let a = inicio; a >= fin; a -= paso) angulos.push(a);
+//     return angulos;
+//   };
+
+//   const enviarComando = async (comando) => {
+//     if (!userId) return;
+//     const fbRef = ref(db, `users/${userId}/Exp2/communication/FrontToBack`);
+//     await set(fbRef, comando);
+//     setTimeout(() => set(fbRef, "x").catch(() => {}), 300);
+//   };
+
+//   const iniciarBarrido = async () => {
+//     if (!userId) return alert("Debes iniciar sesión");
+//     if (barridoEnProgresoRef.current) return alert("Ya hay un barrido en progreso");
+//     if (azimuthStart === azimuthEnd) return alert("Azimuth Start y End deben ser diferentes");
+//     if (zenithStart === zenithEnd) return alert("Zenith Start y End deben ser diferentes");
+
+//     const azList = calcularAngulosBarrido(azimuthStart, azimuthEnd, 5);
+//     const zeList = calcularAngulosBarrido(zenithStart, zenithEnd, 5);
+
+//     setAzimuthAngles(azList);
+//     setZenithAngles(zeList);
+//     setBarridoEnProgreso(true);
+//     setFaseBarrido("azimuth");
+//     setAnguloActualIndex(0);
+//     setDatosTemporales([]);
+//     lastMsgRef.current = null;
+
+//     const sweepId = `sweep_${Date.now()}`;
+//     setSweepIdActual(sweepId);
+
+//     await Promise.all([
+//       set(ref(db, `users/${userId}/Exp2/sweeps/${sweepId}`), {
+//         azimuthStart,
+//         azimuthEnd,
+//         zenithStart,
+//         zenithEnd,
+//         step: 5,
+//         status: "in_progress",
+//         fase: "azimuth",
+//         timestamp: Date.now(),
+//       }),
+//       set(ref(db, `users/${userId}/Exp2/currentSweepId`), sweepId),
+//     ]);
+//   };
+
+//   // Escuchar BackToFront (PITCH:, ROLL:, EndMov)
+//   useEffect(() => {
+//     if (!userId) return;
+
+//     const dbRef = ref(db, `users/${userId}/Exp2/communication/BackToFront`);
+//     const unsubscribe = onValue(dbRef, async (snapshot) => {
+//       const msg = snapshot.val();
+//       if (!msg || msg === "x") return;
+
+//       if (lastMsgRef.current === msg) return;
+//       lastMsgRef.current = msg;
+
+//       const fase = faseBarridoRef.current;
+//       const idx = anguloActualIndexRef.current;
+//       const sweepId = sweepIdActualRef.current;
+//       const enProgreso = barridoEnProgresoRef.current;
+
+//       if (!enProgreso || !sweepId) return;
+
+//       if (msg === "PITCH:") {
+//         if (fase === "azimuth") {
+//           const anguloPitch = azimuthAnglesRef.current[idx];
+//           await enviarComando("p" + anguloPitch);
+//           await update(ref(db, `users/${userId}/Exp2/sweeps/${sweepId}`), {
+//             fase,
+//             currentPitch: anguloPitch,
+//             lastUpdated: Date.now(),
+//           });
+//         } else if (fase === "zenith") {
+//           const pitchFijo = azimuthEnd;
+//           await enviarComando("p" + pitchFijo);
+//           await update(ref(db, `users/${userId}/Exp2/sweeps/${sweepId}`), {
+//             fase,
+//             currentPitch: pitchFijo,
+//             lastUpdated: Date.now(),
+//           });
+//         }
+//         return;
+//       }
+
+//       if (msg === "ROLL:") {
+//         if (fase === "azimuth") {
+//           const rollFijo = zenithStart;
+//           await enviarComando("r" + rollFijo);
+//           await update(ref(db, `users/${userId}/Exp2/sweeps/${sweepId}`), {
+//             fase,
+//             currentRoll: rollFijo,
+//             lastUpdated: Date.now(),
+//           });
+//         } else if (fase === "zenith") {
+//           const anguloRoll = zenithAnglesRef.current[idx];
+//           await enviarComando("r" + anguloRoll);
+//           await update(ref(db, `users/${userId}/Exp2/sweeps/${sweepId}`), {
+//             fase,
+//             currentRoll: anguloRoll,
+//             lastUpdated: Date.now(),
+//           });
+//         }
+//         return;
+//       }
+
+//       if (msg === "EndMov") {
+//         const azList = azimuthAnglesRef.current;
+//         const zeList = zenithAnglesRef.current;
+
+//         if (fase === "azimuth") {
+//           const siguiente = idx + 1;
+//           if (siguiente < azList.length) setAnguloActualIndex(siguiente);
+//           else {
+//             setFaseBarrido("zenith");
+//             setAnguloActualIndex(0);
+//             await update(ref(db, `users/${userId}/Exp2/sweeps/${sweepId}`), {
+//               fase: "zenith",
+//               lastUpdated: Date.now(),
+//             });
+//           }
+//         } else if (fase === "zenith") {
+//           const siguiente = idx + 1;
+//           if (siguiente < zeList.length) setAnguloActualIndex(siguiente);
+//           else {
+//             setBarridoEnProgreso(false);
+//             setFaseBarrido("done");
+//             await Promise.all([
+//               update(ref(db, `users/${userId}/Exp2/sweeps/${sweepId}`), {
+//                 status: "completed",
+//                 fase: "done",
+//                 lastUpdated: Date.now(),
+//               }),
+//               set(ref(db, `users/${userId}/Exp2/currentSweepId`), null),
+//             ]);
+//           }
+//         }
+//         return;
+//       }
+//     });
+
+//     return () => unsubscribe();
+//   }, [azimuthEnd, zenithStart, db, userId]);
+
+//   // Escuchar measurements temporales del sweep actual
+//   useEffect(() => {
+//     if (!userId) return;
+
+//     const dbRef = ref(db, `users/${userId}/Exp2/measurements`);
+//     const unsubscribe = onChildAdded(dbRef, (snapshot) => {
+//       const data = snapshot.val();
+//       if (!data) return;
+
+//       if (data.sweepId === sweepIdActual && data.isSaved === false) {
+//         setDatosTemporales((prev) => {
+//           const existe = prev.some((d) => d.timestamp === data.timestamp);
+//           return existe ? prev : [...prev, data];
+//         });
+//       }
+//     });
+
+//     return () => unsubscribe();
+//   }, [sweepIdActual, db, userId]);
+
+//   const guardarBarrido = async () => {
+//     if (!userId) return alert("Debes iniciar sesión");
+//     if (datosTemporales.length === 0) return alert("No hay datos para guardar");
+
+//     const confirmar = window.confirm(`¿Guardar ${datosTemporales.length} mediciones del barrido?`);
+//     if (!confirmar) return;
+
+//     const updates = {};
+//     datosTemporales.forEach((d) => {
+//       updates[`users/${userId}/Exp2/measurements/meas_${d.timestamp}/isSaved`] = true;
+//     });
+//     await update(ref(db), updates);
+
+//     alert("✅ Barrido guardado correctamente");
+//     setDatosTemporales([]);
+//   };
+
+//   const noEnviarNuevoAngulo = async () => {
+//     if (!userId) return;
+//     await set(ref(db, `users/${userId}/Exp2/communication/FrontToBack`), "n").catch(() => {});
+//     setTimeout(() => set(ref(db, `users/${userId}/Exp2/communication/FrontToBack`), "x").catch(() => {}), 200);
+//   };
+
+//   const eliminarDatos = async () => {
+//     if (!userId) return;
+//     await remove(ref(db, `users/${userId}/Exp2/measurements`)).catch(() => {});
+//     await remove(ref(db, `users/${userId}/Exp2/sweeps`)).catch(() => {});
+//     await set(ref(db, `users/${userId}/Exp2/currentSweepId`), null).catch(() => {});
+//   };
+
+//   const handleBack = () => {
+//     noEnviarNuevoAngulo();
+//     navigate("/experiments/experimentChooser");
+//     eliminarDatos();
+//   };
+
+//   const [youtubeVideoId] = useState("nAQz4RMaHVA");
+
+//   const handleDownloadBothData = () => {
+//     generateTXT({
+//       filename: "subsystem2_all_data.txt",
+//       metadata: [
+//         { label: "Azimuth Sweep", value: `${azimuthStart}° → ${azimuthEnd}°` },
+//         { label: "Zenith Sweep", value: `${zenithStart}° → ${zenithEnd}°` },
+//       ],
+//       sections: [
+//         {
+//           title: "Measurements",
+//           headers: ["Pitch", "Roll", "Voltage", "Current"],
+//           data: datosTemporales.map((d) => [d.pitchAngle, d.rollAngle, d.voltage, d.current]),
+//         },
+//       ],
+//     });
+//   };
+
+//   if (!userId) return <Typography>Cargando...</Typography>;
+
+//   return (
+//     <Box width="90%" maxWidth="1300px" margin="auto" mt={7} mb={5}>
+//       <Typography variant="h4" gutterBottom sx={{ textAlign: "left" }}>
+//         {MAIN_TITLE}
+//       </Typography>
+//       <Typography variant="body1" sx={{ textAlign: "left", mb: 3 }}>
+//         {DESCRIPTION}
+//       </Typography>
+
+//       <Grid container spacing={4} alignItems="flex-start">
+//         <Grid item xs={12} md={6}>
+//           <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
+//             🚀 Automatic sweeping control (2-axis)
+//           </Typography>
+
+//           <SliderComponent value={azimuthStart} label="Azimuth Start Angle" min={-30} max={30} step={5} actualAngle={azimuthStart} onChange={(e, v) => setAzimuthStart(v)} disabled={barridoEnProgreso} />
+//           <Box mt={2}>
+//             <SliderComponent value={azimuthEnd} label="Azimuth End Angle" min={-30} max={30} step={5} actualAngle={azimuthEnd} onChange={(e, v) => setAzimuthEnd(v)} disabled={barridoEnProgreso} />
+//           </Box>
+
+//           <Box mt={3}>
+//             <SliderComponent value={zenithStart} label="Zenith Start Angle" min={-30} max={30} step={5} actualAngle={zenithStart} onChange={(e, v) => setZenithStart(v)} disabled={barridoEnProgreso} />
+//           </Box>
+//           <Box mt={2}>
+//             <SliderComponent value={zenithEnd} label="Zenith End Angle" min={-30} max={30} step={5} actualAngle={zenithEnd} onChange={(e, v) => setZenithEnd(v)} disabled={barridoEnProgreso} />
+//           </Box>
+
+//           <Box mt={2}>
+//             {barridoEnProgreso && <p style={{ color: "black" }}>El panel está en movimiento</p>}
+//             <Button id="btnSweep2" variant="contained" color="primary" onClick={iniciarBarrido} align="right" disabled={barridoEnProgreso}>
+//               {barridoEnProgreso ? "⏳ Barrido en progreso..." : MOVE_BUTTON}
+//             </Button>
+//           </Box>
+
+//           {barridoEnProgreso && (
+//             <Box sx={{ mt: 3, backgroundColor: "#eee", borderRadius: 1, height: 10 }}>
+//               <Box
+//                 sx={{
+//                   height: "100%",
+//                   borderRadius: 1,
+//                   backgroundColor: "#2196f3",
+//                   width:
+//                     faseBarrido === "azimuth"
+//                       ? `${((anguloActualIndex + 1) / (azimuthAngles.length || 1)) * 50}%`
+//                       : `${50 + ((anguloActualIndex + 1) / (zenithAngles.length || 1)) * 50}%`,
+//                   transition: "width 0.3s",
+//                 }}
+//               />
+//             </Box>
+//           )}
+
+//           <Box mt={3}>
+//             {datosTemporales.length > 0 ? (
+//               <DataTable
+//                 columns={SUBSISTEMA2_COLUMNS}
+//                 data={datosTemporales.map((d) => ({
+//                   [SUBSISTEMA2_COLUMNS[0]]: `${d.rollAngle ?? "-"}°`,
+//                   [SUBSISTEMA2_COLUMNS[1]]: `${d.pitchAngle ?? "-"}°`,
+//                   [SUBSISTEMA2_COLUMNS[2]]: d.voltage?.toFixed(2),
+//                   [SUBSISTEMA2_COLUMNS[3]]: d.current?.toFixed(2),
+//                   [SUBSISTEMA2_COLUMNS[4]]: (((d.voltage ?? 0) * (d.current ?? 0)) / 100).toFixed(2),
+//                   [SUBSISTEMA2_COLUMNS[5]]: "—",
+//                 }))}
+//               />
+//             ) : (
+//               <Paper sx={{ p: 2 }}>
+//                 <Typography variant="body2" color="text.secondary">
+//                   Aún no hay mediciones temporales del barrido.
+//                 </Typography>
+//               </Paper>
+//             )}
+//           </Box>
+
+//           <Box mt={2}>
+//             <Button variant="contained" color="primary" onClick={guardarBarrido} align="right" disabled={datosTemporales.length === 0}>
+//               {SAVE_BUTTON}
+//             </Button>
+//           </Box>
+//         </Grid>
+
+//         <Grid item xs={12} md={6} sx={{ display: "flex", flexDirection: "column" }}>
+//           <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
+//             <Paper
+//               className="paper-camera"
+//               sx={{
+//                 p: 2,
+//                 width: "100%",
+//                 backgroundColor: "#121212",
+//                 color: "#fff",
+//                 borderRadius: "12px",
+//                 boxShadow: "0px 4px 10px rgba(0,0,0,0.4)",
+//               }}
+//             >
+//               <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", display: "flex", alignItems: "center" }}>
+//                 {CAMERA_TITLE}
+//                 <Typography component="span" variant="caption" sx={{ color: "#e53935", fontWeight: "bold", ml: 1 }}>
+//                   ● En vivo
+//                 </Typography>
+//               </Typography>
+
+//               <Box sx={{ width: "100%", height: "400px", mt: 1, borderRadius: "8px", overflow: "hidden", backgroundColor: "#000" }}>
+//                 <iframe
+//                   width="100%"
+//                   height="400"
+//                   src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1`}
+//                   title="Transmisión en vivo de YouTube"
+//                   frameBorder="0"
+//                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+//                   allowFullScreen
+//                   style={{ borderRadius: "8px" }}
+//                 />
+//               </Box>
+//             </Paper>
+//           </Box>
+
+//           <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
+//             <Paper className="paper-graph">
+//               <GraphTitleWithTooltip title={VOLTAGE_VS_TIME_TITLE} description={GRAPH_DESCRIPTIONS.VOLTAGE_VS_TIME} />
+//             </Paper>
+//           </Box>
+
+//           <Button variant="contained" color="secondary" onClick={() => {}} align="right" marginTop={-1}>
+//             {DOWNLOAD_1_GRAPH}
+//           </Button>
+
+//           <Box mt={2} sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
+//             <Paper className="paper-graph">
+//               <GraphTitleWithTooltip title={CURRENT_VS_TIME_TITLE} description={GRAPH_DESCRIPTIONS.CURRENT_VS_TIME} />
+//             </Paper>
+//           </Box>
+
+//           <Button variant="contained" color="secondary" onClick={() => {}} align="right" marginTop={-1}>
+//             {DOWNLOAD_1_GRAPH}
+//           </Button>
+
+//           <Button variant="contained" color="pink" onClick={handleDownloadBothData} fullWidth align="center" marginTop={2}>
+//             {DOWNLOAD_GRAPHS_BUTTON}
+//           </Button>
+//         </Grid>
+//       </Grid>
+
+//       <Button variant="outlined" color="secondary" onClick={handleBack} align="center" marginTop={4}>
+//         {BACK_BUTTON}
+//       </Button>
+//     </Box>
+//   );
+// };
+
+// export default Subsistema2;
+
+
+
+
+
+// ozzyjames11: nueva version, esto incluye apariencia similar al subsistema 1, slider dual, graficos en tiempo real implementados, tabla corregida
+import React, { useState, useEffect, useRef } from "react";
+import { Box, Paper, Typography, Tabs, Tab } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import Grid from "@mui/material/Grid";
+
+// Componentes
+import DualAxisControl from "../../components/Elements/DualAxisControl";
+import DataTable from "../../components/Elements/DataTable";
+import Button from "../../components/Elements/Button.jsx";
+import GraphTitleWithTooltip from "../../components/Elements/GraphTitleWithTooltip";
+import RealTimeChart from "../../components/Elements/RealTimeChart";
+
+// Iconos
+import { 
+  PlayArrow, 
+  Save, 
+  CloudDone, 
+  Download, 
+  CropFree, 
+  SaveAlt, 
+  RocketLaunch 
+} from '@mui/icons-material';
+import CircularProgress from '@mui/material/CircularProgress';
+
+// Utilidades
+import { exportData, downloadChartAsImage } from "../../../src/utils/ExportUtils";
+
+// Constantes
+import {
+  SUBSISTEMA2_COLUMNS,
+  PAGE_TITLES,
+  GRAPH_DESCRIPTIONS,
+} from "../../assets/Strings/Experiments/Subsistema2Strings.jsx";
+
+// Estilos
+import "../../assets/css/Elements/PaperStyles.css";
+
+// Firebase
+import {
+  getDatabase,
+  ref,
+  set,
+  update,
+  onValue,
+  onChildAdded,
+  remove,
+  get
+} from "firebase/database";
+import app from "../../firebaseConfig.js";
+
+const Subsistema2 = () => {
+  const navigate = useNavigate();
+  const db = getDatabase(app);
+
+  // === CONFIGURACIÓN DE USUARIO Y RUTAS ===
+  const UID_USUARIO = "8qb4yEqxXWcvdIEEXYBgANR57T12"; // Usuario quemado para pruebas
+  const BASE_PATH = `users/${UID_USUARIO}/Exp2`; // Ruta base correcta
+
+  const {
+    MAIN_TITLE, DESCRIPTION, SAVE_BUTTON, MOVE_BUTTON,
+    DOWNLOAD_GRAPHS_BUTTON, DOWNLOAD_1_GRAPH, BACK_BUTTON,
+    CAMERA_TITLE, VOLTAGE_VS_TIME_TITLE, CURRENT_VS_TIME_TITLE,
+  } = PAGE_TITLES;
+
+  // ==================== ESTADOS ====================
+  const [azimuthStart, setAzimuthStart] = useState(0);
+  const [azimuthEnd, setAzimuthEnd] = useState(20);
+  const [zenithStart, setZenithStart] = useState(0);
+  const [zenithEnd, setZenithEnd] = useState(20);
+
+  const [barridoEnProgreso, setBarridoEnProgreso] = useState(false);
+  const [azimuthAngles, setAzimuthAngles] = useState([]);
+  const [zenithAngles, setZenithAngles] = useState([]);
+  
+  const [faseBarrido, setFaseBarrido] = useState("azimuth"); 
+  const [anguloActualIndex, setAnguloActualIndex] = useState(0);
+
+  const [sweepIdActual, setSweepIdActual] = useState(null);
+  const [datosTemporales, setDatosTemporales] = useState([]);
+  const [userSession, setUserSession] = useState(null);
+
+  const [activeTab, setActiveTab] = useState(0); // 0: Azimuth, 1: Zenith
+
+  // ==================== REFERENCIAS (CORREGIDO) ====================
+  const azimuthAnglesRef = useRef([]);
+  const zenithAnglesRef = useRef([]);
+  const anguloActualIndexRef = useRef(0);
+  const faseBarridoRef = useRef("azimuth");
+  const sweepIdActualRef = useRef(null);
+  const barridoEnProgresoRef = useRef(false);
+  const lastMsgRef = useRef(null);
+  
+  // ✅ AQUÍ ESTABA EL ERROR: Faltaba definir esta referencia
+  const datosTemporalesRef = useRef([]); 
+
+  // Sincronización de Refs
+  useEffect(() => {
+    azimuthAnglesRef.current = azimuthAngles;
+    zenithAnglesRef.current = zenithAngles;
+    anguloActualIndexRef.current = anguloActualIndex;
+    faseBarridoRef.current = faseBarrido;
+    sweepIdActualRef.current = sweepIdActual;
+    barridoEnProgresoRef.current = barridoEnProgreso;
+    
+    // ✅ Sincronizamos también los datos
+    datosTemporalesRef.current = datosTemporales; 
+  }, [azimuthAngles, zenithAngles, anguloActualIndex, faseBarrido, sweepIdActual, barridoEnProgreso, datosTemporales]);
+
+  // ==================== INICIALIZACIÓN ====================
+  useEffect(() => {
+    const sessionId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    setUserSession(sessionId);
+
+    // Recuperar ID actual de Exp2
+    const currentSweepRef = ref(db, `${BASE_PATH}/currentSweepId`);
+    get(currentSweepRef).then((snapshot) => {
+        if (snapshot.exists()) {
+             setSweepIdActual(snapshot.val());
+             console.log("🆔 ID Exp2 recuperado:", snapshot.val());
+        }
+    });
+    
+    // Cleanup
+    return () => {
+        // Detener hardware
+        update(ref(db), { [`${BASE_PATH}/communication/FrontToBack`]: "n" }).catch(() => {});
+        
+        // ✅ AHORA SÍ FUNCIONA: Borrar datos no guardados al salir
+        const datos = datosTemporalesRef.current || []; 
+        const datosBasura = datos.filter(d => d.isSaved === false);
+        
+        if (datosBasura.length > 0) {
+            console.log(`🗑️ Limpiando ${datosBasura.length} datos temporales de Exp2...`);
+            const updates = {};
+            datosBasura.forEach((d) => {
+                updates[`${BASE_PATH}/measurements/meas_${d.timestamp}`] = null;
+            });
+            update(ref(db), updates).catch((e) => console.error(e));
+        }
+    };
+  }, []);
+
+  // ==================== LÓGICA ====================
+  
+  const calcularAngulosBarrido = (inicio, fin, paso = 5) => {
+    const angulos = [];
+    if (inicio <= fin) for (let a = inicio; a <= fin; a += paso) angulos.push(a);
+    else for (let a = inicio; a >= fin; a -= paso) angulos.push(a);
+    return angulos;
+  };
+
+  const enviarComando = async (comando) => {
+    const fbRef = ref(db, `${BASE_PATH}/communication/FrontToBack`);
+    await set(fbRef, comando);
+    setTimeout(async () => await set(fbRef, "x"), 300);
+  };
+
+  const iniciarBarrido = async () => {
+    if (barridoEnProgresoRef.current) return alert("Ya hay un barrido en progreso");
+    if (azimuthStart === azimuthEnd) return alert("Azimuth Start y End deben ser diferentes");
+    if (zenithStart === zenithEnd) return alert("Zenith Start y End deben ser diferentes");
+
+    setDatosTemporales([]);
+    setActiveTab(0);
+    setBarridoEnProgreso(true);
+    setFaseBarrido("azimuth");
+    setAnguloActualIndex(0);
+    lastMsgRef.current = null;
+
+    const azList = calcularAngulosBarrido(azimuthStart, azimuthEnd, 5);
+    const zeList = calcularAngulosBarrido(zenithStart, zenithEnd, 5);
+    setAzimuthAngles(azList);
+    setZenithAngles(zeList);
+
+    const sweepId = `sweep_${Date.now()}`;
+    setSweepIdActual(sweepId);
+
+    try {
+      await Promise.all([
+        set(ref(db, `${BASE_PATH}/sweeps/${sweepId}`), {
+          azimuthStart, azimuthEnd, zenithStart, zenithEnd,
+          step: 5, status: "in_progress", fase: "azimuth",
+          timestamp: Date.now(), userSession,
+        }),
+        set(ref(db, `${BASE_PATH}/currentSweepId`), sweepId),
+      ]);
+      console.log(`🚀 Barrido Exp2 iniciado: ${sweepId}`);
+      
+      // Iniciar secuencia (Opcional: enviar primer comando o esperar Arduino)
+      setTimeout(() => enviarComando("p" + azList[0]), 500);
+
+    } catch (error) {
+      console.error("Error iniciando:", error);
+      setBarridoEnProgreso(false);
+    }
+  };
+
+  // Listener Comunicación (BackToFront)
+  useEffect(() => {
+    const dbRef = ref(db, `${BASE_PATH}/communication/BackToFront`);
+    const unsubscribe = onValue(dbRef, async (snapshot) => {
+      const msg = snapshot.val();
+      if (!msg || msg === "x") return;
+      if (lastMsgRef.current === msg) return;
+      lastMsgRef.current = msg;
+
+      const fase = faseBarridoRef.current;
+      const idx = anguloActualIndexRef.current;
+      const sweepId = sweepIdActualRef.current;
+      if (!barridoEnProgresoRef.current || !sweepId) return;
+
+      if (msg === "PITCH:") {
+         if (fase === "azimuth") {
+            const azList = azimuthAnglesRef.current;
+            await enviarComando("p" + azList[idx]);
+            await update(ref(db, `${BASE_PATH}/sweeps/${sweepId}`), { currentPitch: azList[idx], lastUpdated: Date.now() });
+         } else {
+            await enviarComando("p" + azimuthEnd); 
+         }
+      } 
+      else if (msg === "ROLL:") {
+         if (fase === "azimuth") {
+            await enviarComando("r" + zenithStart);
+         } else {
+            const zeList = zenithAnglesRef.current;
+            await enviarComando("r" + zeList[idx]);
+            await update(ref(db, `${BASE_PATH}/sweeps/${sweepId}`), { currentRoll: zeList[idx], lastUpdated: Date.now() });
+         }
+      }
+      else if (msg === "EndMov") {
+        const azList = azimuthAnglesRef.current;
+        const zeList = zenithAnglesRef.current;
+
+        if (fase === "azimuth") {
+          if (idx + 1 < azList.length) {
+            setAnguloActualIndex(idx + 1);
+            // Siguiente Azimuth
+            setTimeout(() => enviarComando("p" + azList[idx + 1]), 500); 
+          } else {
+            console.log("Cambio de fase a Zenith");
+            setFaseBarrido("zenith");
+            setAnguloActualIndex(0);
+            setActiveTab(1); 
+            await update(ref(db, `${BASE_PATH}/sweeps/${sweepId}`), { fase: "zenith" });
+            // Iniciar primer Zenith
+            setTimeout(() => enviarComando("r" + zeList[0]), 1000);
+          }
+        } else {
+          if (idx + 1 < zeList.length) {
+            setAnguloActualIndex(idx + 1);
+            // Siguiente Zenith
+            setTimeout(() => enviarComando("r" + zeList[idx + 1]), 500);
+          } else {
+            setBarridoEnProgreso(false);
+            setFaseBarrido("done");
+            await update(ref(db, `${BASE_PATH}/sweeps/${sweepId}`), { status: "completed", fase: "done" });
+            console.log("Fin Barrido Exp2");
+          }
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, [azimuthEnd, zenithStart]); 
+
+  // Listener Datos (Measurements)
+  useEffect(() => {
+    if (!sweepIdActual) return;
+    const dbRef = ref(db, `${BASE_PATH}/measurements`);
+    
+    // Carga inicial
+    get(dbRef).then((snapshot) => {
+        if (snapshot.exists()) {
+            const allData = Object.values(snapshot.val());
+            const myData = allData.filter(d => d.sweepId === sweepIdActual);
+            // Inferencia simple de fase
+            const myDataWithPhase = myData.map(d => ({
+                ...d,
+                faseEstimada: (d.rollAngle === zenithStart && d.pitchAngle !== azimuthEnd) ? "azimuth" : "zenith"
+            }));
+            setDatosTemporales(myDataWithPhase);
+        }
+    });
+
+    const unsubscribe = onChildAdded(dbRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data && data.sweepId === sweepIdActual) {
+        const datoConFase = { ...data, faseEstimada: faseBarridoRef.current }; 
+        setDatosTemporales((prev) => {
+           const existe = prev.some((d) => d.timestamp === data.timestamp);
+           return existe ? prev : [...prev, datoConFase];
+        });
+      }
+    });
+    return () => unsubscribe();
+  }, [sweepIdActual]);
+
+  // ==================== GUARDAR Y SALIDA ====================
+  const guardarBarrido = async () => {
+    const unsaved = datosTemporales.filter(d => !d.isSaved);
+    if (unsaved.length === 0) return alert("No hay nuevos datos para guardar.");
+    if (!window.confirm(`¿Guardar ${unsaved.length} mediciones permanentemente?`)) return;
+
+    try {
+      const updates = {};
+      unsaved.forEach((d) => {
+        updates[`${BASE_PATH}/measurements/meas_${d.timestamp}/isSaved`] = true;
+      });
+      await update(ref(db), updates);
+      setDatosTemporales(prev => prev.map(d => ({ ...d, isSaved: true })));
+      alert("✅ Datos guardados con éxito.");
+    } catch (error) {
+      console.error("Error guardando:", error);
+    }
+  };
+
+  const handleBackSafe = () => {
+    const haySinGuardar = datosTemporales.some(d => !d.isSaved);
+    if (haySinGuardar) {
+        if (!window.confirm("⚠️ DATOS SIN GUARDAR.\n\nSi sales ahora, los datos se borrarán.\n¿Salir?")) return;
+    }
+    navigate("/experiments/experimentChooser");
+  };
+
+  // Simulación
+  const simularDatos = () => {
+      if(!sweepIdActual) return alert("Inicia barrido primero");
+      const timestamp = Date.now();
+      const fakeData = {
+          pitchAngle: faseBarrido === 'azimuth' ? -30 + anguloActualIndex*5 : azimuthEnd,
+          rollAngle: faseBarrido === 'zenith' ? -30 + anguloActualIndex*5 : zenithStart,
+          voltage: Number((10 + Math.random()).toFixed(2)),
+          current: Number((2 + Math.random()).toFixed(2)),
+          timestamp: timestamp,
+          sweepId: sweepIdActual,
+          isSaved: false
+      };
+      // Escribir en firebase
+      const updates = {};
+      updates[`${BASE_PATH}/measurements/meas_${timestamp}`] = fakeData;
+      update(ref(db), updates);
+  };
+
+  const hayDatosSinGuardar = datosTemporales.some(d => !d.isSaved);
+  const youtubeVideoId = "nAQz4RMaHVA";
+
+  // Filtro para gráficas según Tab
+  const chartData = datosTemporales.filter(d => {
+      if (activeTab === 0) return d.faseEstimada === "azimuth" || (!d.faseEstimada && d.rollAngle === zenithStart);
+      if (activeTab === 1) return d.faseEstimada === "zenith" || (!d.faseEstimada && d.pitchAngle === azimuthEnd);
+      return true;
+  });
+
+  return (
+    <Box width="90%" maxWidth="1300px" margin="auto" mt={7} mb={5}>
+      <Typography variant="h4" gutterBottom sx={{ textAlign: "left" }}>{MAIN_TITLE}</Typography>
+      <Typography variant="body1" sx={{ textAlign: "left", mb: 3 }}>{DESCRIPTION}</Typography>
+
+      <Grid container spacing={4} alignItems="flex-start">
+        
+        {/* === IZQUIERDA: CONTROLES === */}
+        <Grid item xs={12} md={6}>
+            <Box display="flex" alignItems="center" mb={2}>
+                <RocketLaunch color="primary" sx={{ mr: 1 }} />
+                <Typography variant="h5">Automatic sweeping control (2-Axis)</Typography>
+            </Box>
+
+            <DualAxisControl 
+                axisName="Azimuth Control"
+                startValue={azimuthStart}
+                endValue={azimuthEnd}
+                setStart={setAzimuthStart}
+                setEnd={setAzimuthEnd}
+                disabled={barridoEnProgreso}
+            />
+
+            <DualAxisControl 
+                axisName="Zenith Control"
+                startValue={zenithStart}
+                endValue={zenithEnd}
+                setStart={setZenithStart}
+                setEnd={setZenithEnd}
+                disabled={barridoEnProgreso}
+            />
+
+            <Box mt={3} mb={2}>
+                <Button 
+                    variant="contained" 
+                    color="primary" 
+                    size="large" 
+                    fullWidth 
+                    onClick={iniciarBarrido} 
+                    disabled={barridoEnProgreso}
+                    startIcon={barridoEnProgreso ? <CircularProgress size={20} color="inherit" /> : <PlayArrow />}
+                >
+                    {barridoEnProgreso ? `Scanning ${faseBarrido.toUpperCase()}...` : "START DUAL AXIS SWEEP"}
+                </Button>
+            </Box>
+
+            {/* Test Button */}
+            <Box mb={2}>
+                <Button variant="outlined" color="warning" onClick={simularDatos} disabled={!barridoEnProgreso}>
+                    🛠️ Test Point
+                </Button>
+            </Box>
+
+            {/* Progress Bar */}
+            {barridoEnProgreso && (
+                <Box sx={{ mb: 3, backgroundColor: "#eee", borderRadius: 1, height: 10 }}>
+                    <Box sx={{
+                        height: "100%", borderRadius: 1, backgroundColor: "#2196f3",
+                        width: faseBarrido === "azimuth"
+                            ? `${((anguloActualIndex + 1) / (azimuthAngles.length || 1)) * 50}%`
+                            : `${50 + ((anguloActualIndex + 1) / (zenithAngles.length || 1)) * 50}%`,
+                        transition: "width 0.3s",
+                    }} />
+                </Box>
+            )}
+
+            {/* TABLA DE MEDIDAS */}
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                <Typography variant="h5">Measurements Table</Typography>
+                <Button
+                    variant={hayDatosSinGuardar ? "contained" : "outlined"}
+                    color="primary"
+                    onClick={guardarBarrido}
+                    disabled={datosTemporales.length === 0}
+                    startIcon={hayDatosSinGuardar ? <Save /> : <CloudDone />}
+                    size="medium"
+                >
+                    {hayDatosSinGuardar ? "SAVE DATA" : "ALL DATA SAVED"}
+                </Button>
+            </Box>
+
+            <Box mt={3}>
+                {datosTemporales.length > 0 ? (
+                    <DataTable
+                        columns={SUBSISTEMA2_COLUMNS}
+                        data={datosTemporales.map((d) => ({
+                             [SUBSISTEMA2_COLUMNS[0]]: `${d.pitchAngle ?? "-"}°`,
+                             [SUBSISTEMA2_COLUMNS[1]]: `${d.rollAngle ?? "-"}°`,
+                             [SUBSISTEMA2_COLUMNS[2]]: d.voltage?.toFixed(2),
+                             [SUBSISTEMA2_COLUMNS[3]]: d.current?.toFixed(2),
+                             [SUBSISTEMA2_COLUMNS[4]]: ((d.voltage * d.current)/100).toFixed(2),
+                             [SUBSISTEMA2_COLUMNS[5]]: "0.75"
+                        }))}
+                        onDelete={() => {}} // Lógica delete
+                        maxHeight="550px"
+                        disableHorizontalScroll={true}
+                    />
+                 ) : (
+                    <Paper sx={{ p: 2, textAlign: 'center', color: '#666' }}>
+                        Waiting for sweep data...
+                    </Paper>
+                 )}
+            </Box>
+        </Grid>
+
+        {/* === DERECHA: CÁMARA Y GRÁFICOS === */}
+        <Grid item xs={12} md={6} sx={{ display: "flex", flexDirection: "column" }}>
+             
+             {/* CÁMARA */}
+             <Box sx={{ display: "flex", justifyContent: "center", width: "100%", mb: 3 }}>
+                <Paper className="paper-camera" sx={{ p: 2, width: "100%", backgroundColor: "#121212", color: "#fff", borderRadius: "12px" }}>
+                    <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", display: "flex", alignItems: "center", fontFamily: '"Poppins", sans-serif' }}>
+                        {CAMERA_TITLE} <Typography component="span" variant="caption" sx={{ color: "#e53935", fontWeight: "bold", ml: 1, fontFamily: '"Poppins", sans-serif' }}>● En vivo</Typography>
+                    </Typography>
+                    <Box sx={{ width: "100%", height: "300px", mt: 1, borderRadius: "8px", overflow: "hidden", backgroundColor: "#000" }}>
+                        <iframe width="100%" height="100%" src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1`} title="Cam" frameBorder="0" allowFullScreen />
+                    </Box>
+                </Paper>
+             </Box>
+
+             {/* TABS */}
+             <Paper sx={{ mb: 2, borderRadius: 2, overflow: 'hidden' }}>
+                 <Tabs 
+                    value={activeTab} 
+                    onChange={(e, v) => setActiveTab(v)} 
+                    variant="fullWidth" 
+                    indicatorColor="primary"
+                    textColor="primary"
+                    sx={{ '& .MuiTab-root': { fontFamily: '"Poppins", sans-serif', textTransform: 'none', fontWeight: 600 } }}
+                 >
+                     <Tab label="Axis 1: Azimuth" />
+                     <Tab label="Axis 2: Zenith" />
+                 </Tabs>
+             </Paper>
+
+             {/* GRÁFICOS */}
+             {/* Voltaje */}
+             <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
+                <Paper className="paper-graph" sx={{ width: "100%", p: 2 }}>
+                    <GraphTitleWithTooltip 
+                        title={`${VOLTAGE_VS_TIME_TITLE} (${activeTab === 0 ? 'Azimuth' : 'Zenith'})`} 
+                        description="Real-time voltage measurements." 
+                    />
+                    <Box mt={2}>
+                        <RealTimeChart
+                            chartId="chart-voltage-2"
+                            data={chartData} 
+                            dataKey="voltage"
+                            color="#2196f3"
+                            yLabel="Voltage (V)"
+                            unit="V"
+                        />
+                    </Box>
+                </Paper>
+             </Box>
+             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: -1, mb: 3, position: 'relative', top: 10 }}>
+                <Button variant="outlined" size="small" color="primary" onClick={() => exportData(chartData, 'volt', 'Exp2', 'csv')} startIcon={<Download fontSize="small" />}>CSV</Button>
+                <Button variant="outlined" size="small" color="primary" onClick={() => downloadChartAsImage("chart-voltage-2", "Volt")} startIcon={<CropFree fontSize="small" />}>IMG</Button>
+             </Box>
+
+             {/* Corriente */}
+             <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
+                <Paper className="paper-graph" sx={{ width: "100%", p: 2 }}>
+                    <GraphTitleWithTooltip 
+                        title={`${CURRENT_VS_TIME_TITLE} (${activeTab === 0 ? 'Azimuth' : 'Zenith'})`} 
+                        description="Real-time current measurements." 
+                    />
+                    <Box mt={2}>
+                        <RealTimeChart
+                            chartId="chart-current-2"
+                            data={chartData}
+                            dataKey="current"
+                            color="#4caf50"
+                            yLabel="Current (A)"
+                            unit="A"
+                        />
+                    </Box>
+                </Paper>
+             </Box>
+             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: -1, position: 'relative', top: 10 }}>
+                <Button variant="outlined" size="small" color="primary" onClick={() => exportData(chartData, 'curr', 'Exp2', 'csv')} startIcon={<Download fontSize="small" />}>CSV</Button>
+                <Button variant="outlined" size="small" color="primary" onClick={() => downloadChartAsImage("chart-current-2", "Curr")} startIcon={<CropFree fontSize="small" />}>IMG</Button>
+             </Box>
+
+             {/* Descarga Total */}
+             <Box mt={5}>
+                <Button 
+                    variant="contained" 
+                    color="pink" 
+                    onClick={() => exportData(datosTemporales, 'full_report_exp2', 'Exp2', 'csv')}
+                    fullWidth 
+                    marginTop={2}
+                    startIcon={<SaveAlt />}
+                >
+                    {DOWNLOAD_GRAPHS_BUTTON}
+                </Button>
+             </Box>
+
+        </Grid>
+      </Grid>
+
+      {/* FOOTER */}
+      <Box mt={6} mb={4} sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+          <Button variant="outlined" color="secondary" onClick={handleBackSafe}>
+            {BACK_BUTTON}
+          </Button>
+      </Box>
+    </Box>
+  );
+};
+
+export default Subsistema2;
+
