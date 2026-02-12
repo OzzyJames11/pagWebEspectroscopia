@@ -3834,6 +3834,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Box, Paper, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { useNavigate } from "react-router-dom";
+import {useSelector} from "react-redux";
 
 // Componentes
 import SliderComponent from "../../components/Elements/SliderComponent";
@@ -3893,7 +3894,17 @@ const Subsistema1 = () => {
   const db = getDatabase(app);
 
   // 1. USUARIO ESPECÍFICO (QUEMADO PARA PRODUCCIÓN ACTUAL)
-  const UID_USUARIO = "8qb4yEqxXWcvdIEEXYBgANR57T12"; 
+  // const UID_USUARIO = "8qb4yEqxXWcvdIEEXYBgANR57T12"; 
+  // Se obtiene el ID del usuario dinámicamente
+  const user = useSelector((state) => state.auth.user);
+  if(!user){
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+  const UID_USUARIO = user.uid;
   const BASE_PATH = `users/${UID_USUARIO}/Exp1`; 
 
   // ==================== ESTADOS ====================
