@@ -1,9 +1,15 @@
 import html2canvas from 'html2canvas';
 
-// Helper para formatear números al estilo Excel Español (3.14 -> "3,14")
+// Helper: Formato numérico Excel ES (2 decimales fijos) - Usado para tiempos o métricas calculadas
 const fmtNum = (num, decimals = 2) => {
   if (num === undefined || num === null) return "";
   return Number(num).toFixed(decimals).replace('.', ',');
+};
+
+// Helper: Valor en bruto (TODOS los decimales) pero con coma decimal para Excel
+const rawNum = (num) => {
+  if (num === undefined || num === null) return "";
+  return String(num).replace('.', ',');
 };
 
 const calculateMetrics = (d) => {
@@ -12,12 +18,10 @@ const calculateMetrics = (d) => {
   const power = vol * cur;
   const efficiency = 15 + Math.random() * 7; 
   const fillFactor = 0.70 + Math.random() * 0.15;
-
   return { ...d, power, efficiency, fillFactor };
 };
 
 const triggerDownload = (content, filename, mimeType) => {
-  // Agregamos el BOM (\uFEFF) para que Excel reconozca tildes y caracteres especiales
   const blob = new Blob(["\uFEFF" + content], { type: mimeType });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
@@ -27,20 +31,22 @@ const triggerDownload = (content, filename, mimeType) => {
   document.body.removeChild(link);
 };
 
-export const exportData = (data, type, subsystem = 'Exp1', format = 'csv') => {
+// === FUNCIÓN PRINCIPAL ===
+export const exportData = (data, type, subsystem = 'Exp1', format = 'csv', customStartTime = null) => {
   try {
     if (!data || data.length === 0) {
       alert("⚠️ No hay datos para exportar.");
       return;
     }
 
-    // CAMBIO CLAVE PARA EXCEL EN ESPAÑOL:
-    // Si es CSV, usamos punto y coma (;). Si es TXT, usamos tabulación.
     const separator = format === 'csv' ? ';' : '\t';
     const mimeType = format === 'csv' ? 'text/csv;charset=utf-8;' : 'text/plain;charset=utf-8;';
     const ext = format === 'csv' ? '.csv' : '.txt';
     
-    const t0 = data[0].timestamp;
+    // TIEMPO RELATIVO:
+    // Si viene customStartTime (para Axis 2), lo usamos. Si no, usamos el del primer dato.
+    const t0 = customStartTime !== null ? customStartTime : data[0].timestamp;
+    
     let headers = [];
     let mapRow = null;
     let filenamePrefix = "";
@@ -48,48 +54,79 @@ export const exportData = (data, type, subsystem = 'Exp1', format = 'csv') => {
     const enrichedData = data.map(calculateMetrics);
 
     switch (type) {
+      // === GRÁFICOS DE VOLTAJE ===
       case 'chart_voltage':
+      case 'volt':
         filenamePrefix = `${subsystem}_Voltage`;
-        headers = ["Time(s)", "Voltage(V)", "Angle(deg)"];
-        mapRow = (d) => [
-          fmtNum((d.timestamp - t0) / 1000, 0), // Tiempo entero
-          fmtNum(d.voltage, 2),
-          d.angle // Ángulo suele ser entero
-        ];
+        
+        if (subsystem === 'Exp1') {
+            // SUBSISTEMA 1: Tiempo con decimales, Voltaje CRUDO
+            headers = ["Time(s)", "Voltage(V)", "Angle(deg)"];
+            mapRow = (d) => [
+                fmtNum((d.timestamp - t0) / 1000, 2), // CAMBIO: Decimales en tiempo
+                rawNum(d.voltage), // CAMBIO: Datos crudos
+                d.angle
+            ];
+        } else {
+            // SUBSISTEMA 2: Tiempo con decimales, Voltaje CRUDO, Ángulos separados
+            headers = ["Time(s)", "Voltage(V)", "Pitch (Azimuth)", "Roll (Zenith)"];
+            mapRow = (d) => [
+                fmtNum((d.timestamp - t0) / 1000, 2), 
+                rawNum(d.voltage), // CAMBIO: Datos crudos (antes estaba limitado a 2)
+                d.pitchAngle ?? 0,
+                d.rollAngle ?? 0
+            ];
+        }
         break;
 
+      // === GRÁFICOS DE CORRIENTE ===
       case 'chart_current':
+      case 'curr':
         filenamePrefix = `${subsystem}_Current`;
-        headers = ["Time(s)", "Current(A)", "Angle(deg)"];
-        mapRow = (d) => [
-          fmtNum((d.timestamp - t0) / 1000, 0),
-          fmtNum(d.current, 2),
-          d.angle
-        ];
+        
+        if (subsystem === 'Exp1') {
+            // SUBSISTEMA 1
+            headers = ["Time(s)", "Current(A)", "Angle(deg)"];
+            mapRow = (d) => [
+                fmtNum((d.timestamp - t0) / 1000, 2), // CAMBIO: Decimales en tiempo
+                rawNum(d.current), // CAMBIO: Datos crudos
+                d.angle
+            ];
+        } else {
+            // SUBSISTEMA 2
+            headers = ["Time(s)", "Current(A)", "Pitch (Azimuth)", "Roll (Zenith)"];
+            mapRow = (d) => [
+                fmtNum((d.timestamp - t0) / 1000, 2),
+                rawNum(d.current), // CAMBIO: Datos crudos (antes estaba limitado a 2)
+                d.pitchAngle ?? 0,
+                d.rollAngle ?? 0
+            ];
+        }
         break;
 
+      // === REPORTE COMPLETO ===
       case 'full_report':
       default:
         filenamePrefix = `${subsystem}_Full_Report`;
         if (subsystem === 'Exp1') {
           headers = ["Time(s)", "Angle(deg)", "Voltage(V)", "Current(A)", "Power(W)", "Efficiency(%)", "Fill Factor"];
           mapRow = (d) => [
-            fmtNum((d.timestamp - t0) / 1000, 2), // Aquí sí queremos decimales en el tiempo
+            fmtNum((d.timestamp - t0) / 1000, 2),
             d.angle,
-            fmtNum(d.voltage, 2),
-            fmtNum(d.current, 2),
+            rawNum(d.voltage), // Datos crudos
+            rawNum(d.current), // Datos crudos
             fmtNum(d.power, 4),
             fmtNum(d.efficiency, 2),
             fmtNum(d.fillFactor, 2)
           ];
         } else {
-          headers = ["Time(s)", "Pitch", "Roll", "Voltage(V)", "Current(A)", "Power(W)", "Eff(%)", "FF"];
+          headers = ["Time(s)", "Pitch (Azimuth)", "Roll (Zenith)", "Voltage(V)", "Current(A)", "Power(W)", "Eff(%)", "FF"];
           mapRow = (d) => [
             fmtNum((d.timestamp - t0) / 1000, 2),
-            d.pitch ?? 0,
-            d.roll ?? 0,
-            fmtNum(d.voltage, 2),
-            fmtNum(d.current, 2),
+            d.pitchAngle ?? 0,
+            d.rollAngle ?? 0,
+            rawNum(d.voltage), // Datos crudos
+            rawNum(d.current), // Datos crudos
             fmtNum(d.power, 4),
             fmtNum(d.efficiency, 2),
             fmtNum(d.fillFactor, 2)

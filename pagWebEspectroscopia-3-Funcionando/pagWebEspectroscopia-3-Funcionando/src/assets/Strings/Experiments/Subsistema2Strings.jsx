@@ -12,8 +12,8 @@
 //     "Fill Factor 2"
 // ];
 export const SUBSISTEMA2_COLUMNS = [
-    "Zenith Angle (°)",
     "Azimuth Angle (°)",
+    "Zenith Angle (°)",
     "Voltage",
     "Current",
     "Efficiency",

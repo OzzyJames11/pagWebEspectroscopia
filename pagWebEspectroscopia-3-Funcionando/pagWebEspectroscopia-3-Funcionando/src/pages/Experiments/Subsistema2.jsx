@@ -4644,11 +4644,606 @@ export default Subsistema2;
 
 
 // ozzyjames11: nueva version, esto incluye apariencia similar al subsistema 1, slider dual, graficos en tiempo real implementados, tabla corregida
+// codigo funcional, pero probaré la nueva version que mejora los graficos
+
+// import React, { useState, useEffect, useRef } from "react";
+// import { Box, Paper, Typography, Tabs, Tab } from "@mui/material";
+// import { useNavigate } from "react-router-dom";
+// import Grid from "@mui/material/Grid";
+// import {useSelector} from "react-redux";
+
+// // Componentes
+// import DualAxisControl from "../../components/Elements/DualAxisControl";
+// import DataTable from "../../components/Elements/DataTable";
+// import Button from "../../components/Elements/Button.jsx";
+// import GraphTitleWithTooltip from "../../components/Elements/GraphTitleWithTooltip";
+// import RealTimeChart from "../../components/Elements/RealTimeChart";
+
+// // Iconos
+// import { 
+//   PlayArrow, 
+//   Save, 
+//   CloudDone, 
+//   Download, 
+//   CropFree, 
+//   SaveAlt, 
+//   RocketLaunch 
+// } from '@mui/icons-material';
+// import CircularProgress from '@mui/material/CircularProgress';
+
+// // Utilidades
+// import { exportData, downloadChartAsImage } from "../../../src/utils/ExportUtils";
+
+// // Constantes
+// import {
+//   SUBSISTEMA2_COLUMNS,
+//   PAGE_TITLES,
+//   GRAPH_DESCRIPTIONS,
+// } from "../../assets/Strings/Experiments/Subsistema2Strings.jsx";
+
+// // Estilos
+// import "../../assets/css/Elements/PaperStyles.css";
+
+// // Firebase
+// import {
+//   getDatabase,
+//   ref,
+//   set,
+//   update,
+//   onValue,
+//   onChildAdded,
+//   remove,
+//   get
+// } from "firebase/database";
+// import app from "../../firebaseConfig.js";
+
+// const Subsistema2 = () => {
+//   const navigate = useNavigate();
+//   const db = getDatabase(app);
+
+//   // === CONFIGURACIÓN DE USUARIO Y RUTAS ===
+//   // const UID_USUARIO = "8qb4yEqxXWcvdIEEXYBgANR57T12"; // Usuario quemado para pruebas
+//   // Se obtiene el ID del usuario dinámicamente
+//   const user = useSelector((state) => state.auth.user);
+//   if(!user){
+//     return (
+//       <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
+//         <CircularProgress />
+//       </Box>
+//     );
+//   }
+//   const UID_USUARIO = user.uid;
+//   const BASE_PATH = `users/${UID_USUARIO}/Exp2`; // Ruta base correcta
+
+//   const {
+//     MAIN_TITLE, DESCRIPTION, SAVE_BUTTON, MOVE_BUTTON,
+//     DOWNLOAD_GRAPHS_BUTTON, DOWNLOAD_1_GRAPH, BACK_BUTTON,
+//     CAMERA_TITLE, VOLTAGE_VS_TIME_TITLE, CURRENT_VS_TIME_TITLE,
+//   } = PAGE_TITLES;
+
+//   // ==================== ESTADOS ====================
+//   const [azimuthStart, setAzimuthStart] = useState(0);
+//   const [azimuthEnd, setAzimuthEnd] = useState(20);
+//   const [zenithStart, setZenithStart] = useState(0);
+//   const [zenithEnd, setZenithEnd] = useState(20);
+
+//   const [barridoEnProgreso, setBarridoEnProgreso] = useState(false);
+//   const [azimuthAngles, setAzimuthAngles] = useState([]);
+//   const [zenithAngles, setZenithAngles] = useState([]);
+  
+//   const [faseBarrido, setFaseBarrido] = useState("azimuth"); 
+//   const [anguloActualIndex, setAnguloActualIndex] = useState(0);
+
+//   const [sweepIdActual, setSweepIdActual] = useState(null);
+//   const [datosTemporales, setDatosTemporales] = useState([]);
+//   const [userSession, setUserSession] = useState(null);
+
+//   const [activeTab, setActiveTab] = useState(0); // 0: Azimuth, 1: Zenith
+
+//   // ==================== REFERENCIAS (CORREGIDO) ====================
+//   const azimuthAnglesRef = useRef([]);
+//   const zenithAnglesRef = useRef([]);
+//   const anguloActualIndexRef = useRef(0);
+//   const faseBarridoRef = useRef("azimuth");
+//   const sweepIdActualRef = useRef(null);
+//   const barridoEnProgresoRef = useRef(false);
+//   const lastMsgRef = useRef(null);
+  
+//   // ✅ AQUÍ ESTABA EL ERROR: Faltaba definir esta referencia
+//   const datosTemporalesRef = useRef([]); 
+
+//   // Sincronización de Refs
+//   useEffect(() => {
+//     azimuthAnglesRef.current = azimuthAngles;
+//     zenithAnglesRef.current = zenithAngles;
+//     anguloActualIndexRef.current = anguloActualIndex;
+//     faseBarridoRef.current = faseBarrido;
+//     sweepIdActualRef.current = sweepIdActual;
+//     barridoEnProgresoRef.current = barridoEnProgreso;
+    
+//     // ✅ Sincronizamos también los datos
+//     datosTemporalesRef.current = datosTemporales; 
+//   }, [azimuthAngles, zenithAngles, anguloActualIndex, faseBarrido, sweepIdActual, barridoEnProgreso, datosTemporales]);
+
+//   // ==================== INICIALIZACIÓN ====================
+//   useEffect(() => {
+//     const sessionId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+//     setUserSession(sessionId);
+
+//     // Recuperar ID actual de Exp2
+//     const currentSweepRef = ref(db, `${BASE_PATH}/currentSweepId`);
+//     get(currentSweepRef).then((snapshot) => {
+//         if (snapshot.exists()) {
+//              setSweepIdActual(snapshot.val());
+//              console.log("🆔 ID Exp2 recuperado:", snapshot.val());
+//         }
+//     });
+    
+//     // Cleanup
+//     return () => {
+//         // Detener hardware
+//         // ozzyjames11: detenido momentáneamente
+//         // update(ref(db), { [`${BASE_PATH}/communication/FrontToBack`]: "n" }).catch(() => {});
+        
+//         // ✅ AHORA SÍ FUNCIONA: Borrar datos no guardados al salir
+//         const datos = datosTemporalesRef.current || []; 
+//         const datosBasura = datos.filter(d => d.isSaved === false);
+        
+//         if (datosBasura.length > 0) {
+//             console.log(`🗑️ Limpiando ${datosBasura.length} datos temporales de Exp2...`);
+//             const updates = {};
+//             datosBasura.forEach((d) => {
+//                 updates[`${BASE_PATH}/measurements/meas_${d.timestamp}`] = null;
+//             });
+//             update(ref(db), updates).catch((e) => console.error(e));
+//         }
+//     };
+//   }, []);
+
+//   // ==================== LÓGICA ====================
+  
+//   const calcularAngulosBarrido = (inicio, fin, paso = 5) => {
+//     const angulos = [];
+//     if (inicio <= fin) for (let a = inicio; a <= fin; a += paso) angulos.push(a);
+//     else for (let a = inicio; a >= fin; a -= paso) angulos.push(a);
+//     return angulos;
+//   };
+
+//   const enviarComando = async (comando) => {
+//     const fbRef = ref(db, `${BASE_PATH}/communication/FrontToBack`);
+//     await set(fbRef, comando);
+//     setTimeout(async () => await set(fbRef, "x"), 300);
+//   };
+
+//   const iniciarBarrido = async () => {
+//     if (barridoEnProgresoRef.current) return alert("Ya hay un barrido en progreso");
+//     if (azimuthStart === azimuthEnd) return alert("Azimuth Start y End deben ser diferentes");
+//     if (zenithStart === zenithEnd) return alert("Zenith Start y End deben ser diferentes");
+
+//     setDatosTemporales([]);
+//     setActiveTab(0);
+//     setBarridoEnProgreso(true);
+//     setFaseBarrido("azimuth");
+//     setAnguloActualIndex(0);
+//     lastMsgRef.current = null;
+
+//     const azList = calcularAngulosBarrido(azimuthStart, azimuthEnd, 5);
+//     const zeList = calcularAngulosBarrido(zenithStart, zenithEnd, 5);
+//     setAzimuthAngles(azList);
+//     setZenithAngles(zeList);
+
+//     const sweepId = `sweep_${Date.now()}`;
+//     setSweepIdActual(sweepId);
+
+//     try {
+//       await Promise.all([
+//         set(ref(db, `${BASE_PATH}/sweeps/${sweepId}`), {
+//           azimuthStart, azimuthEnd, zenithStart, zenithEnd,
+//           step: 5, status: "in_progress", fase: "azimuth",
+//           timestamp: Date.now(), userSession,
+//         }),
+//         set(ref(db, `${BASE_PATH}/currentSweepId`), sweepId),
+//       ]);
+//       console.log(`🚀 Barrido Exp2 iniciado: ${sweepId}`);
+      
+//       // Iniciar secuencia (Opcional: enviar primer comando o esperar Arduino)
+//       setTimeout(() => enviarComando("p" + azList[0]), 500);
+
+//     } catch (error) {
+//       console.error("Error iniciando:", error);
+//       setBarridoEnProgreso(false);
+//     }
+//   };
+
+//   // Listener Comunicación (BackToFront)
+//   useEffect(() => {
+//     const dbRef = ref(db, `${BASE_PATH}/communication/BackToFront`);
+//     const unsubscribe = onValue(dbRef, async (snapshot) => {
+//       const msg = snapshot.val();
+//       if (!msg || msg === "x") return;
+//       if (lastMsgRef.current === msg) return;
+//       lastMsgRef.current = msg;
+
+//       const fase = faseBarridoRef.current;
+//       const idx = anguloActualIndexRef.current;
+//       const sweepId = sweepIdActualRef.current;
+//       if (!barridoEnProgresoRef.current || !sweepId) return;
+
+//       if (msg === "PITCH:") {
+//          if (fase === "azimuth") {
+//             const azList = azimuthAnglesRef.current;
+//             await enviarComando("p" + azList[idx]);
+//             await update(ref(db, `${BASE_PATH}/sweeps/${sweepId}`), { currentPitch: azList[idx], lastUpdated: Date.now() });
+//          } else {
+//             await enviarComando("p" + azimuthEnd); 
+//          }
+//       } 
+//       else if (msg === "ROLL:") {
+//          if (fase === "azimuth") {
+//             await enviarComando("r" + zenithStart);
+//          } else {
+//             const zeList = zenithAnglesRef.current;
+//             await enviarComando("r" + zeList[idx]);
+//             await update(ref(db, `${BASE_PATH}/sweeps/${sweepId}`), { currentRoll: zeList[idx], lastUpdated: Date.now() });
+//          }
+//       }
+//       else if (msg === "EndMov") {
+//         const azList = azimuthAnglesRef.current;
+//         const zeList = zenithAnglesRef.current;
+
+//         if (fase === "azimuth") {
+//           if (idx + 1 < azList.length) {
+//             setAnguloActualIndex(idx + 1);
+//             // Siguiente Azimuth
+//             setTimeout(() => enviarComando("p" + azList[idx + 1]), 500); 
+//           } else {
+//             console.log("Cambio de fase a Zenith");
+//             setFaseBarrido("zenith");
+//             setAnguloActualIndex(0);
+//             setActiveTab(1); 
+//             await update(ref(db, `${BASE_PATH}/sweeps/${sweepId}`), { fase: "zenith" });
+//             // Iniciar primer Zenith
+//             setTimeout(() => enviarComando("r" + zeList[0]), 1000);
+//           }
+//         } else {
+//           if (idx + 1 < zeList.length) {
+//             setAnguloActualIndex(idx + 1);
+//             // Siguiente Zenith
+//             setTimeout(() => enviarComando("r" + zeList[idx + 1]), 500);
+//           } else {
+//             setBarridoEnProgreso(false);
+//             setFaseBarrido("done");
+//             await update(ref(db, `${BASE_PATH}/sweeps/${sweepId}`), { status: "completed", fase: "done" });
+//             console.log("Fin Barrido Exp2");
+//           }
+//         }
+//       }
+//     });
+//     return () => unsubscribe();
+//   }, [azimuthEnd, zenithStart]); 
+
+//   // Listener Datos (Measurements)
+//   useEffect(() => {
+//     if (!sweepIdActual) return;
+//     const dbRef = ref(db, `${BASE_PATH}/measurements`);
+    
+//     // Carga inicial
+//     get(dbRef).then((snapshot) => {
+//         if (snapshot.exists()) {
+//             const allData = Object.values(snapshot.val());
+//             const myData = allData.filter(d => d.sweepId === sweepIdActual);
+//             // Inferencia simple de fase
+//             const myDataWithPhase = myData.map(d => ({
+//                 ...d,
+//                 faseEstimada: (d.rollAngle === zenithStart && d.pitchAngle !== azimuthEnd) ? "azimuth" : "zenith"
+//             }));
+//             setDatosTemporales(myDataWithPhase);
+//         }
+//     });
+
+//     const unsubscribe = onChildAdded(dbRef, (snapshot) => {
+//       const data = snapshot.val();
+//       if (data && data.sweepId === sweepIdActual) {
+//         const datoConFase = { ...data, faseEstimada: faseBarridoRef.current }; 
+//         setDatosTemporales((prev) => {
+//            const existe = prev.some((d) => d.timestamp === data.timestamp);
+//            return existe ? prev : [...prev, datoConFase];
+//         });
+//       }
+//     });
+//     return () => unsubscribe();
+//   }, [sweepIdActual]);
+
+//   // ==================== GUARDAR Y SALIDA ====================
+//   const guardarBarrido = async () => {
+//     const unsaved = datosTemporales.filter(d => !d.isSaved);
+//     if (unsaved.length === 0) return alert("No hay nuevos datos para guardar.");
+//     if (!window.confirm(`¿Guardar ${unsaved.length} mediciones permanentemente?`)) return;
+
+//     try {
+//       const updates = {};
+//       unsaved.forEach((d) => {
+//         updates[`${BASE_PATH}/measurements/meas_${d.timestamp}/isSaved`] = true;
+//       });
+//       await update(ref(db), updates);
+//       setDatosTemporales(prev => prev.map(d => ({ ...d, isSaved: true })));
+//       alert("✅ Datos guardados con éxito.");
+//     } catch (error) {
+//       console.error("Error guardando:", error);
+//     }
+//   };
+
+//   const handleBackSafe = () => {
+//     const haySinGuardar = datosTemporales.some(d => !d.isSaved);
+//     if (haySinGuardar) {
+//         if (!window.confirm("⚠️ DATOS SIN GUARDAR.\n\nSi sales ahora, los datos se borrarán.\n¿Salir?")) return;
+//     }
+//     navigate("/experiments/experimentChooser");
+//   };
+
+//   // Simulación
+//   const simularDatos = () => {
+//       if(!sweepIdActual) return alert("Inicia barrido primero");
+//       const timestamp = Date.now();
+//       const fakeData = {
+//           pitchAngle: faseBarrido === 'azimuth' ? -30 + anguloActualIndex*5 : azimuthEnd,
+//           rollAngle: faseBarrido === 'zenith' ? -30 + anguloActualIndex*5 : zenithStart,
+//           voltage: Number((10 + Math.random()).toFixed(2)),
+//           current: Number((2 + Math.random()).toFixed(2)),
+//           timestamp: timestamp,
+//           sweepId: sweepIdActual,
+//           isSaved: false
+//       };
+//       // Escribir en firebase
+//       const updates = {};
+//       updates[`${BASE_PATH}/measurements/meas_${timestamp}`] = fakeData;
+//       update(ref(db), updates);
+//   };
+
+//   const hayDatosSinGuardar = datosTemporales.some(d => !d.isSaved);
+//   const youtubeVideoId = "nAQz4RMaHVA";
+
+//   // Filtro para gráficas según Tab
+//   const chartData = datosTemporales.filter(d => {
+//       if (activeTab === 0) return d.faseEstimada === "azimuth" || (!d.faseEstimada && d.rollAngle === zenithStart);
+//       if (activeTab === 1) return d.faseEstimada === "zenith" || (!d.faseEstimada && d.pitchAngle === azimuthEnd);
+//       return true;
+//   });
+
+//   return (
+//     <Box width="90%" maxWidth="1300px" margin="auto" mt={7} mb={5}>
+//       <Typography variant="h4" gutterBottom sx={{ textAlign: "left" }}>{MAIN_TITLE}</Typography>
+//       <Typography variant="body1" sx={{ textAlign: "left", mb: 3 }}>{DESCRIPTION}</Typography>
+
+//       <Grid container spacing={4} alignItems="flex-start">
+        
+//         {/* === IZQUIERDA: CONTROLES === */}
+//         <Grid item xs={12} md={6}>
+//             <Box display="flex" alignItems="center" mb={2}>
+//                 <RocketLaunch color="primary" sx={{ mr: 1 }} />
+//                 <Typography variant="h5">Automatic sweeping control (2-Axis)</Typography>
+//             </Box>
+
+//             <DualAxisControl 
+//                 axisName="Azimuth Control"
+//                 startValue={azimuthStart}
+//                 endValue={azimuthEnd}
+//                 setStart={setAzimuthStart}
+//                 setEnd={setAzimuthEnd}
+//                 disabled={barridoEnProgreso}
+//             />
+
+//             <DualAxisControl 
+//                 axisName="Zenith Control"
+//                 startValue={zenithStart}
+//                 endValue={zenithEnd}
+//                 setStart={setZenithStart}
+//                 setEnd={setZenithEnd}
+//                 disabled={barridoEnProgreso}
+//             />
+
+//             <Box mt={3} mb={2}>
+//                 <Button 
+//                     variant="contained" 
+//                     color="primary" 
+//                     size="large" 
+//                     fullWidth 
+//                     onClick={iniciarBarrido} 
+//                     disabled={barridoEnProgreso}
+//                     startIcon={barridoEnProgreso ? <CircularProgress size={20} color="inherit" /> : <PlayArrow />}
+//                 >
+//                     {barridoEnProgreso ? `Scanning ${faseBarrido.toUpperCase()}...` : "START DUAL AXIS SWEEP"}
+//                 </Button>
+//             </Box>
+
+//             {/* Test Button */}
+//             <Box mb={2}>
+//                 <Button variant="outlined" color="warning" onClick={simularDatos} disabled={!barridoEnProgreso}>
+//                     🛠️ Test Point
+//                 </Button>
+//             </Box>
+
+//             {/* Progress Bar */}
+//             {barridoEnProgreso && (
+//                 <Box sx={{ mb: 3, backgroundColor: "#eee", borderRadius: 1, height: 10 }}>
+//                     <Box sx={{
+//                         height: "100%", borderRadius: 1, backgroundColor: "#2196f3",
+//                         width: faseBarrido === "azimuth"
+//                             ? `${((anguloActualIndex + 1) / (azimuthAngles.length || 1)) * 50}%`
+//                             : `${50 + ((anguloActualIndex + 1) / (zenithAngles.length || 1)) * 50}%`,
+//                         transition: "width 0.3s",
+//                     }} />
+//                 </Box>
+//             )}
+
+//             {/* TABLA DE MEDIDAS */}
+//             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+//                 <Typography variant="h5">Measurements Table</Typography>
+//                 <Button
+//                     variant={hayDatosSinGuardar ? "contained" : "outlined"}
+//                     color="primary"
+//                     onClick={guardarBarrido}
+//                     disabled={datosTemporales.length === 0}
+//                     startIcon={hayDatosSinGuardar ? <Save /> : <CloudDone />}
+//                     size="medium"
+//                 >
+//                     {hayDatosSinGuardar ? "SAVE DATA" : "ALL DATA SAVED"}
+//                 </Button>
+//             </Box>
+
+//             <Box mt={3}>
+//                 {datosTemporales.length > 0 ? (
+//                     <DataTable
+//                         columns={SUBSISTEMA2_COLUMNS}
+//                         data={datosTemporales.map((d) => ({
+//                              [SUBSISTEMA2_COLUMNS[0]]: `${d.pitchAngle ?? "-"}°`,
+//                              [SUBSISTEMA2_COLUMNS[1]]: `${d.rollAngle ?? "-"}°`,
+//                              [SUBSISTEMA2_COLUMNS[2]]: d.voltage?.toFixed(2),
+//                              [SUBSISTEMA2_COLUMNS[3]]: d.current?.toFixed(2),
+//                              [SUBSISTEMA2_COLUMNS[4]]: ((d.voltage * d.current)/100).toFixed(2),
+//                              [SUBSISTEMA2_COLUMNS[5]]: "0.75"
+//                         }))}
+//                         onDelete={() => {}} // Lógica delete
+//                         maxHeight="550px"
+//                         disableHorizontalScroll={true}
+//                     />
+//                  ) : (
+//                     <Paper sx={{ p: 2, textAlign: 'center', color: '#666' }}>
+//                         Waiting for sweep data...
+//                     </Paper>
+//                  )}
+//             </Box>
+//         </Grid>
+
+//         {/* === DERECHA: CÁMARA Y GRÁFICOS === */}
+//         <Grid item xs={12} md={6} sx={{ display: "flex", flexDirection: "column" }}>
+             
+//              {/* CÁMARA */}
+//              <Box sx={{ display: "flex", justifyContent: "center", width: "100%", mb: 3 }}>
+//                 <Paper className="paper-camera" sx={{ p: 2, width: "100%", backgroundColor: "#121212", color: "#fff", borderRadius: "12px" }}>
+//                     <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", display: "flex", alignItems: "center", fontFamily: '"Poppins", sans-serif' }}>
+//                         {CAMERA_TITLE} <Typography component="span" variant="caption" sx={{ color: "#e53935", fontWeight: "bold", ml: 1, fontFamily: '"Poppins", sans-serif' }}>● En vivo</Typography>
+//                     </Typography>
+//                     <Box sx={{ width: "100%", height: "300px", mt: 1, borderRadius: "8px", overflow: "hidden", backgroundColor: "#000" }}>
+//                         <iframe width="100%" height="100%" src="https://www.youtube.com/embed/live_stream?channel=UCo3rncfvezDnIu6mCpdOMZA&autoplay=1&mute=1" title="Cam" frameBorder="0" allowFullScreen />
+//                     </Box>
+//                 </Paper>
+//              </Box>
+
+//              {/* TABS */}
+//              <Paper sx={{ mb: 2, borderRadius: 2, overflow: 'hidden' }}>
+//                  <Tabs 
+//                     value={activeTab} 
+//                     onChange={(e, v) => setActiveTab(v)} 
+//                     variant="fullWidth" 
+//                     indicatorColor="primary"
+//                     textColor="primary"
+//                     sx={{ '& .MuiTab-root': { fontFamily: '"Poppins", sans-serif', textTransform: 'none', fontWeight: 600 } }}
+//                  >
+//                      <Tab label="Axis 1: Azimuth" />
+//                      <Tab label="Axis 2: Zenith" />
+//                  </Tabs>
+//              </Paper>
+
+//              {/* GRÁFICOS */}
+//              {/* Voltaje */}
+//              <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
+//                 <Paper className="paper-graph" sx={{ width: "100%", p: 2 }}>
+//                     <GraphTitleWithTooltip 
+//                         title={`${VOLTAGE_VS_TIME_TITLE} (${activeTab === 0 ? 'Azimuth' : 'Zenith'})`} 
+//                         description="Real-time voltage measurements." 
+//                     />
+//                     <Box mt={2}>
+//                         <RealTimeChart
+//                             chartId="chart-voltage-2"
+//                             data={chartData} 
+//                             dataKey="voltage"
+//                             color="#2196f3"
+//                             yLabel="Voltage (V)"
+//                             unit="V"
+//                         />
+//                     </Box>
+//                 </Paper>
+//              </Box>
+//              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: -1, mb: 3, position: 'relative', top: 10 }}>
+//                 <Button variant="outlined" size="small" color="primary" onClick={() => exportData(chartData, 'volt', 'Exp2', 'csv')} startIcon={<Download fontSize="small" />}>CSV</Button>
+//                 <Button variant="outlined" size="small" color="primary" onClick={() => downloadChartAsImage("chart-voltage-2", "Volt")} startIcon={<CropFree fontSize="small" />}>IMG</Button>
+//              </Box>
+
+//              {/* Corriente */}
+//              <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
+//                 <Paper className="paper-graph" sx={{ width: "100%", p: 2 }}>
+//                     <GraphTitleWithTooltip 
+//                         title={`${CURRENT_VS_TIME_TITLE} (${activeTab === 0 ? 'Azimuth' : 'Zenith'})`} 
+//                         description="Real-time current measurements." 
+//                     />
+//                     <Box mt={2}>
+//                         <RealTimeChart
+//                             chartId="chart-current-2"
+//                             data={chartData}
+//                             dataKey="current"
+//                             color="#4caf50"
+//                             yLabel="Current (A)"
+//                             unit="A"
+//                         />
+//                     </Box>
+//                 </Paper>
+//              </Box>
+//              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: -1, position: 'relative', top: 10 }}>
+//                 <Button variant="outlined" size="small" color="primary" onClick={() => exportData(chartData, 'curr', 'Exp2', 'csv')} startIcon={<Download fontSize="small" />}>CSV</Button>
+//                 <Button variant="outlined" size="small" color="primary" onClick={() => downloadChartAsImage("chart-current-2", "Curr")} startIcon={<CropFree fontSize="small" />}>IMG</Button>
+//              </Box>
+
+//              {/* Descarga Total */}
+//              <Box mt={5}>
+//                 <Button 
+//                     variant="contained" 
+//                     color="pink" 
+//                     onClick={() => exportData(datosTemporales, 'full_report_exp2', 'Exp2', 'csv')}
+//                     fullWidth 
+//                     marginTop={2}
+//                     startIcon={<SaveAlt />}
+//                 >
+//                     {DOWNLOAD_GRAPHS_BUTTON}
+//                 </Button>
+//              </Box>
+
+//         </Grid>
+//       </Grid>
+
+//       {/* FOOTER */}
+//       <Box mt={6} mb={4} sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+//           <Button variant="outlined" color="secondary" onClick={handleBackSafe}>
+//             {BACK_BUTTON}
+//           </Button>
+//       </Box>
+//     </Box>
+//   );
+// };
+
+// export default Subsistema2;
+
+
+
+
+
+/*
+ozzyjames11: código corregido
+- Los gráficos se ven bien: se ajustó los títulos de los ejes y espaciados
+- Los gráficos tienen una secuencia temporal: el gráfico del Axis 2 empieza desde la cantidad de segundos que terminó el gráfico del Axis 1.
+- Se reintrodujo los datos repetidos: en tablas y gráficos, no tenía sentido eliminarlos.
+- Se creó nuevamente RealTimeChart.jsx, con sus dependencias.
+- Se corrigíó los títulos de la tabla.
+- Se acctualizó la lógica de descarga de archivos .csv
+*/
 import React, { useState, useEffect, useRef } from "react";
 import { Box, Paper, Typography, Tabs, Tab } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import {useSelector} from "react-redux";
+
+// estilos
+import styles from "../../assets/css/Elements/RealTimeChart.module.css";
 
 // Componentes
 import DualAxisControl from "../../components/Elements/DualAxisControl";
@@ -4780,7 +5375,8 @@ const Subsistema2 = () => {
     // Cleanup
     return () => {
         // Detener hardware
-        update(ref(db), { [`${BASE_PATH}/communication/FrontToBack`]: "n" }).catch(() => {});
+        // ozzyjames11: detenido momentáneamente
+        // update(ref(db), { [`${BASE_PATH}/communication/FrontToBack`]: "n" }).catch(() => {});
         
         // ✅ AHORA SÍ FUNCIONA: Borrar datos no guardados al salir
         const datos = datosTemporalesRef.current || []; 
@@ -4795,7 +5391,7 @@ const Subsistema2 = () => {
             update(ref(db), updates).catch((e) => console.error(e));
         }
     };
-  }, []);
+  }, [UID_USUARIO]); // Agregamos UID_USUARIO como dependencia
 
   // ==================== LÓGICA ====================
   
@@ -4897,7 +5493,7 @@ const Subsistema2 = () => {
             console.log("Cambio de fase a Zenith");
             setFaseBarrido("zenith");
             setAnguloActualIndex(0);
-            setActiveTab(1); 
+            // setActiveTab(1); 
             await update(ref(db, `${BASE_PATH}/sweeps/${sweepId}`), { fase: "zenith" });
             // Iniciar primer Zenith
             setTimeout(() => enviarComando("r" + zeList[0]), 1000);
@@ -4917,9 +5513,9 @@ const Subsistema2 = () => {
       }
     });
     return () => unsubscribe();
-  }, [azimuthEnd, zenithStart]); 
+  }, [azimuthEnd, zenithStart, BASE_PATH]); 
 
-  // Listener Datos (Measurements)
+  // Listener Datos (Guardamos todo sin filtrar)
   useEffect(() => {
     if (!sweepIdActual) return;
     const dbRef = ref(db, `${BASE_PATH}/measurements`);
@@ -4929,27 +5525,23 @@ const Subsistema2 = () => {
         if (snapshot.exists()) {
             const allData = Object.values(snapshot.val());
             const myData = allData.filter(d => d.sweepId === sweepIdActual);
-            // Inferencia simple de fase
-            const myDataWithPhase = myData.map(d => ({
-                ...d,
-                faseEstimada: (d.rollAngle === zenithStart && d.pitchAngle !== azimuthEnd) ? "azimuth" : "zenith"
-            }));
-            setDatosTemporales(myDataWithPhase);
+            // Ordenar por tiempo para asegurar consistencia
+            myData.sort((a,b) => a.timestamp - b.timestamp);
+            setDatosTemporales(myData);
         }
     });
 
     const unsubscribe = onChildAdded(dbRef, (snapshot) => {
       const data = snapshot.val();
       if (data && data.sweepId === sweepIdActual) {
-        const datoConFase = { ...data, faseEstimada: faseBarridoRef.current }; 
         setDatosTemporales((prev) => {
-           const existe = prev.some((d) => d.timestamp === data.timestamp);
-           return existe ? prev : [...prev, datoConFase];
+           if (prev.some((d) => d.timestamp === data.timestamp)) return prev;
+           return [...prev, data];
         });
       }
     });
     return () => unsubscribe();
-  }, [sweepIdActual]);
+  }, [sweepIdActual, BASE_PATH]);
 
   // ==================== GUARDAR Y SALIDA ====================
   const guardarBarrido = async () => {
@@ -5000,12 +5592,79 @@ const Subsistema2 = () => {
   const hayDatosSinGuardar = datosTemporales.some(d => !d.isSaved);
   const youtubeVideoId = "nAQz4RMaHVA";
 
-  // Filtro para gráficas según Tab
-  const chartData = datosTemporales.filter(d => {
-      if (activeTab === 0) return d.faseEstimada === "azimuth" || (!d.faseEstimada && d.rollAngle === zenithStart);
-      if (activeTab === 1) return d.faseEstimada === "zenith" || (!d.faseEstimada && d.pitchAngle === azimuthEnd);
-      return true;
-  });
+  // =====================================================================
+  // 🧠 LÓGICA DE GRÁFICOS (SPLIT BY DUPLICATE)
+  // =====================================================================
+  const getDataByAxis = () => {
+      if (datosTemporales.length === 0) return { axis1: [], axis2: [] };
+
+      let splitIndex = -1;
+      
+      // Buscamos el punto de transición (el duplicado de ángulos)
+      for (let i = 0; i < datosTemporales.length - 1; i++) {
+          const current = datosTemporales[i];
+          const next = datosTemporales[i + 1];
+
+          // 1. Detección por ÁNGULOS IDÉNTICOS (Transición Real)
+          // Si PITCH y ROLL son iguales en 'current' y 'next', 'current' es el final del Axis 1.
+          // 'next' será el inicio del Axis 2.
+          if (Math.abs(current.pitchAngle - next.pitchAngle) < 0.1 && 
+              Math.abs(current.rollAngle - next.rollAngle) < 0.1) {
+              splitIndex = i;
+              break;
+          }
+
+          // 2. Fallback: Si el Zenith cambia, asumimos transición.
+          if (Math.abs(current.rollAngle - next.rollAngle) > 0.1) {
+              splitIndex = i;
+              break;
+          }
+      }
+
+      // Si no encontramos quiebre (solo fase 1), devolvemos todo en Axis 1
+      if (splitIndex === -1) {
+          return { axis1: datosTemporales, axis2: [] };
+      }
+
+      // Axis 1: Incluye hasta el punto de quiebre
+      const axis1 = datosTemporales.slice(0, splitIndex + 1);
+      
+      // Axis 2: Incluye desde el punto SIGUIENTE al quiebre
+      const axis2 = datosTemporales.slice(splitIndex + 1);
+
+      return { axis1, axis2 };
+  };
+
+  const { axis1: dataAxis1, axis2: dataAxis2 } = getDataByAxis();
+  const globalStartTime = datosTemporales.length > 0 ? datosTemporales[0].timestamp : 0;
+
+  // Estilos "Celestes" para Tabs (Sin CSS externo)
+  const tabStyles = {
+      textTransform: 'none',
+      fontWeight: 600,
+      fontSize: '1rem',
+      borderRadius: '8px',
+      margin: '0 4px',
+      transition: 'all 0.3s ease',
+      '&.Mui-selected': {
+          backgroundColor: '#e3f2fd', // Celeste muy claro
+          color: '#1565c0', // Azul fuerte
+          boxShadow: '0 2px 4px rgba(25, 118, 210, 0.15)'
+      },
+      '&:hover': {
+          backgroundColor: '#f5f5f5'
+      }
+  };
+
+
+    // AUTO-SWITCH DE TABS (NUEVO)
+  useEffect(() => {
+      if (faseBarrido === "zenith") {
+          setActiveTab(1); 
+      } else if (faseBarrido === "azimuth" && datosTemporales.length === 0) {
+          setActiveTab(0); 
+      }
+  }, [faseBarrido, datosTemporales.length]);
 
   return (
     <Box width="90%" maxWidth="1300px" margin="auto" mt={7} mb={5}>
@@ -5122,28 +5781,28 @@ const Subsistema2 = () => {
                         {CAMERA_TITLE} <Typography component="span" variant="caption" sx={{ color: "#e53935", fontWeight: "bold", ml: 1, fontFamily: '"Poppins", sans-serif' }}>● En vivo</Typography>
                     </Typography>
                     <Box sx={{ width: "100%", height: "300px", mt: 1, borderRadius: "8px", overflow: "hidden", backgroundColor: "#000" }}>
-                        <iframe width="100%" height="100%" src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1`} title="Cam" frameBorder="0" allowFullScreen />
+                        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/live_stream?channel=UCo3rncfvezDnIu6mCpdOMZA&autoplay=1&mute=1" title="Cam" frameBorder="0" allowFullScreen />
                     </Box>
                 </Paper>
              </Box>
 
-             {/* TABS */}
-             <Paper sx={{ mb: 2, borderRadius: 2, overflow: 'hidden' }}>
+             {/* TABS ESTILIZADAS (Sin CSS externo) */}
+             <Box sx={{ 
+                 backgroundColor: "#fff", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", 
+                 p: "6px", mb: 2, border: "1px solid #e0e0e0" 
+             }}>
                  <Tabs 
                     value={activeTab} 
                     onChange={(e, v) => setActiveTab(v)} 
                     variant="fullWidth" 
-                    indicatorColor="primary"
-                    textColor="primary"
-                    sx={{ '& .MuiTab-root': { fontFamily: '"Poppins", sans-serif', textTransform: 'none', fontWeight: 600 } }}
+                    TabIndicatorProps={{ style: { display: "none" } }} // Sin línea
                  >
-                     <Tab label="Axis 1: Azimuth" />
-                     <Tab label="Axis 2: Zenith" />
+                     <Tab label="Axis 1: Azimuth" sx={tabStyles} />
+                     <Tab label="Axis 2: Zenith" sx={tabStyles} />
                  </Tabs>
-             </Paper>
+             </Box>
 
-             {/* GRÁFICOS */}
-             {/* Voltaje */}
+             {/* GRÁFICO VOLTAJE */}
              <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
                 <Paper className="paper-graph" sx={{ width: "100%", p: 2 }}>
                     <GraphTitleWithTooltip 
@@ -5153,22 +5812,27 @@ const Subsistema2 = () => {
                     <Box mt={2}>
                         <RealTimeChart
                             chartId="chart-voltage-2"
-                            data={chartData} 
+                            data={activeTab === 0 ? dataAxis1 : dataAxis2} 
+                            customStartTime={globalStartTime}
+                            
                             dataKey="voltage"
                             color="#2196f3"
                             yLabel="Voltage (V)"
                             unit="V"
+                            // Props dinámicas para el Tooltip mejorado
+                            angleKey={activeTab === 0 ? "pitchAngle" : "rollAngle"}
+                            angleLabel={activeTab === 0 ? "Azimuth Angle" : "Zenith Angle"}
                         />
                     </Box>
                 </Paper>
              </Box>
-             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: -1, mb: 3, position: 'relative', top: 10 }}>
-                <Button variant="outlined" size="small" color="primary" onClick={() => exportData(chartData, 'volt', 'Exp2', 'csv')} startIcon={<Download fontSize="small" />}>CSV</Button>
+             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: -2, mb: 3, position: 'relative', top: 10 }}>
+                <Button variant="outlined" size="small" color="primary" onClick={() => exportData(activeTab === 0 ? dataAxis1 : dataAxis2, 'volt', 'Exp2', 'csv', globalStartTime)} startIcon={<Download fontSize="small" />}>CSV</Button>
                 <Button variant="outlined" size="small" color="primary" onClick={() => downloadChartAsImage("chart-voltage-2", "Volt")} startIcon={<CropFree fontSize="small" />}>IMG</Button>
              </Box>
 
-             {/* Corriente */}
-             <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
+             {/* GRÁFICO CORRIENTE */}
+             <Box sx={{ display: "flex", justifyContent: "center", width: "100%", mt: 2 }}>
                 <Paper className="paper-graph" sx={{ width: "100%", p: 2 }}>
                     <GraphTitleWithTooltip 
                         title={`${CURRENT_VS_TIME_TITLE} (${activeTab === 0 ? 'Azimuth' : 'Zenith'})`} 
@@ -5177,17 +5841,22 @@ const Subsistema2 = () => {
                     <Box mt={2}>
                         <RealTimeChart
                             chartId="chart-current-2"
-                            data={chartData}
+                            data={activeTab === 0 ? dataAxis1 : dataAxis2}
+                            customStartTime={globalStartTime}
+
                             dataKey="current"
                             color="#4caf50"
                             yLabel="Current (A)"
                             unit="A"
+                            // Props dinámicas
+                            angleKey={activeTab === 0 ? "pitchAngle" : "rollAngle"}
+                            angleLabel={activeTab === 0 ? "Azimuth Angle" : "Zenith Angle"}
                         />
                     </Box>
                 </Paper>
              </Box>
-             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: -1, position: 'relative', top: 10 }}>
-                <Button variant="outlined" size="small" color="primary" onClick={() => exportData(chartData, 'curr', 'Exp2', 'csv')} startIcon={<Download fontSize="small" />}>CSV</Button>
+             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: -2, position: 'relative', top: 10 }}>
+                <Button variant="outlined" size="small" color="primary" onClick={() => exportData(activeTab === 0 ? dataAxis1 : dataAxis2, 'curr', 'Exp2', 'csv', globalStartTime)} startIcon={<Download fontSize="small" />}>CSV</Button>
                 <Button variant="outlined" size="small" color="primary" onClick={() => downloadChartAsImage("chart-current-2", "Curr")} startIcon={<CropFree fontSize="small" />}>IMG</Button>
              </Box>
 

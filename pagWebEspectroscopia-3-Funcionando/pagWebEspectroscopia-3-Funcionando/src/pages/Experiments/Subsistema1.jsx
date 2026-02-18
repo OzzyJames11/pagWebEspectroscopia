@@ -4402,7 +4402,7 @@ const Subsistema1 = () => {
               </Typography>
               <Box sx={{ width: "100%", height: "300px", mt: 1, borderRadius: "8px", overflow: "hidden", backgroundColor: "#000" }}>
                 {/* ozzyjames11: descomentar, es la transmisión de YT */}
-                {/* <iframe width="100%" height="100%" src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1`} title="Cam" frameBorder="0" allowFullScreen /> */}
+                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/live_stream?channel=UCo3rncfvezDnIu6mCpdOMZA&autoplay=1&mute=1" title="Cam" frameBorder="0" allowFullScreen /> 
               </Box>
             </Paper>
           </Box>
