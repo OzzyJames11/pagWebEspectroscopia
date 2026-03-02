@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+/*import React, { useState, useEffect, useRef } from "react";
 import { Box, Paper, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
@@ -300,8 +300,8 @@ const Subsistema3 = () => {
     alert("Funcionalidad de descarga pendiente de implementación");
   };*/
 
-  // Descargar ambos gráficos en un solo archivo
-  const handleDownloadBothData = () => {
+  // Descargar ambos gráficos en un solo archivo*/
+  /*const handleDownloadBothData = () => {
     generateTXT({
       filename: "subsystem3_all_data.txt",
       metadata: [
@@ -518,16 +518,16 @@ const Subsistema3 = () => {
       <Typography variant="body1" sx={{ textAlign: "left", mb: 3 }}>
         {DESCRIPTION}
       </Typography>
-
+*/
       {/* Boton para controlar arduinos */}
       {/*<Button variant="contained" marginTop={-2} marginBottom={3}>Controlar Arduino</Button>*/}
 
       {/* Contenedor con dos columnas */}
-      <Grid container spacing={4} alignItems="flex-start">
+     // <Grid container spacing={4} alignItems="flex-start">
         {/* Columna Izquierda: Estado del subsistema, botón de limpieza y tabla */}
-        <Grid item xs={12} md={6}>
+       // <Grid item xs={12} md={6}>
           {/* Estado del subsistema y botón de limpieza */}
-          <Paper
+        /*  <Paper
             className="paper-camera"
             sx={{ p: 3, textAlign: "center", mb: 3 }}
           >
@@ -548,16 +548,16 @@ const Subsistema3 = () => {
               {CLEAN_BUTTON}
             </Button>
           </Paper>
-
+*/
           {/* Tabla de datos */}
-          <DataTable
+         /* <DataTable
             columns={SUBSISTEMA3_COLUMNS}
             data={datos}
             onDelete={handleEliminar}
           />
-
+*/
           {/* Botón para guardar datos */}
-          <Box mt={2}>
+         /* <Box mt={2}>
             <Button
               variant="contained"
               color="primary"
@@ -569,9 +569,9 @@ const Subsistema3 = () => {
             </Button>
           </Box>
         </Grid>
-
+*/
         {/* Columna Derecha: Gráficos */}
-        <Grid
+       /* <Grid
           item
           xs={12}
           md={6}
@@ -638,7 +638,7 @@ const Subsistema3 = () => {
               <GraphTitleWithTooltip 
                 title={VOLTAGE_VS_TIME_TITLE} 
                 description={GRAPH_DESCRIPTIONS.VOLTAGE_VS_TIME}
-              />
+              />*/
               {/* Desactivado temporalmente por OzzyJames11 
               <div style={styles.smallGraph}>
                 <Line
@@ -646,7 +646,7 @@ const Subsistema3 = () => {
                   options={{ responsive: true, maintainAspectRatio: false }} 
                 />
               </div>*/}
-            </Paper>
+           /* </Paper>
           </Box>
 
           <Button
@@ -668,14 +668,14 @@ const Subsistema3 = () => {
                 title={CURRENT_VS_TIME_TITLE} 
                 description={GRAPH_DESCRIPTIONS.CURRENT_VS_TIME}
               />
-              {/* Desactivado temporalmente por OzzyJames11 
+              */{/* Desactivado temporalmente por OzzyJames11 
               <div style={styles.smallGraph}>
                 <Line
                   data={corrienteChart}
                   options={{ responsive: true, maintainAspectRatio: false }} 
                 />
               </div>*/}
-            </Paper>
+            /*</Paper>
           </Box>
           <Button
             variant="contained"
@@ -698,9 +698,9 @@ const Subsistema3 = () => {
           </Button>
         </Grid>
       </Grid>
-
+*/
       {/* Botón para volver */}
-      <Button
+     /* <Button
         variant="outlined"
         color="secondary"
         onClick={handleBack}
@@ -743,5 +743,530 @@ const styles = {
       flexDirection: "column",
     },
   };
+
+export default Subsistema3;*/
+
+
+
+
+
+
+
+
+/*
+import React, { useState, useEffect, useRef } from "react";
+import { Box, Paper, Typography, Grid } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+
+// Firebase e Auth
+import {
+  getDatabase,
+  ref,
+  set,
+  onValue,
+  onChildAdded,
+  remove,
+} from "firebase/database";
+import { getAuth } from "firebase/auth"; // Importante para el UID
+import app from "../../firebaseConfig.js";
+
+// Importación de componentes
+import DataTable from "../../components/Elements/DataTable";
+import Button from "../../components/Elements/Button.jsx";
+import GraphTitleWithTooltip from "../../components/Elements/GraphTitleWithTooltip";
+import { generateTXT } from "../../../src/components/Elements/generateTXT.jsx";
+
+// Importación de constantes y estilos
+import {
+  SUBSISTEMA3_COLUMNS,
+  PAGE_TITLES,
+  GRAPH_DESCRIPTIONS,
+} from "../../assets/Strings/Experiments/Subsistema3Strings.jsx";
+import "../../assets/css/Elements/PaperStyles.css";
+
+const Subsistema3 = () => {
+  const navigate = useNavigate();
+  const db = getDatabase(app);
+  const auth = getAuth(app);
+  const user = auth.currentUser; // Obtenemos el usuario actual
+
+  const {
+    MAIN_TITLE, DESCRIPTION, SAVE_BUTTON, DOWNLOAD_GRAPHS_BUTTON,
+    DOWNLOAD_1_GRAPH, BACK_BUTTON, CAMERA_TITLE, VOLTAGE_VS_TIME_TITLE,
+    CURRENT_VS_TIME_TITLE, SUBSYSTEM_STATUS_TITLE, CURRENT_STATUS_LABEL, CLEAN_BUTTON,
+  } = PAGE_TITLES;
+
+  // Estados
+  const [corrienteData, setCorrienteData] = useState([]);
+  const [voltajeData, setVoltajeData] = useState([]);
+  const [contadorLabels, setContadorLabels] = useState([]);
+  const [voltajeValue, setVoltajeValue] = useState(0);
+  const [corrienteValue, setCorrienteValue] = useState(0);
+  const [estado, setEstado] = useState("dirty");
+  const [datos, setDatos] = useState([]);
+  const [youtubeVideoId] = useState("nAQz4RMaHVA");
+  const [angulo, setAngulo] = useState(5);
+
+  // 1. Efecto inicial: Cargar datos locales y enviar señal de inicio
+  useEffect(() => {
+    const datosGuardados = JSON.parse(localStorage.getItem("historicalData_subsistema3")) || [];
+    setDatos(datosGuardados);
+   
+    if (user) {
+      enviarComando("y"); // Señal de inicio 'y' según tu lógica anterior
+    }
+  }, [user]);
+
+  // 2. Listener de Datos (Measurements) - Ahora basado en el UID del usuario
+  useEffect(() => {
+    if (!user) return;
+
+    // Nota: El backend antiguo enviaba a Exp3/data, el nuevo lo maneja por usuario
+    // Si el backend envía datos crudos a una ruta global, usa "Exp3/data"
+    // Pero si quieres aislamiento total, el backend debería escribir en users/uid/Exp3/data
+    const dataRef = ref(db, `Exp3/data`);
+
+    const unsubscribe = onChildAdded(dataRef, (snapshot) => {
+      const newData = snapshot.val();
+      if (newData && newData.data1) {
+        setCorrienteData((prev) => [...prev.slice(-19), newData.data1.current]);
+        setVoltajeData((prev) => [...prev.slice(-19), newData.data1.voltage]);
+        setContadorLabels((prev) => [...prev.slice(-19), newData.data1.cont || prev.length]);
+        setVoltajeValue(newData.data1.voltage);
+        setCorrienteValue(newData.data1.current);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [user, db]);
+
+  // 3. Listener de BackToFront (Handshake/EndMov) - ESPECÍFICO POR USUARIO
+  useEffect(() => {
+    if (!user) return;
+
+    const btfRef = ref(db, `users/${user.uid}/Exp3/communication/BackToFront`);
+
+    const unsubscribe = onValue(btfRef, (snapshot) => {
+      const mensaje = snapshot.val();
+      console.log("MENSAJE RECIBIDO DESDE FIREBASE:", mensaje); 
+      if (mensaje === "EndMov") {
+        console.log("Movimiento finalizado para este usuario");
+        // Aquí puedes reactivar botones si los deshabilitaste
+      }
+    });
+
+    return () => unsubscribe();
+  }, [user, db]);
+
+  // Función genérica para enviar comandos al nuevo Backend
+  const enviarComando = (cmd) => {
+    if (!user) {
+        console.error("No hay usuario autenticado");
+        return;
+    }
+    const commandRef = ref(db, `users/${user.uid}/Exp3/communication/FrontToBack`);
+    set(commandRef, cmd).catch(err => console.error("Error enviando comando:", err));
+  };
+
+  const handleLimpiar = () => {
+    setEstado("clean");
+    enviarComando("c");
+  };
+
+  const handleMove = () => {
+    enviarComando(`p${angulo}`);
+  };
+
+  const handleGuardar = () => {
+    const nuevoDato = {
+      [SUBSISTEMA3_COLUMNS[0]]: voltajeValue.toFixed(2),
+      [SUBSISTEMA3_COLUMNS[1]]: corrienteValue.toFixed(2),
+      [SUBSISTEMA3_COLUMNS[2]]: (voltajeValue * corrienteValue).toFixed(2), // Ejemplo Potencia
+      [SUBSISTEMA3_COLUMNS[3]]: "1.00",
+    };
+    const nuevosDatos = [...datos, nuevoDato];
+    setDatos(nuevosDatos);
+    localStorage.setItem("historicalData_subsistema3", JSON.stringify(nuevosDatos));
+  };
+
+  const handleEliminar = (index) => {
+    const nuevosDatos = datos.filter((_, i) => i !== index);
+    setDatos(nuevosDatos);
+    localStorage.setItem("historicalData_subsistema3", JSON.stringify(nuevosDatos));
+  };
+
+  const handleBack = async () => {
+    enviarComando("n"); // Stop
+    // Limpiar datos de Firebase si es necesario antes de salir
+    const dataRef = ref(db, "Exp3/data");
+    await remove(dataRef);
+    navigate("/experiments/experimentChooser");
+  };
+
+  return (
+    <Box width="90%" maxWidth="1200px" margin="auto" mt={7} mb={5}>
+      <Typography variant="h4" gutterBottom>{MAIN_TITLE}</Typography>
+      <Typography variant="body1" sx={{ mb: 3 }}>{DESCRIPTION}</Typography>
+
+      <Grid container spacing={4}>*/
+        {/* Columna Izquierda */}
+       /* <Grid item xs={12} md={6}>
+          <Paper className="paper-camera" sx={{ p: 3, textAlign: "center", mb: 3 }}>
+            <Typography variant="h5">{SUBSYSTEM_STATUS_TITLE}</Typography>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              {CURRENT_STATUS_LABEL} <strong>{estado}</strong>
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={handleLimpiar}
+              disabled={estado === "clean"}
+            >
+              {CLEAN_BUTTON}
+            </Button>
+          </Paper>
+
+          <DataTable
+            columns={SUBSISTEMA3_COLUMNS}
+            data={datos}
+            onDelete={handleEliminar}
+          />
+
+          <Box mt={2}>
+            <Button variant="contained" onClick={handleGuardar}>
+              {SAVE_BUTTON}
+            </Button>
+          </Box>
+        </Grid>
+
+       */ {/* Columna Derecha */}
+       /* <Grid item xs={12} md={6}>
+          <Paper className="paper-camera" sx={{ p: 2, backgroundColor: "#121212", color: "#fff", borderRadius: "12px" }}>
+            <Typography variant="h5" sx={{ display: "flex", alignItems: "center" }}>
+              {CAMERA_TITLE} <span style={{ color: "#e53935", fontSize: "0.8rem", marginLeft: "10px" }}>● En vivo</span>
+            </Typography>
+            <Box sx={{ width: "100%", height: "400px", mt: 1, backgroundColor: "#000" }}>
+              <iframe
+                width="100%" height="400"
+                src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1`}
+                title="Live Stream" frameBorder="0" allowFullScreen
+              ></iframe>
+            </Box>
+          </Paper>
+
+          <Box mt={3}>
+             <Paper sx={{ p: 2, mb: 2 }}>
+                <Typography variant="h6">Control de Ángulo</Typography>
+                <input
+                    type="range" min="0" max="180" value={angulo}
+                    onChange={(e) => setAngulo(e.target.value)}
+                    style={{ width: "100%" }}
+                />
+                <Typography>Ángulo seleccionado: {angulo}°</Typography>
+                <Button variant="contained" onClick={handleMove} fullWidth>Mover Panel</Button>
+             </Paper>
+          </Box>
+        </Grid>
+      </Grid>
+
+      <Button variant="outlined" color="secondary" onClick={handleBack} align="center" marginTop={4}>
+        {BACK_BUTTON}
+      </Button>
+    </Box>
+  );
+};
+
+export default Subsistema3;
+*/
+
+
+
+
+import React, { useState, useEffect } from "react";
+import { Box, Paper, Typography, Grid } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+
+// Firebase
+import { getDatabase, ref, set, onValue, remove } from "firebase/database";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import app from "../../firebaseConfig.js";
+
+// Componentes (los tuyos)
+import DataTable from "../../components/Elements/DataTable";
+import Button from "../../components/Elements/Button.jsx";
+
+// Strings (puedes ajustar los textos en tu archivo si quieres)
+import {
+  PAGE_TITLES,
+} from "../../assets/Strings/Experiments/Subsistema3Strings.jsx";
+
+import "../../assets/css/Elements/PaperStyles.css";
+
+const Subsistema3 = () => {
+  const navigate = useNavigate();
+  const db = getDatabase(app);
+  const auth = getAuth(app);
+
+  // =========================================================
+  // ESTADOS
+  // =========================================================
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // Pitch live + historial corto para gráfica (si la usas en otra parte)
+  const [pitchValue, setPitchValue] = useState(null);
+  const [pitchData, setPitchData] = useState([]);
+  const [timeLabels, setTimeLabels] = useState([]);
+
+  // Tabla local (guardado manual)
+  const [estado, setEstado] = useState("dirty");
+  const [datos, setDatos] = useState([]);
+
+  const [youtubeVideoId] = useState("nAQz4RMaHVA");
+
+  const {
+    MAIN_TITLE,
+    DESCRIPTION,
+    SAVE_BUTTON,
+    BACK_BUTTON,
+    CAMERA_TITLE,
+    SUBSYSTEM_STATUS_TITLE,
+    CURRENT_STATUS_LABEL,
+    CLEAN_BUTTON,
+  } = PAGE_TITLES;
+
+  // Columnas para PITCH
+  const TABLE_COLUMNS = ["Pitch", "Hora"];
+
+  // =========================================================
+  // 1) AUTH: Detectar usuario
+  // =========================================================
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user);
+        console.log("✅ Usuario autenticado:", user.uid);
+      } else {
+        setCurrentUser(null);
+        console.warn("❌ No hay sesión activa.");
+      }
+    });
+    return () => unsubscribe();
+  }, [auth]);
+
+  // =========================================================
+  // 2) Cargar tabla local + mandar "y" al entrar
+  // =========================================================
+  useEffect(() => {
+    const datosGuardados =
+      JSON.parse(localStorage.getItem("historicalData_subsistema3_pitch")) || [];
+    setDatos(datosGuardados);
+
+    if (currentUser) {
+      enviarComando("y"); // iniciar medición/streaming
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser]);
+
+  // =========================================================
+  // 3) Listener LIVE pitch (por usuario)
+  // Ruta: users/{uid}/Exp3/live
+  // =========================================================
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const liveRef = ref(db, `users/${currentUser.uid}/Exp3/live`);
+    const unsubscribe = onValue(liveRef, (snapshot) => {
+      const v = snapshot.val();
+      if (!v || typeof v.pitch !== "number") return;
+
+      const pitch = v.pitch;
+      const label = v.timestamp
+        ? new Date(v.timestamp).toLocaleTimeString()
+        : new Date().toLocaleTimeString();
+
+      setPitchValue(pitch);
+      setPitchData((prev) => [...prev.slice(-19), pitch]);
+      setTimeLabels((prev) => [...prev.slice(-19), label]);
+    });
+
+    return () => unsubscribe();
+  }, [currentUser, db]);
+
+  // =========================================================
+  // 4) Listener BackToFront (por usuario) — opcional
+  // Ruta: users/{uid}/Exp3/communication/BackToFront
+  // =========================================================
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const btfRef = ref(db, `users/${currentUser.uid}/Exp3/communication/BackToFront`);
+    const unsubscribe = onValue(btfRef, (snapshot) => {
+      const mensaje = snapshot.val();
+      if (!mensaje || mensaje === "x") return;
+
+      console.log("📩 BackToFront Exp3:", mensaje);
+      // Si tu Arduino manda EndMov para algún proceso, aquí lo capturas:
+      // if (mensaje === "EndMov") { ... }
+    });
+
+    return () => unsubscribe();
+  }, [currentUser, db]);
+
+  // =========================================================
+  // Enviar comandos a Exp3 (por usuario)
+  // =========================================================
+  const enviarComando = (cmd) => {
+    if (!currentUser) {
+      console.error("⛔ Acción bloqueada: esperando autenticación...");
+      return;
+    }
+    const commandRef = ref(
+      db,
+      `users/${currentUser.uid}/Exp3/communication/FrontToBack`
+    );
+
+    set(commandRef, cmd)
+      .then(() => console.log(`🚀 Comando "${cmd}" enviado.`))
+      .catch((err) => console.error("❌ Error enviando comando:", err));
+  };
+
+  // =========================================================
+  // UI actions
+  // =========================================================
+  const handleLimpiar = () => {
+    setEstado("clean");
+    // Limpieza local
+    setPitchData([]);
+    setTimeLabels([]);
+    setPitchValue(null);
+
+    enviarComando("c");
+  };
+
+  const handleGuardar = () => {
+    const now = new Date();
+    const row = {
+      [TABLE_COLUMNS[0]]: pitchValue === null ? "-" : pitchValue.toFixed(4),
+      [TABLE_COLUMNS[1]]: now.toLocaleTimeString(),
+    };
+
+    const nuevosDatos = [...datos, row];
+    setDatos(nuevosDatos);
+    localStorage.setItem("historicalData_subsistema3_pitch", JSON.stringify(nuevosDatos));
+    setEstado("dirty");
+  };
+
+  const handleEliminar = (index) => {
+    const nuevosDatos = datos.filter((_, i) => i !== index);
+    setDatos(nuevosDatos);
+    localStorage.setItem("historicalData_subsistema3_pitch", JSON.stringify(nuevosDatos));
+  };
+
+  const handleBack = async () => {
+    try {
+      // Detener streaming/medición
+      enviarComando("n");
+
+      if (currentUser) {
+        // Limpia solo lo de este usuario (opcional)
+        await remove(ref(db, `users/${currentUser.uid}/Exp3/live`));
+        // Si guardas histórico:
+        // await remove(ref(db, `users/${currentUser.uid}/Exp3/measurements`));
+      }
+    } catch (e) {
+      console.warn("⚠️ Error limpiando datos de Exp3:", e);
+    }
+
+    navigate("/experiments/experimentChooser");
+  };
+
+  // =========================================================
+  // Render
+  // =========================================================
+  return (
+    <Box width="90%" maxWidth="1200px" margin="auto" mt={7} mb={5}>
+      <Typography variant="h4" gutterBottom>{MAIN_TITLE}</Typography>
+      <Typography variant="body1" sx={{ mb: 3 }}>{DESCRIPTION}</Typography>
+
+      <Grid container spacing={4}>
+        {/* Columna Izquierda */}
+        <Grid item xs={12} md={6}>
+          <Paper className="paper-camera" sx={{ p: 3, textAlign: "center", mb: 3 }}>
+            <Typography variant="h5">{SUBSYSTEM_STATUS_TITLE}</Typography>
+
+            <Typography variant="body1" sx={{ mb: 1 }}>
+              {CURRENT_STATUS_LABEL} <strong>{estado}</strong>
+            </Typography>
+
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              Pitch actual:{" "}
+              <strong>
+                {pitchValue === null ? "—" : `${pitchValue.toFixed(4)}`}
+              </strong>
+            </Typography>
+
+            <Button variant="contained" onClick={handleLimpiar} disabled={estado === "clean"}>
+              {CLEAN_BUTTON}
+            </Button>
+          </Paper>
+
+          <DataTable
+            columns={TABLE_COLUMNS}
+            data={datos}
+            onDelete={handleEliminar}
+          />
+
+          <Box mt={2}>
+            <Button variant="contained" onClick={handleGuardar} disabled={pitchValue === null}>
+              {SAVE_BUTTON}
+            </Button>
+          </Box>
+        </Grid>
+
+        {/* Columna Derecha */}
+        <Grid item xs={12} md={6}>
+          <Paper
+            className="paper-camera"
+            sx={{
+              p: 2,
+              backgroundColor: "#121212",
+              color: "#fff",
+              borderRadius: "12px"
+            }}
+          >
+            <Typography variant="h5" sx={{ display: "flex", alignItems: "center" }}>
+              {CAMERA_TITLE}
+              <span style={{ color: "#e53935", fontSize: "0.8rem", marginLeft: "10px" }}>
+                ● En vivo
+              </span>
+            </Typography>
+
+            <Box sx={{ width: "100%", height: "400px", mt: 1, backgroundColor: "#000" }}>
+              <iframe
+                width="100%"
+                height="400"
+                src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1`}
+                title="Live Stream"
+                frameBorder="0"
+                allowFullScreen
+              />
+            </Box>
+          </Paper>
+
+          {/* Si luego quieres una gráfica, aquí puedes renderizarla usando pitchData y timeLabels */}
+        </Grid>
+      </Grid>
+
+      <Button
+        variant="outlined"
+        color="secondary"
+        onClick={handleBack}
+        align="center"
+        marginTop={4}
+      >
+        {BACK_BUTTON}
+      </Button>
+    </Box>
+  );
+};
 
 export default Subsistema3;

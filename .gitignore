@@ -37,3 +37,27 @@ pgConFirebaseBACK_3/pgConFirebaseBACK/*.json
 # Ignorar credenciales sensibles de Firebase
 #pgConFirebaseBACK_3/pgConFirebaseBACK/*.json
 #pgConFirebaseBACK_3/pgConFirebaseBACK/pruebaerasmus-d80e8-firebase-adminsdk-fbsvc-33644752a7.json
+
+
+
+# =========================================
+# Subsistema 4: Python & Espectrómetro
+# =========================================
+
+# 1. Ignorar el entorno virtual de Python (¡Pesa mucho y no se sube!)
+spectrometer-service/venv/
+spectrometer-service/env/
+
+# 2. Ignorar caché de Python (Archivos temporales)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 3. Ignorar credenciales sensibles (El archivo JSON que acabas de copiar)
+spectrometer-service/app/*.json
+
+# 4. IGNORAR EL ALMACENAMIENTO MASIVO (¡CRÍTICO!)
+spectrometer-service/app/local_storage/
+
+# 5. Ignorar ejecutables pesados
+ngrok.exe
