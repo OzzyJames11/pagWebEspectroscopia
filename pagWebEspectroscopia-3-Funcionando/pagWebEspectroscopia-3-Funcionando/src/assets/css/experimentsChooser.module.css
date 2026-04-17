@@ -6,21 +6,60 @@
     margin-bottom: 30px;
 }
 
-.card {
-    max-width: 300px;
-    margin: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
 .gridContainer {
     width: 90%;
+    max-width: 1000px; /* Límite para que entren exactamente 3 arriba y 2 abajo */
     margin-top: 20px;
 }
 
+.card {
+    width: 100%;
+    max-width: 300px; /* Mantiene tu ancho original */
+    min-height: 260px; /* Obliga a la tarjeta a ser casi cuadrada */
+    margin: 0 auto; 
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Nuevo contenedor interno para distribuir los espacios */
+.cardContent {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    align-items: center;
+    padding: 24px !important;
+}
+
+.title {
+    text-align: center;
+    font-size: 1.25rem; 
+    margin-bottom: 10px;
+    min-height: 60px; /* Reserva espacio para 2 líneas de texto, evitando saltos desiguales */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: pre-line;
+}
+
 .description {
-    margin-top: 15px;
     text-align: center;
     font-size: 0.9rem;
     color: #666;
+    /* ✅ Reservamos espacio para 3 líneas exactas. 
+       Así los botones siempre se alinean sin importar si el texto es corto. */
+    min-height: 65px; 
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    margin-bottom: 0px; 
 }
+
+.buttonContainer {
+    margin-top: auto; /* ✅ Acerca el botón al texto de arriba */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+

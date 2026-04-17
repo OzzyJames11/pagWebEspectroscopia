@@ -6,12 +6,12 @@ export const PAGE_TITLES = {
 
 export const SUBSYSTEMS = [
     {
-        title: "Panel Subsystem (1 Rotation)",
+        title: "Panel Subsystem \n(1 Rotation)",
         description: "This subsystem focuses on spinning solar panels that have a rotation.",
         path: "/experiments/subsistema1",
     },
     {
-        title: "Panel Subsystem (2 Rotations)",
+        title: "Panel Subsystem \n(2 Rotations)",
         description: "This subsystem focuses on spinning solar panels that have two rotations.",
         path: "/experiments/subsistema2",
     },
@@ -25,11 +25,11 @@ export const SUBSYSTEMS = [
         description: "This subsystem performs radiation analysis.",
         path: "/experiments/subsistema4",
     },
-    {
-        title: "Historical Data",
-        description: "Average hourly and monthly data.",
-        path: "/experiments/historicalData",
-    },
+    // {
+    //     title: "Historical Data",
+    //     description: "Average hourly and monthly data.",
+    //     path: "/experiments/historicalData",
+    // },
     {
         title: "Data Summary",
         description: "Summary of all the data collected in different subsystems.",

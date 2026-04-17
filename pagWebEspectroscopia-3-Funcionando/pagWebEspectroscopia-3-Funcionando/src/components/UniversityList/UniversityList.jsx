@@ -13,7 +13,7 @@ const UniversityList = ({ universities, onUniversityClick }) => {
                 ))}
             </ul>
             <p className="funding-text">
-            These laboratories were financed through the Erasmus EUBGP project of the European Union and collaborating universities.            </p>
+            These laboratories were financed through the Erasmus EUBEGP project of the European Union and collaborating universities.            </p>
         </div>
     );
 };

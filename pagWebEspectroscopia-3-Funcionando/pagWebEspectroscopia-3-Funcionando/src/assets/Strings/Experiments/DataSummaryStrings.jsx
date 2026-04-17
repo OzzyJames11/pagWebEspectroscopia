@@ -7,7 +7,7 @@
 //     "Fill Factor"
 // ];
 
-// Textos de los subsistemas
+// // Textos de los subsistemas
 export const SUBSYSTEM_TITLES = {
     SUBSYSTEM1: "Subsystem 1",
     SUBSYSTEM2: "Subsystem 2",

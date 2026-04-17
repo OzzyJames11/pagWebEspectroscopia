@@ -105,42 +105,7 @@ import { loginSuccess, logoutSuccess } from './Redux/Actions/authActions.jsx';
 import { auth } from './firebaseConfig.js';
 import { onAuthStateChanged } from 'firebase/auth';
 
-// const App = () => {
-//   return (
-//       <Router>
-//           <Box
-//               sx={{
-//                   display: 'flex',
-//                   flexDirection: 'column',
-//                   minHeight: '100vh', // Asegura que el contenedor ocupe al menos el 100% de la altura de la ventana
-//                   width: '100vw', // Ocupa todo el ancho del navegador
-//                   margin: 0, // Elimina márgenes
-//                   padding: 0, // Elimina padding
-//                   overflowX: 'hidden', // Evita el desplazamiento horizontal
-//               }}
-//           >
-//               {/* Header */}
-//               <Header />
-
-//               {/* Contenido principal */}
-//               <Box
-//                   component="main"
-//                   sx={{
-//                       flex: 1, // Hace que el contenido principal ocupe el espacio restante
-//                       width: '100%', // Ocupa todo el ancho
-//                       margin: 0, // Elimina márgenes
-//                       padding: 0, // Elimina padding
-//                   }}
-//               >
-//                   <AppRouter /> {/* Aquí se renderizan las rutas */}
-//               </Box>
-
-//               {/* Footer */}
-//               <Footer />
-//           </Box>
-//       </Router>
-//   );
-// };
+import AlertaGlobalTurno from '../src/components/AlertaGlobalTurno.jsx';
 
 const App = () => {
 
@@ -162,6 +127,7 @@ const App = () => {
     return (
       <Router>
         <ThemeProvider theme={theme}>
+          <AlertaGlobalTurno />
           <Header />
           <AppRouter /> 
           <Footer />

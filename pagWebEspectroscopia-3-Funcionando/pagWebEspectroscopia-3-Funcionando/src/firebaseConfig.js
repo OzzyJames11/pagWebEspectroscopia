@@ -34,6 +34,7 @@ import { getAnalytics } from "firebase/analytics";
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from "firebase/firestore";
 import { getDatabase } from "firebase/database"; // ✅ AGREGADO: Realtime Database
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
 console.log("Project ID:", import.meta.env.VITE_FIREBASE_PROJECT_ID);
 
@@ -49,6 +50,14 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+if (typeof window !== 'undefined') { // Asegura que solo corra en el navegador
+  initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider(import.meta.env.VITE_RECAPTCHA_SITE_KEY),
+    isTokenAutoRefreshEnabled: true
+  });
+}
+
 const analytics = getAnalytics(app);
 
 export const auth = getAuth(app);

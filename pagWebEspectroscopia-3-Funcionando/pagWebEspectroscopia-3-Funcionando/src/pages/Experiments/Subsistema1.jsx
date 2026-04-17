@@ -3393,447 +3393,11 @@ export default Subsistema1;
 
 
 // ozzyjames11: modificacion, esta es la version del 10/2/2026
-// import React, { useState, useEffect, useRef } from "react";
-// import { Box, Paper, Typography } from "@mui/material";
-// import Grid from "@mui/material/Grid";
-// import { useNavigate } from "react-router-dom";
-// import { useSelector } from "react-redux";
-
-// import SliderComponent from "../../components/Elements/SliderComponent";
-// import DataTable from "../../components/Elements/DataTable";
-// import Button from "../../components/Elements/Button.jsx";
-// import GraphTitleWithTooltip from "../../components/Elements/GraphTitleWithTooltip";
-
-// import {
-//   SUBSISTEMA1_COLUMNS,
-//   PAGE_TITLES,
-//   SUBSISTEMA1_TOOLTIPS,
-//   GRAPH_DESCRIPTIONS,
-// } from "../../assets/Strings/Experiments/Subsistema1Strings.jsx";
-
-// import "../../assets/css/Elements/PaperStyles.css";
-
-// import {
-//   getDatabase,
-//   ref,
-//   set,
-//   update,
-//   onValue,
-//   onChildAdded,
-//   remove,
-// } from "firebase/database";
-// import app from "../../firebaseConfig.js";
-
-// const Subsistema1 = () => {
-//   const navigate = useNavigate();
-//   const db = getDatabase(app);
-
-//   // ✅ UID del usuario logeado
-//   const user = useSelector((state) => state.auth.user);
-//   const userId = user?.uid;
-
-//   // ==================== ESTADOS ====================
-//   const [anguloInicial, setAnguloInicial] = useState(0);
-//   const [anguloFinal, setAnguloFinal] = useState(20);
-//   const [barridoEnProgreso, setBarridoEnProgreso] = useState(false);
-//   const [angulosBarrido, setAngulosBarrido] = useState([]);
-//   const [anguloActualIndex, setAnguloActualIndex] = useState(0);
-//   const [sweepIdActual, setSweepIdActual] = useState(null);
-//   const [datosTemporales, setDatosTemporales] = useState([]);
-
-//   // Refs para evitar stale state
-//   const angulosBarridoRef = useRef([]);
-//   const anguloActualIndexRef = useRef(0);
-//   const sweepIdActualRef = useRef(null);
-
-//   // ✅ CAMBIO 1: bloquear EndMov duplicados
-//   const lastEndMovAtRef = useRef(0);
-
-//   useEffect(() => {
-//     angulosBarridoRef.current = angulosBarrido;
-//     anguloActualIndexRef.current = anguloActualIndex;
-//     sweepIdActualRef.current = sweepIdActual;
-//   }, [angulosBarrido, anguloActualIndex, sweepIdActual]);
-
-//   // ✅ Guard: requiere login
-//   useEffect(() => {
-//     if (!userId) {
-//       alert("Debes iniciar sesión para usar este experimento");
-//       navigate("/login");
-//     }
-//   }, [userId, navigate]);
-
-//   // ==================== AUX ====================
-//   const calcularAngulosBarrido = (inicio, fin, paso = 5) => {
-//     const angulos = [];
-//     if (inicio <= fin) for (let a = inicio; a <= fin; a += paso) angulos.push(a);
-//     else for (let a = inicio; a >= fin; a -= paso) angulos.push(a);
-//     return angulos;
-//   };
-
-//   // ==================== INICIAR BARRIDO ====================
-//   const iniciarBarrido = async () => {
-//     if (!userId) return alert("Debes iniciar sesión");
-//     if (barridoEnProgreso) return alert("Ya hay un barrido en progreso");
-//     if (anguloInicial === anguloFinal) return alert("Los ángulos deben ser diferentes");
-
-//     try {
-//       const angulos = calcularAngulosBarrido(anguloInicial, anguloFinal, 5);
-//       setAngulosBarrido(angulos);
-//       setBarridoEnProgreso(true);
-//       setAnguloActualIndex(0);
-//       setDatosTemporales([]);
-
-//       const sweepId = `sweep_${Date.now()}`;
-//       setSweepIdActual(sweepId);
-
-//       await Promise.all([
-//         set(ref(db, `users/${userId}/Exp1/sweeps/${sweepId}`), {
-//           startAngle: anguloInicial,
-//           endAngle: anguloFinal,
-//           step: 5,
-//           status: "in_progress",
-//           timestamp: Date.now(),
-//         }),
-//         set(ref(db, `users/${userId}/Exp1/currentSweepId`), sweepId),
-//       ]);
-
-//       console.log("🚀 Barrido iniciado:", angulos);
-
-//       // reset anti-duplicados
-//       lastEndMovAtRef.current = 0;
-
-//       setTimeout(() => moverASiguienteAngulo(angulos[0], sweepId, 0), 400);
-//     } catch (err) {
-//       console.error("❌ Error al iniciar barrido:", err);
-//       setBarridoEnProgreso(false);
-//     }
-//   };
-
-//   // ==================== MOVER PANEL ====================
-//   const moverASiguienteAngulo = async (angulo, sweepId, index) => {
-//     if (!userId) return;
-
-//     console.log(`🎯 Moviendo a ángulo ${angulo}° (${index + 1}/${angulosBarridoRef.current.length})`);
-
-//     try {
-//       const comando = "p" + angulo;
-//       const fbRef = ref(db, `users/${userId}/Exp1/communication/FrontToBack`);
-
-//       await set(fbRef, comando);
-
-//       // ✅ CAMBIO 2: NO resetear a "x" desde el frontend
-//       // El backend ya resetea a "x" cuando consume el comando.
-
-//       await update(ref(db, `users/${userId}/Exp1/sweeps/${sweepId}`), {
-//         currentAngle: angulo,
-//         lastUpdated: Date.now(),
-//       });
-//     } catch (error) {
-//       console.error("❌ Error al mover el panel:", error);
-//       setBarridoEnProgreso(false);
-//     }
-//   };
-
-//   // ==================== ESCUCHAR EndMov ====================
-//   useEffect(() => {
-//     if (!userId) return;
-
-//     const dbRef = ref(db, `users/${userId}/Exp1/communication/BackToFront`);
-
-//     const unsubscribe = onValue(dbRef, async (snapshot) => {
-//       const msg = snapshot.val();
-//       if (msg !== "EndMov") return;
-
-//       // ✅ CAMBIO 3: ignorar duplicados (por si llega EndMov repetido)
-//       const now = Date.now();
-//       if (now - lastEndMovAtRef.current < 600) return;
-//       lastEndMovAtRef.current = now;
-
-//       const indexActual = anguloActualIndexRef.current;
-//       const siguiente = indexActual + 1;
-//       const sweepId = sweepIdActualRef.current;
-//       const angulos = angulosBarridoRef.current;
-
-//       if (!sweepId || angulos.length === 0) return;
-
-//       if (siguiente < angulos.length) {
-//         setAnguloActualIndex(siguiente);
-//         setTimeout(() => moverASiguienteAngulo(angulos[siguiente], sweepId, siguiente), 1200);
-//       } else {
-//         setBarridoEnProgreso(false);
-
-//         await update(ref(db, `users/${userId}/Exp1/sweeps/${sweepId}`), {
-//           status: "completed",
-//           lastUpdated: Date.now(),
-//         });
-
-//         // ✅ CAMBIO 4: NO limpiar currentSweepId aquí (evita que Exp1 quede “desenganchado”)
-//         // Lo limpiamos cuando el usuario sale del subsistema (handleBack).
-//       }
-//     });
-
-//     return () => unsubscribe();
-//   }, [db, userId]);
-
-//   // ==================== ESCUCHAR MEDICIONES ====================
-//   useEffect(() => {
-//     if (!userId) return;
-
-//     const dbRef = ref(db, `users/${userId}/Exp1/measurements`);
-//     const unsubscribe = onChildAdded(dbRef, (snapshot) => {
-//       const data = snapshot.val();
-//       if (data?.sweepId === sweepIdActual && data.isSaved === false) {
-//         setDatosTemporales((prev) => {
-//           const existe = prev.some((d) => d.timestamp === data.timestamp);
-//           return existe ? prev : [...prev, data];
-//         });
-//       }
-//     });
-
-//     return () => unsubscribe();
-//   }, [db, sweepIdActual, userId]);
-
-//   // ==================== GUARDAR ====================
-//   const guardarBarrido = async () => {
-//     if (!userId) return alert("Debes iniciar sesión");
-//     if (datosTemporales.length === 0) return alert("No hay datos para guardar");
-
-//     const confirmar = window.confirm(`¿Guardar ${datosTemporales.length} mediciones del barrido?`);
-//     if (!confirmar) return;
-
-//     try {
-//       const updates = {};
-//       datosTemporales.forEach((d) => {
-//         updates[`users/${userId}/Exp1/measurements/meas_${d.timestamp}/isSaved`] = true;
-//       });
-//       await update(ref(db), updates);
-
-//       alert("✅ Barrido guardado correctamente");
-//       setDatosTemporales([]);
-//     } catch (error) {
-//       console.error("❌ Error al guardar barrido:", error);
-//     }
-//   };
-
-//   // ==================== BACK ====================
-//   const noEnviarNuevoAngulo = async () => {
-//     if (!userId) return;
-//     await set(ref(db, `users/${userId}/Exp1/communication/FrontToBack`), "n").catch(() => {});
-//   };
-
-//   const limpiarTemporales = async () => {
-//     if (!userId) return;
-
-//     await remove(ref(db, `users/${userId}/Exp1/measurements`)).catch(() => {});
-//     // ✅ aquí sí limpiamos el sweepId actual (al salir)
-//     await set(ref(db, `users/${userId}/Exp1/currentSweepId`), null).catch(() => {});
-//   };
-
-//   const handleBack = () => {
-//     noEnviarNuevoAngulo();
-//     navigate("/experiments/experimentChooser");
-//     limpiarTemporales();
-//   };
-
-//   // ==================== UI ====================
-//   const {
-//     MAIN_TITLE,
-//     DESCRIPTION,
-//     MOVE_BUTTON,
-//     SAVE_BUTTON,
-//     CAMERA_TITLE,
-//     VOLTAGE_VS_TIME_TITLE,
-//     CURRENT_VS_TIME_TITLE,
-//     DOWNLOAD_1_GRAPH,
-//     DOWNLOAD_GRAPHS_BUTTON,
-//     BACK_BUTTON,
-//   } = PAGE_TITLES;
-
-//   const youtubeVideoId = "1wLSlr1kh6Q";
-
-//   if (!userId) return <Typography>Cargando...</Typography>;
-
-//   return (
-//     <Box width="90%" maxWidth="1200px" margin="auto" mt={7} mb={5}>
-//       <Typography variant="h4" gutterBottom sx={{ textAlign: "left" }}>
-//         {MAIN_TITLE}
-//       </Typography>
-//       <Typography variant="body1" sx={{ textAlign: "left", mb: 3 }}>
-//         {DESCRIPTION}
-//       </Typography>
-
-//       <Grid container spacing={4} alignItems="flex-start">
-//         <Grid item xs={12} md={6}>
-//           <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
-//             🚀 Automatic sweeping control
-//           </Typography>
-
-//           <SliderComponent
-//             value={anguloInicial}
-//             label="Initial Angle"
-//             min={-30}
-//             max={30}
-//             step={5}
-//             actualAngle={anguloInicial}
-//             onChange={(e, newValue) => setAnguloInicial(newValue)}
-//             disabled={barridoEnProgreso}
-//           />
-
-//           <Box mt={2}>
-//             <SliderComponent
-//               value={anguloFinal}
-//               label="Final Angle"
-//               min={-30}
-//               max={30}
-//               step={5}
-//               actualAngle={anguloFinal}
-//               onChange={(e, newValue) => setAnguloFinal(newValue)}
-//               disabled={barridoEnProgreso}
-//             />
-//           </Box>
-
-//           <Box mt={2}>
-//             {barridoEnProgreso && <p style={{ color: "black" }}>El panel está en movimiento</p>}
-//             <Button
-//               id="btnMov1"
-//               variant="contained"
-//               color="primary"
-//               onClick={iniciarBarrido}
-//               align="right"
-//               disabled={barridoEnProgreso}
-//             >
-//               {barridoEnProgreso ? "⏳ Barrido en progreso..." : MOVE_BUTTON}
-//             </Button>
-//           </Box>
-
-//           {barridoEnProgreso && angulosBarrido.length > 0 && (
-//             <Box sx={{ mt: 3, backgroundColor: "#eee", borderRadius: 1, height: 10 }}>
-//               <Box
-//                 sx={{
-//                   height: "100%",
-//                   borderRadius: 1,
-//                   backgroundColor: "#2196f3",
-//                   width: `${((anguloActualIndex + 1) / angulosBarrido.length) * 100}%`,
-//                   transition: "width 0.3s",
-//                 }}
-//               />
-//             </Box>
-//           )}
-
-//           <Box mt={3}>
-//             {datosTemporales.length > 0 ? (
-//               <DataTable
-//                 columns={SUBSISTEMA1_COLUMNS}
-//                 data={datosTemporales.map((d) => ({
-//                   [SUBSISTEMA1_COLUMNS[0]]: `${d.angle}°`,
-//                   [SUBSISTEMA1_COLUMNS[1]]: d.voltage?.toFixed(2),
-//                   [SUBSISTEMA1_COLUMNS[2]]: d.current?.toFixed(2),
-//                   [SUBSISTEMA1_COLUMNS[3]]: (((d.voltage ?? 0) * (d.current ?? 0)) / 100).toFixed(2),
-//                   [SUBSISTEMA1_COLUMNS[4]]: "—",
-//                 }))}
-//                 tooltips={SUBSISTEMA1_TOOLTIPS}
-//               />
-//             ) : (
-//               <Paper sx={{ p: 2 }}>
-//                 <Typography variant="body2" color="text.secondary">
-//                   Aún no hay mediciones temporales del barrido.
-//                 </Typography>
-//               </Paper>
-//             )}
-//           </Box>
-
-//           <Box mt={2}>
-//             <Button
-//               variant="contained"
-//               color="primary"
-//               onClick={guardarBarrido}
-//               align="right"
-//               disabled={datosTemporales.length === 0}
-//             >
-//               {SAVE_BUTTON}
-//             </Button>
-//           </Box>
-//         </Grid>
-
-//         <Grid item xs={12} md={6} sx={{ display: "flex", flexDirection: "column" }}>
-//           <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
-//             <Paper
-//               className="paper-camera"
-//               sx={{
-//                 p: 2,
-//                 width: "100%",
-//                 backgroundColor: "#121212",
-//                 color: "#fff",
-//                 borderRadius: "12px",
-//                 boxShadow: "0px 4px 10px rgba(0,0,0,0.4)",
-//               }}
-//             >
-//               <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", display: "flex", alignItems: "center" }}>
-//                 {CAMERA_TITLE}
-//                 <Typography component="span" variant="caption" sx={{ color: "#e53935", fontWeight: "bold", ml: 1 }}>
-//                   ● En vivo
-//                 </Typography>
-//               </Typography>
-
-//               <Box sx={{ width: "100%", height: "400px", mt: 1, borderRadius: "8px", overflow: "hidden", backgroundColor: "#000" }}>
-//                 <iframe
-//                   width="100%"
-//                   height="400"
-//                   src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1`}
-//                   title="Transmisión en vivo de YouTube"
-//                   frameBorder="0"
-//                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-//                   allowFullScreen
-//                   style={{ borderRadius: "8px" }}
-//                 />
-//               </Box>
-//             </Paper>
-//           </Box>
-
-//           <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
-//             <Paper className="paper-graph">
-//               <GraphTitleWithTooltip title={VOLTAGE_VS_TIME_TITLE} description={GRAPH_DESCRIPTIONS.VOLTAGE_VS_TIME} />
-//             </Paper>
-//           </Box>
-
-//           <Button variant="contained" color="secondary" onClick={() => {}} align="right" marginTop={-1}>
-//             {DOWNLOAD_1_GRAPH}
-//           </Button>
-
-//           <Box mt={2} sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
-//             <Paper className="paper-graph">
-//               <GraphTitleWithTooltip title={CURRENT_VS_TIME_TITLE} description={GRAPH_DESCRIPTIONS.CURRENT_VS_TIME} />
-//             </Paper>
-//           </Box>
-
-//           <Button variant="contained" color="secondary" onClick={() => {}} align="right" marginTop={-1}>
-//             {DOWNLOAD_1_GRAPH}
-//           </Button>
-
-//           <Button variant="contained" color="pink" onClick={() => {}} fullWidth align="center" marginTop={2}>
-//             {DOWNLOAD_GRAPHS_BUTTON}
-//           </Button>
-//         </Grid>
-//       </Grid>
-
-//       <Button variant="outlined" color="secondary" onClick={handleBack} align="center" marginTop={4}>
-//         {BACK_BUTTON}
-//       </Button>
-//     </Box>
-//   );
-// };
-
-// export default Subsistema1;
-
-
-
-
-// ozzyjames11: esta es mi version actualizada con graficos
 import React, { useState, useEffect, useRef } from "react";
 import { Box, Paper, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // ✅ CORRECCIÓN: Importación correcta
 import {useSelector} from "react-redux";
 
 // Componentes
@@ -3843,8 +3407,11 @@ import Button from "../../components/Elements/Button.jsx";
 import GraphTitleWithTooltip from "../../components/Elements/GraphTitleWithTooltip";
 import RealTimeChart from "../../components/Elements/RealTimeChart"; 
 
-// Utilidades de descarga (Tus funciones)
+// Utilidades de descarga
 import { exportData, downloadChartAsImage } from "../../../src/utils/ExportUtils";
+
+// Importaci[on de onDisconnect
+import { getDatabase, ref, set, update, onValue, onChildAdded, get, onDisconnect } from "firebase/database";
 
 // Strings
 import {
@@ -3877,16 +3444,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 // Estilos
 import "../../assets/css/Elements/PaperStyles.css";
 
-// Firebase
-import {
-  getDatabase,
-  ref,
-  set,
-  update,
-  onValue,
-  onChildAdded,
-  get // Importante para leer datos existentes
-} from "firebase/database";
+// Firebase (Eliminamos la importación duplicada que tenías abajo y usamos la de arriba que ya tiene onDisconnect)
 import app from "../../firebaseConfig.js";
 
 const Subsistema1 = () => {
@@ -3897,15 +3455,17 @@ const Subsistema1 = () => {
   // const UID_USUARIO = "8qb4yEqxXWcvdIEEXYBgANR57T12"; 
   // Se obtiene el ID del usuario dinámicamente
   const user = useSelector((state) => state.auth.user);
-  if(!user){
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
-        <CircularProgress />
-      </Box>
-    );
-  }
-  const UID_USUARIO = user.uid;
-  const BASE_PATH = `users/${UID_USUARIO}/Exp1`; 
+  // if(!user){
+  //   return (
+  //     <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
+  //       <CircularProgress />
+  //     </Box>
+  //   );
+  // }
+
+  // 1. Manejo seguro del usuario para no romper los Hooks
+  const UID_USUARIO = user?.uid || "invitado";
+  const BASE_PATH = `users/${UID_USUARIO}/Exp1`;
 
   // ==================== ESTADOS ====================
   const [anguloInicial, setAnguloInicial] = useState(0);
@@ -3918,6 +3478,20 @@ const Subsistema1 = () => {
   const [sweepIdActual, setSweepIdActual] = useState(null);
   const [datosTemporales, setDatosTemporales] = useState([]);
   const [userSession, setUserSession] = useState(null);
+
+  // Estado para saber si el panel ya terminó de calibrarse
+  const [isHardwareReady, setIsHardwareReady] = useState(false);
+
+  // Escuchar el estado físico del motor
+  useEffect(() => {
+    const statusRef = ref(db, 'estado_general/Exp1/hardwareStatus');
+    const unsubscribe = onValue(statusRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setIsHardwareReady(snapshot.val() === 'READY');
+      }
+    });
+    return () => unsubscribe();
+  }, [db]);
 
   // ==================== REFERENCIAS (Para limpieza al desmontar) ====================
   const sweepIdActualRef = useRef(null);
@@ -3933,63 +3507,144 @@ const Subsistema1 = () => {
     anguloActualIndexRef.current = anguloActualIndex;
   }, [sweepIdActual, datosTemporales, angulosBarrido, anguloActualIndex]);
 
-  // ==================== 1. INICIALIZACIÓN Y RECUPERACIÓN DE ESTADO ====================
-  useEffect(() => {
-    // Generar sesión de navegador
-    const sessionId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    setUserSession(sessionId);
-    
-    // RECUPERAR ID ACTUAL DE FIREBASE
-    // Esto permite que si recargas la página, sepa cuál es el barrido activo
-    const currentSweepRef = ref(db, `${BASE_PATH}/currentSweepId`);
-    get(currentSweepRef).then((snapshot) => {
-      if (snapshot.exists()) {
-        const activeId = snapshot.val();
-        console.log("🆔 ID de barrido recuperado:", activeId);
-        setSweepIdActual(activeId); 
-      }
-    }).catch(err => console.error("Error obteniendo currentSweepId:", err));
-    
-    // CLEANUP: LIMPIEZA AL CERRAR/SALIR
-    return () => {
-      console.log("🧹 Desmontando componente...");
-      
-      // Detener hardware (intento)
-      update(ref(db), { [`${BASE_PATH}/communication/FrontToBack`]: "n" }).catch(() => {});
-      
-      // Borrar datos NO guardados (isSaved: false)
-      const datos = datosTemporalesRef.current;
-      const datosBasura = datos.filter(d => d.isSaved === false);
-      
-      // ozzyjames11: descomentar todo esto para que borre datos nuevamente
-      if (datosBasura.length > 0) {
-        console.log(`🗑️ Eliminando ${datosBasura.length} datos no guardados.`);
-        const updates = {};
-        datosBasura.forEach((d) => {
-           updates[`${BASE_PATH}/measurements/meas_${d.timestamp}`] = null;
-        });
-        update(ref(db), updates).catch((e) => console.error(e));
-      }
-    };
-  }, []);
+// ==================== 1. INICIALIZACIÓN Y RECUPERACIÓN ====================
+useEffect(() => {
+  if (!user) return; 
 
-// NUEVO BLOQUE: PROTECCIÓN CONTRA CIERRE DE PESTAÑA O RECARGA
+  const sessionId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  setUserSession(sessionId);
+  
+  const fbRef = ref(db, `${BASE_PATH}/communication/FrontToBack`);
+
+  // Seguro: Si cierran la pestaña de golpe, Firebase manda 'n'
+  onDisconnect(fbRef).set("n");
+
+  // Despertar Arduino de forma limpia
+  set(fbRef, "y").catch((err) => console.error(err));
+  
+  // Recuperar ID de barrido anterior
+  const currentSweepRef = ref(db, `${BASE_PATH}/currentSweepId`);
+  get(currentSweepRef).then((snapshot) => {
+    if (snapshot.exists()) {
+      setSweepIdActual(snapshot.val()); 
+    }
+  });
+
+  // LIMPIEZA AL SALIR
+  return () => {
+    console.log("🧹 Desmontando componente...");
+    set(fbRef, "n").catch(() => {});
+    onDisconnect(fbRef).cancel(); 
+    
+    const datos = datosTemporalesRef.current;
+    const datosBasura = datos.filter(d => d.isSaved === false);
+    if (datosBasura.length > 0) {
+      const updates = {};
+      datosBasura.forEach((d) => {
+         updates[`${BASE_PATH}/measurements/meas_${d.timestamp}`] = null;
+      });
+      update(ref(db), updates).catch((e) => console.error(e));
+    }
+  };
+}, [user]);
+
+
+  // ==================== PROTECCIÓN F5 / CERRAR PESTAÑA ====================
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-      // Si hay datos sin guardar, activamos la alerta nativa del navegador
       const hayDatosSinGuardar = datosTemporales.some(d => !d.isSaved);
-      if (hayDatosSinGuardar) {
+      
+      // Si el barrido está corriendo o hay datos sin guardar, activamos la alerta del navegador
+      if (barridoEnProgreso || hayDatosSinGuardar) {
         e.preventDefault();
-        e.returnValue = ""; // Esto fuerza al navegador a mostrar su popup estándar
+        e.returnValue = ""; 
       }
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [datosTemporales, barridoEnProgreso]);
 
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
+// ==================== VARIABLES GLOBALES PARA EL HEADER ====================
+const hayDatosSinGuardar = datosTemporales.some((d) => d.isSaved === false);
+
+useEffect(() => {
+  window.barridoEnProgreso = barridoEnProgreso;
+  window.datosEnPeligro = hayDatosSinGuardar;
+
+  return () => {
+    window.barridoEnProgreso = false;
+    window.datosEnPeligro = false;
+  };
+}, [barridoEnProgreso, hayDatosSinGuardar]);
+
+// ==================== PROTECCIÓN F5 / CERRAR PESTAÑA ====================
+// Nota: El navegador fuerza su propio popup aquí. No podemos usar window.alert.
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (barridoEnProgreso || hayDatosSinGuardar) {
+        e.preventDefault();
+        e.returnValue = ""; 
+      }
     };
-  }, [datosTemporales]);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [datosTemporales, barridoEnProgreso]);
+
+// ==================== TRAMPA PARA LA FLECHA DE ATRÁS DEL NAVEGADOR ====================
+useEffect(() => {
+  window.history.pushState(null, null, window.location.pathname);
+
+  const handlePopState = () => {
+    // 🛑 PRIORIDAD 1: BARRIDO EN PROGRESO (Bloqueo Total)
+    if (window.barridoEnProgreso) {
+      window.alert("⚠️ EXPERIMENT IN PROGRESS\n\nPlease wait until the sweeping is finished before leaving the page.");
+      window.history.pushState(null, null, window.location.pathname); // Restaura la trampa
+      return;
+    }
+
+    // ⚠️ PRIORIDAD 2: DATOS SIN GUARDAR (Pregunta)
+    if (window.datosEnPeligro) {
+      const confirmar = window.confirm(
+        "⚠️ UNSAVED DATA.\n\nIf you leave now, unsaved data will be permanently deleted.\nAre you sure you want to exit?"
+      );
+      if (!confirmar) {
+        window.history.pushState(null, null, window.location.pathname);
+        return;
+      }
+    }
+    
+    // Si todo está bien o aceptó salir:
+    window.datosEnPeligro = false;
+    window.removeEventListener("popstate", handlePopState);
+    setTimeout(() => {
+      navigate("/experiments/experimentChooser", { replace: true });
+    }, 10);
+  };
+
+  window.addEventListener("popstate", handlePopState);
+  return () => window.removeEventListener("popstate", handlePopState);
+}, [navigate]);
+
+// ==================== BOTÓN GO BACK ====================
+const handleBackSafe = () => {
+  // 🛑 PRIORIDAD 1: BARRIDO EN PROGRESO (Bloqueo Total)
+  if (window.barridoEnProgreso) {
+    window.alert("⚠️ EXPERIMENT IN PROGRESS\n\nPlease wait until the sweeping is finished before leaving the page.");
+    return;
+  }
+
+  // ⚠️ PRIORIDAD 2: DATOS SIN GUARDAR (Pregunta)
+  if (window.datosEnPeligro) {
+    const confirmar = window.confirm(
+      "⚠️ UNSAVED DATA.\n\nIf you leave now, unsaved data will be permanently deleted.\nAre you sure you want to exit?"
+    );
+    if (!confirmar) return; 
+  }
+  
+  navigate("/experiments/experimentChooser");
+};
+
 
   // ==================== 2. LECTURA DE DATOS (HISTÓRICO + TIEMPO REAL) ====================
   useEffect(() => {
@@ -4093,10 +3748,9 @@ const Subsistema1 = () => {
 
   const moverASiguienteAngulo = async (angulo, sweepId, index) => {
     try {
+      // ✅ SE MANTIENE: Envía "p" + ángulo (ej. "p20") a la cola de FrontToBack
       const fbRef = ref(db, `${BASE_PATH}/communication/FrontToBack`);
       await set(fbRef, "p" + angulo);
-
-      setTimeout(async () => await set(fbRef, "x"), 500);
 
       await update(ref(db, `${BASE_PATH}/sweeps/${sweepId}`), {
         currentAngle: angulo,
@@ -4153,19 +3807,11 @@ const Subsistema1 = () => {
     }
   };
 
-  const handleBackSafe = () => {
-    // Verificar si hay datos sin guardar
-    const hayDatosSinGuardar = datosTemporales.some(d => d.isSaved === false);
-
-    if (hayDatosSinGuardar) {
-      const confirmar = window.confirm(
-        "⚠️ TIENES DATOS SIN GUARDAR.\n\nSi sales ahora, los datos se borrarán permanentemente.\n¿Estás seguro de salir?"
-      );
-      if (!confirmar) return; 
-    }
-    // Si confirma, navegamos. El useEffect de cleanup borrará los datos.
-    navigate("/experiments/experimentChooser");
-  };
+  // const handleBackSafe = () => {
+  //   // Ya no preguntamos aquí. Simplemente intentamos navegar.
+  //   // El 'useBlocker' atrapará este intento y lanzará la alerta automáticamente.
+  //   navigate("/experiments/experimentChooser");
+  // };
 
 
   // ozzyjames11: esto es solo para desarrollo, simular datos. Borrar después
@@ -4197,11 +3843,11 @@ const Subsistema1 = () => {
   // };
 
   // ==================== UI ====================
-  const {
-    MAIN_TITLE, DESCRIPTION, MOVE_BUTTON, SAVE_BUTTON, CAMERA_TITLE,
-    VOLTAGE_VS_TIME_TITLE, CURRENT_VS_TIME_TITLE, DOWNLOAD_1_GRAPH,
-    DOWNLOAD_GRAPHS_BUTTON, BACK_BUTTON,
-  } = PAGE_TITLES;
+  // const {
+  //   MAIN_TITLE, DESCRIPTION, MOVE_BUTTON, SAVE_BUTTON, CAMERA_TITLE,
+  //   VOLTAGE_VS_TIME_TITLE, CURRENT_VS_TIME_TITLE, DOWNLOAD_1_GRAPH,
+  //   DOWNLOAD_GRAPHS_BUTTON, BACK_BUTTON,
+  // } = PAGE_TITLES;
 
   const youtubeVideoId = "nAQz4RMaHVA";
 
@@ -4231,8 +3877,21 @@ const Subsistema1 = () => {
     }
   };
 
-  const hayDatosSinGuardar = datosTemporales.some((d) => d.isSaved === false);
+  // ==================== UI ====================
+  const {
+    MAIN_TITLE, DESCRIPTION, MOVE_BUTTON, CAMERA_TITLE,
+    VOLTAGE_VS_TIME_TITLE, CURRENT_VS_TIME_TITLE, DOWNLOAD_GRAPHS_BUTTON, BACK_BUTTON,
+  } = PAGE_TITLES;
   
+  // 2. Retorno condicional DESPUÉS de todos los Hooks
+  if(!user){
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Box 
     width="90%" maxWidth="1200px" margin="auto" mt={7} mb={5}
@@ -4251,15 +3910,44 @@ const Subsistema1 = () => {
             </Typography>
           </Box>
           
+
+          <Box 
+            sx={{
+              // Forzamos el color gris oscuro en TODO el slider cuando tiene la clase .Mui-disabled
+              '& .MuiSlider-root.Mui-disabled': {
+                color: '#9e9e9e', // Cambia el color base a gris
+                
+                // Sobrescribimos partes específicas que podrían resistirse
+                '& .MuiSlider-thumb': {
+                  backgroundColor: '#f5f5f5', // Thumb blanco-grisáceo
+                  borderColor: '#9e9e9e',     // Borde gris
+                },
+                '& .MuiSlider-track': {
+                  backgroundColor: '#9e9e9e', // Línea principal gris
+                  borderColor: '#9e9e9e',
+                },
+                '& .MuiSlider-rail': {
+                  backgroundColor: '#e0e0e0', // Línea de fondo (más clara)
+                },
+                '& .MuiSlider-mark': {
+                  backgroundColor: '#9e9e9e', // Puntitos de marca grises
+                },
+                '& .MuiSlider-markLabel': {
+                  color: '#9e9e9e', // Texto de los grados en gris
+                }
+              }
+            }}
+          >
           <SliderComponent
             value={anguloInicial} label="Initial Angle" min={-30} max={30} step={5}
-            actualAngle={anguloInicial} onChange={(e, v) => setAnguloInicial(v)} disabled={barridoEnProgreso}
+            actualAngle={anguloInicial} onChange={(e, v) => setAnguloInicial(v)} disabled={barridoEnProgreso || !isHardwareReady}
           />
           <Box mt={2}>
             <SliderComponent
               value={anguloFinal} label="Final Angle" min={-30} max={30} step={5}
-              actualAngle={anguloFinal} onChange={(e, v) => setAnguloFinal(v)} disabled={barridoEnProgreso}
+              actualAngle={anguloFinal} onChange={(e, v) => setAnguloFinal(v)} disabled={barridoEnProgreso || !isHardwareReady}
             />
+          </Box>
           </Box>
 
           {/* <Box mt={2}>
@@ -4287,10 +3975,19 @@ const Subsistema1 = () => {
               size="large" //mod
               fullWidth //mod
               onClick={iniciarBarrido} 
-              disabled={barridoEnProgreso}
-              startIcon={barridoEnProgreso ? <CircularProgress size={20} color="inherit" /> : <PlayArrow />}
+              // Se bloquea si hay barrido O si no está ready
+              disabled={barridoEnProgreso || !isHardwareReady}
+              startIcon={
+                // Icono dinámico según lo que esté haciendo
+                !isHardwareReady ? <CircularProgress size={20} color="inherit" /> :
+                barridoEnProgreso ? <CircularProgress size={20} color="inherit" /> : 
+                <PlayArrow />
+              }
             >
-              {barridoEnProgreso ? "Running Sweep..." : MOVE_BUTTON}
+              {/* Texto dinámico */}
+              {!isHardwareReady ? "Calibrating Panel..." :
+              barridoEnProgreso ? "Running Sweep..." : 
+              MOVE_BUTTON}
             </Button>
             </Box>
 
@@ -4352,16 +4049,16 @@ const Subsistema1 = () => {
                     // 1. MAPEO DE DATOS (Lo que se ve)
                     data={datosTemporales.map((d) => {
                       // Cálculos simulados para la vista
-                      const power = ((d.voltage ?? 0) * (d.current ?? 0)).toFixed(4);
-                      const efficiency = (15 + Math.random() * 7).toFixed(2); // Aleatorio 15-22%
-                      const fillFactor = (0.70 + Math.random() * 0.15).toFixed(2); // Aleatorio 0.70-0.85
+                      // const power = ((d.voltage ?? 0) * (d.current ?? 0)).toFixed(4);
+                      // const efficiency = (15 + Math.random() * 7).toFixed(2); // Aleatorio 15-22%
+                      // const fillFactor = (0.70 + Math.random() * 0.15).toFixed(2); // Aleatorio 0.70-0.85
                       
                       return {
-                        [SUBSISTEMA1_COLUMNS[0]]: `${d.angle}°`,
+                        [SUBSISTEMA1_COLUMNS[0]]: `${d.angle}`,
                         [SUBSISTEMA1_COLUMNS[1]]: d.voltage?.toFixed(2),
                         [SUBSISTEMA1_COLUMNS[2]]: d.current?.toFixed(2),
-                        [SUBSISTEMA1_COLUMNS[3]]: efficiency,     // Potencia
-                        [SUBSISTEMA1_COLUMNS[4]]: fillFactor // Antes era isSaved, ahora es Fill Factor
+                        [SUBSISTEMA1_COLUMNS[3]]: (d.efficiency * 100)?.toFixed(2),
+                        [SUBSISTEMA1_COLUMNS[4]]: d.fillFactor?.toFixed(2) // Antes era isSaved, ahora es Fill Factor
                       };
                     })}
 

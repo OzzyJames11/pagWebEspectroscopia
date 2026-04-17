@@ -11,12 +11,12 @@
 //     "Fill Factor 1",
 //     "Fill Factor 2"
 // ];
-export const SUBSISTEMA2_COLUMNS = [
-    "Azimuth Angle (°)",
-    "Zenith Angle (°)",
-    "Voltage",
-    "Current",
-    "Efficiency",
+export const SUBSYSTEM2_COLUMNS = [
+    "Azimuth \n(deg)",
+    "Zenith \n(deg)",
+    "Voltage \n(V)",
+    "Current \n(A)",
+    "Efficiency \n(%)",
     "Fill Factor",
 ];
 
@@ -25,7 +25,7 @@ export const PAGE_TITLES = {
     DESCRIPTION: "This subsystem manages dual-axis rotation of solar panels to optimize sun tracking. It measures real-time voltage (V) and current (A) outputs at each angle position, then calculates two key performance metrics: Energy conversion efficiency (%) and Fill Factor (quality indicator of the solar cells).",
     SAVE_BUTTON: "Save",
     MOVE_BUTTON: "Start Sweep",
-    DOWNLOAD_GRAPHS_BUTTON: "Download All Graphs",
+    DOWNLOAD_GRAPHS_BUTTON: "Download All Data",
     DOWNLOAD_1_GRAPH: "Download Graph",
     BACK_BUTTON: "Go Back",
     CAMERA_TITLE: "Live Camera",

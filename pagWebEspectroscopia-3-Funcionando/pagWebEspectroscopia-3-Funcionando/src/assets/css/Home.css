@@ -1,24 +1,24 @@
-/* src/css/Home.css */
+/* src/assets/css/Home.css */
 .home {
-    padding: 20px; /* Padding normal para el contenido */
-    background-color: #fff; /* Fondo claro */
-    color: #000; /* Texto negro */
+    background-color: #fff; 
+    color: #000; 
     position: relative;
+    /* ✅ Quitamos el padding global para evitar el scroll horizontal */
+    width: 100%;
+    overflow-x: hidden;
 }
 
 .background-image {
     position: relative;
-    width: 100vw; /* Ocupa todo el ancho de la ventana */
-    margin-left: calc(-50vw + 50%); /* Centra el contenedor */
-    height: 400px; /* Ajusta la altura según tus necesidades */
+    width: 100%; /* ✅ 100% natural, sin trucos raros de 100vw */
+    height: 400px; 
     overflow: hidden;
-    padding: 0; /* Elimina el padding para la imagen de fondo */
 }
 
 .background-img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Asegura que la imagen cubra todo el espacio */
+    object-fit: cover; 
 }
 
 .overlay {
@@ -27,7 +27,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Capa opaca (negro con 50% de opacidad) */
+    background-color: rgba(0, 31, 62, 0.6); /* ✅ Un tono un poco más azul/institucional que el negro puro */
 }
 
 .text-container {
@@ -37,43 +37,56 @@
     transform: translate(-50%, -50%);
     text-align: center;
     width: 100%;
-    z-index: 1; /* Asegura que el texto esté encima de la capa opaca */
+    z-index: 1; 
+    font-family: 'Poppins', sans-serif !important;
 }
 
 .title-text {
-    color: white !important; /* Texto blanco */
-    font-size: 3rem; /* Tamaño del título */
-    font-weight: 500; /* Peso de la fuente */
-    margin-bottom: 20px; /* Espacio entre el título y el subtítulo */
-    text-align: center !important; /* Centra el título */
-}
-
-.subtitle-text {
-    color: white !important; /* Texto blanco */
-    font-size: 1.3rem; /* Tamaño del subtítulo */
-    font-weight: 300; /* Peso de la fuente */
-    max-width: 800px; /* Ancho máximo del subtítulo */
-    margin: 0 auto; /* Centrar el subtítulo */
-    text-align: center !important; /* Centra el subtítulo */
+    color: white !important; 
+    font-size: 3rem !important; 
+    font-weight: 600 !important; 
+    margin-bottom: 20px !important; 
+    text-align: center !important; 
+    font-family: 'Poppins', sans-serif !important;
 }
 
 .grid-container {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Dos columnas de igual tamaño */
-    gap: 20px; /* Espacio entre las columnas */
+    grid-template-columns: 1fr 1fr; 
+    gap: 20px; 
     margin-top: 20px;
 }
 
 .map-container {
-    border: 1px solid #ccc;
-    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
     overflow: hidden;
-    height: 300px; /* Altura fija para el mapa */
+    /* ✅ Quitamos el height fijo de 350px y usamos 100% para que se iguale a la lista */
+    height: 100%; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    background-color: #f5f5f5; /* ✅ Un fondo gris muy sutil por si el mapa no cubre todo el alto */
+}
+
+.map-container > * {
+    width: 100%;
+    height: auto;
+    max-height: 100%;
 }
 
 .list-container {
-    border: 1px solid #ccc;
-    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
     padding: 20px;
-    background-color: #f9f9f9;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Responsividad para móviles: apilar mapa y lista */
+@media (max-width: 900px) {
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
 }

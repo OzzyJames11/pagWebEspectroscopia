@@ -24,17 +24,94 @@ const HeaderLinks = ({ divider, closeDrawer }) => {
     return 'U';
   };
 
+  // const handleLogout = () => {
+  // dispatch(logout());
+  // closeDrawer?.();
+  // navigate('/'); // Redirige al Home
+  // };
+  // const handleLogout = () => {
+  //   // Si hay datos en peligro, advertimos antes de cerrar sesión
+  //   if (window.datosEnPeligro) {
+  //     const confirmar = window.confirm(
+  //       "⚠️ TIENES DATOS SIN GUARDAR.\n\nSi cierras sesión ahora, los datos se borrarán permanentemente.\n¿Estás seguro de salir?"
+  //     );
+  //     if (!confirmar) return; // Si cancela, detenemos el logout
+      
+  //     window.datosEnPeligro = false; // Liberamos la variable
+  //   }
+
+  //   // Si todo está bien o aceptó, cerramos sesión normalmente
+  //   dispatch(logout());
+  //   closeDrawer?.();
+  //   navigate('/'); 
+  // };
+
+  // const interceptarNavegacion = (e) => {
+  //   // Revisamos si el Subsistema1 dejó la advertencia activada
+  //   if (window.datosEnPeligro) {
+  //     const confirmar = window.confirm(
+  //       "⚠️ TIENES DATOS SIN GUARDAR.\n\nSi sales ahora, los datos se borrarán permanentemente.\n¿Estás seguro de salir?"
+  //     );
+  
+  //     if (!confirmar) {
+  //       e.preventDefault(); // Magia: Esto cancela el clic y evita que React Router cambie la página
+  //       return;
+  //     }
+  //     // Si el usuario acepta perder los datos, limpiamos la variable para dejarlo salir
+  //     window.datosEnPeligro = false;
+  //   }
+  
+  //   // Si no hay peligro o el usuario aceptó, cerramos el menú lateral (tu código original)
+  //   closeDrawer?.();
+  // };
   const handleLogout = () => {
-  dispatch(logout());
-  closeDrawer?.();
-  navigate('/'); // Redirige al Home
+    // 🛑 PRIORIDAD 1: BARRIDO EN PROGRESO (Bloqueo Total)
+    if (window.barridoEnProgreso) {
+      window.alert("⚠️ EXPERIMENT IN PROGRESS\n\nPlease wait until the sweeping is finished before logging out.");
+      return; 
+    }
+
+    // ⚠️ PRIORIDAD 2: DATOS SIN GUARDAR (Pregunta)
+    if (window.datosEnPeligro) {
+      const confirmar = window.confirm(
+        "⚠️ UNSAVED DATA.\n\nIf you logout now, unsaved data will be permanently deleted.\nAre you sure you want to exit?"
+      );
+      if (!confirmar) return; 
+      window.datosEnPeligro = false; 
+    }
+
+    dispatch(logout());
+    closeDrawer?.();
+    navigate('/'); 
   };
 
+  const interceptarNavegacion = (e) => {
+    // 🛑 PRIORIDAD 1: BARRIDO EN PROGRESO (Bloqueo Total)
+    if (window.barridoEnProgreso) {
+      window.alert("⚠️ EXPERIMENT IN PROGRESS\n\nPlease wait until the sweeping is finished before leaving the page.");
+      e.preventDefault(); 
+      return;
+    }
+
+    // ⚠️ PRIORIDAD 2: DATOS SIN GUARDAR (Pregunta)
+    if (window.datosEnPeligro) {
+      const confirmar = window.confirm(
+        "⚠️ UNSAVED DATA.\n\nIf you leave now, unsaved data will be permanently deleted.\nAre you sure you want to exit?"
+      );
+      if (!confirmar) {
+        e.preventDefault(); 
+        return;
+      }
+      window.datosEnPeligro = false;
+    }
+  
+    closeDrawer?.();
+  };
 
   return (
     <Box className={styles.navContainer}>
       <Box className={styles.navLink}>
-        <Link onClick={closeDrawer} to="/" className={styles.navLink}>
+        <Link onClick={interceptarNavegacion} to="/" className={styles.navLink}>
           <Button className={styles.button}>
             <Home className={styles.icons} />
             <span className={styles.items}>Home</span>
@@ -42,7 +119,7 @@ const HeaderLinks = ({ divider, closeDrawer }) => {
         </Link>
         {divider && <Divider className={styles.divider} />}
 
-        <Link onClick={closeDrawer} to="/experiments/experimentchooser" className={styles.navLink}>
+        <Link onClick={interceptarNavegacion} to="/experiments/experimentchooser" className={styles.navLink}>
           <Button className={styles.button}>
             <LocalHospital className={styles.icons} />
             <span className={styles.items}>Experiment</span>
@@ -53,7 +130,7 @@ const HeaderLinks = ({ divider, closeDrawer }) => {
         {/* Solo mostrar si el usuario está autenticado */}
         {isAuthenticated && (
           <>
-            <Link onClick={closeDrawer} to="/calendarizacion" className={styles.navLink}>
+            <Link onClick={interceptarNavegacion} to="/calendarizacion" className={styles.navLink}>
               <Button className={styles.button}>
                 <Event className={styles.icons} />
                 <span className={styles.items}>Scheduling</span>
@@ -81,7 +158,7 @@ const HeaderLinks = ({ divider, closeDrawer }) => {
           </Tooltip>
         </Box>
       ) : (
-        <Link onClick={closeDrawer} to="/login" className={styles.navLink}>
+        <Link onClick={interceptarNavegacion} to="/login" className={styles.navLink}>
           <Button className={styles.button}>
             <Login className={styles.icons} />
             <span className={styles.items}>Login</span>

@@ -189,6 +189,113 @@
 
 
 
+# ozzyjames11: este codigo si vale
+# import os
+# import sys
+# import time
+# import shutil
+# import matplotlib.pyplot as plt
+# from ctypes import *
+
+# # 1. RECIBIR ARGUMENTOS DE LA TERMINAL
+# if len(sys.argv) < 5:
+#     print("Error: Faltan argumentos. Uso: python script.py <tiempo_ms> <uid> <meas_id> <sim_mode>")
+#     exit()
+
+# tiempo_integracion_ms = float(sys.argv[1])
+# uid = sys.argv[2]
+# meas_id = sys.argv[3]
+# sim_mode = sys.argv[4] == "True"
+
+# # 2. CREAR RUTAS DE DIRECTORIO ESTRUCTURADAS
+# current_dir = os.path.dirname(os.path.abspath(__file__))
+# # Directorio donde están tus datos de prueba viejos
+# OUTPUT_DIR_VIEJO = os.path.join(current_dir, "output") 
+# # Nuevo directorio dinámico por usuario y barrido
+# DEST_DIR = os.path.join(current_dir, "local_storage", "users", uid, "Exp4", meas_id)
+# os.makedirs(DEST_DIR, exist_ok=True)
+
+# # ==========================================
+# # MODO SIMULACIÓN (Trabajo desde casa)
+# # ==========================================
+# if sim_mode:
+#     print(f"[SIMULACIÓN] Copiando datos de prueba a la carpeta del usuario {uid}...")
+#     archivos = ["espectro_completo.png", "espectro_uv.png", "espectro_visible.png", "espectro_nir.png", "espectro_completo.txt"]
+#     for arc in archivos:
+#         src = os.path.join(OUTPUT_DIR_VIEJO, arc)
+#         dst = os.path.join(DEST_DIR, arc)
+#         if os.path.exists(src):
+#             shutil.copy(src, dst)
+#     print("[SIMULACIÓN] Proceso finalizado.")
+#     exit()
+
+# # ==========================================
+# # MODO REAL (Laboratorio)
+# # ==========================================
+# lib_path = os.path.join(current_dir, "TLCCS_64.dll")
+# try:
+#     lib = cdll.LoadLibrary(lib_path)
+# except Exception as e:
+#     print(f"❌ No se encontró la DLL. Error: {e}")
+#     exit()
+
+# resource_name = b"USB0::0x1313::0x8089::M00325088::RAW"
+# ccs_handle = c_int(0)
+# res = lib.tlccs_init(resource_name, 1, 1, byref(ccs_handle))
+
+# if res != 0:
+#     print(f"❌ Error al conectar con hardware: {res}")
+#     exit()
+
+# integration_time = c_double(0.001 * tiempo_integracion_ms)
+# lib.tlccs_setIntegrationTime(ccs_handle, integration_time)
+# lib.tlccs_startScan(ccs_handle)
+
+# time.sleep(integration_time.value + 0.5)
+
+# wavelengths = (c_double * 3648)()
+# lib.tlccs_getWavelengthData(ccs_handle, 0, byref(wavelengths), c_void_p(None), c_void_p(None))
+
+# data_array = (c_double * 3648)()
+# lib.tlccs_getScanData(ccs_handle, byref(data_array))
+
+# wavelengths_list = list(wavelengths)
+# data_list = list(data_array)
+# rows = zip(wavelengths_list, data_list)
+
+# # 3. GUARDAR RESULTADOS EN LA CARPETA DINÁMICA
+# with open(os.path.join(DEST_DIR, "espectro_completo.txt"), mode="w", newline="", encoding="utf-8") as file:
+#     file.write('Longitud de Onda;Intensidad\n')
+#     for wl, inten in rows:
+#         file.write(f'{wl};{inten}\n')
+
+# uv_wavelengths = [wl for wl in wavelengths_list if 200 <= wl < 400]
+# uv_intensity = [inten for wl, inten in zip(wavelengths_list, data_list) if 200 <= wl < 400]
+# visible_wavelengths = [wl for wl in wavelengths_list if 400 <= wl < 700]
+# visible_intensity = [inten for wl, inten in zip(wavelengths_list, data_list) if 400 <= wl < 700]
+# nir_wavelengths = [wl for wl in wavelengths_list if 700 <= wl <= 1100]
+# nir_intensity = [inten for wl, inten in zip(wavelengths_list, data_list) if 700 <= wl <= 1100]
+
+# def guardar_espectro_completo(nombre_archivo, l_uv, l_vis, l_nir, i_uv, i_vis, i_nir):
+#     plt.figure(figsize=(8, 5))
+#     plt.plot(l_uv, i_uv, color="blue", label="UV Spectrum")
+#     plt.plot(l_vis, i_vis, color="green", label="Visible Spectrum")
+#     plt.plot(l_nir, i_nir, color="red", label="NIR Spectrum")
+#     plt.xlabel("Wavelength [nm]")
+#     plt.ylabel("Intensity [a.u.]")
+#     plt.title("Complete Spectrum")
+#     plt.legend()
+#     plt.grid(True)
+#     plt.savefig(os.path.join(DEST_DIR, nombre_archivo), dpi=300)
+#     plt.close()
+
+# guardar_espectro_completo("espectro_completo.png", uv_wavelengths, visible_wavelengths, nir_wavelengths, uv_intensity, visible_intensity, nir_intensity)
+# # (Puedes agregar las demás gráficas individuales aquí siguiendo la misma lógica, apuntando a DEST_DIR)
+
+# lib.tlccs_close(ccs_handle) # Muy importante liberar el equipo
+# print(f"Medición real guardada para {uid} en {meas_id}.")
+
+
 
 import os
 import sys
@@ -269,13 +376,17 @@ with open(os.path.join(DEST_DIR, "espectro_completo.txt"), mode="w", newline="",
     for wl, inten in rows:
         file.write(f'{wl};{inten}\n')
 
+# Filtrar los datos por rangos
 uv_wavelengths = [wl for wl in wavelengths_list if 200 <= wl < 400]
 uv_intensity = [inten for wl, inten in zip(wavelengths_list, data_list) if 200 <= wl < 400]
+
 visible_wavelengths = [wl for wl in wavelengths_list if 400 <= wl < 700]
 visible_intensity = [inten for wl, inten in zip(wavelengths_list, data_list) if 400 <= wl < 700]
+
 nir_wavelengths = [wl for wl in wavelengths_list if 700 <= wl <= 1100]
 nir_intensity = [inten for wl, inten in zip(wavelengths_list, data_list) if 700 <= wl <= 1100]
 
+# --- FUNCIONES DE GRAFICACIÓN ---
 def guardar_espectro_completo(nombre_archivo, l_uv, l_vis, l_nir, i_uv, i_vis, i_nir):
     plt.figure(figsize=(8, 5))
     plt.plot(l_uv, i_uv, color="blue", label="UV Spectrum")
@@ -289,8 +400,28 @@ def guardar_espectro_completo(nombre_archivo, l_uv, l_vis, l_nir, i_uv, i_vis, i
     plt.savefig(os.path.join(DEST_DIR, nombre_archivo), dpi=300)
     plt.close()
 
+# NUEVA FUNCIÓN: Dibuja un solo rango a la vez
+def guardar_espectro_individual(nombre_archivo, l_onda, intensidad, color, label, titulo):
+    if not l_onda: # Evita que matplotlib explote si el sensor no capta nada en ese rango
+        return
+    plt.figure(figsize=(8, 5))
+    plt.plot(l_onda, intensidad, color=color, label=label)
+    plt.xlabel("Wavelength [nm]")
+    plt.ylabel("Intensity [a.u.]")
+    plt.title(titulo)
+    plt.legend()
+    plt.grid(True)
+    plt.savefig(os.path.join(DEST_DIR, nombre_archivo), dpi=300)
+    plt.close()
+
+# --- EJECUCIÓN DE LAS GRÁFICAS ---
+# 1. Guarda la completa
 guardar_espectro_completo("espectro_completo.png", uv_wavelengths, visible_wavelengths, nir_wavelengths, uv_intensity, visible_intensity, nir_intensity)
-# (Puedes agregar las demás gráficas individuales aquí siguiendo la misma lógica, apuntando a DEST_DIR)
+
+# 2. Guarda las individuales
+guardar_espectro_individual("espectro_uv.png", uv_wavelengths, uv_intensity, "blue", "UV Spectrum", "UV Spectrum (200 - 400 nm)")
+guardar_espectro_individual("espectro_visible.png", visible_wavelengths, visible_intensity, "green", "Visible Spectrum", "Visible Spectrum (400 - 700 nm)")
+guardar_espectro_individual("espectro_nir.png", nir_wavelengths, nir_intensity, "red", "NIR Spectrum", "NIR Spectrum (700 - 1100 nm)")
 
 lib.tlccs_close(ccs_handle) # Muy importante liberar el equipo
 print(f"Medición real guardada para {uid} en {meas_id}.")

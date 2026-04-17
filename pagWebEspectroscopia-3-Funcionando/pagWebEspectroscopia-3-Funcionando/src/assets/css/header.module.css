@@ -1,3 +1,11 @@
+/* --- Importar Poppins Globalmente --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* ✅ REGLA MAESTRA: Forzar Poppins en todo el AppBar y sus hijos */
+.appBar, .appBar * {
+  font-family: 'Poppins', sans-serif !important;
+}
+
 /* --- AppBar y comportamiento general --- */
 .appBar {
   background-color: #001f3e;
@@ -32,9 +40,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  /*flex: 1;*/
 }
-
 
 /* --- Navegación horizontal --- */
 .navContainer {
@@ -63,13 +69,13 @@
     display: flex;
     align-items: center;
     padding: 8px 12px;
-    color: #fff !important;  /* Asegura que el texto siempre sea blanco */
-    background-color: #007bff;  /* Fondo sólido para el botón */
+    color: #fff !important; 
+    background-color: #007bff; 
     border-radius: 4px;
     text-transform: uppercase;
-    font-size: 1rem;  /* Tamaño de la fuente en el botón */
-    font-weight: 500;  /* Asegura que el texto sea más legible */
-    transition: none;  /* Desactiva cualquier transición */
+    font-size: 1rem; 
+    font-weight: 500; 
+    transition: none; 
 }
 
 /* Iconos */
@@ -83,7 +89,6 @@
   font-size: 1rem;
   font-weight: 500;
 }
-
 
 /* Usuario autenticado */
 .userSection {
@@ -110,17 +115,17 @@
 }
 
 .userName {
-  font-weight: bold;
+  font-weight: 600; /* Mejor peso para Poppins */
   color: #fff;
 }
 
 .userEmail {
-  opacity: 0.875rem;
+  font-size: 0.875rem;
   color: #ccc;
 }
 
 .logoutButton {
-  color: white;
+  color: white !important;
   transition: none;
 }
 
@@ -140,5 +145,5 @@
 }
 
 .logoutButton:hover {
-    color: #ff5555 !important; /* Color en hover */
+    color: #ff5555 !important; 
 }

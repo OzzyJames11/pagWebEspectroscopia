@@ -6,10 +6,11 @@ export const COMMON_TOOLTIPS = {
     "Power": "Total energy being produced (W)",
     "Efficiency": "How well the system converts sunlight to electricity (%)",
     "Temperature": "How hot the system is (°C)",
+    "Angle": "Solar panel tilt level measured in degrees",
     
     // Specific but recurring columns
-    "Zenith Angle (°)": "How much the panel is tilted up/down (degrees)",
-    "Azimuth Angle (°)": "Which direction the panel is facing (0° = North)",
+    "Zenith": "How much the panel is tilted up/down (degrees)",
+    "Azimuth": "Which direction the panel is facing (0° = North)",
     "Fill Factor": "How good the solar cells are at producing power",
     
 };
