@@ -579,8 +579,10 @@ const ExperimentChooser = () => {
   const navigate = useNavigate();
   const user = useSelector(state => state.auth.user);
   
+  // const [habilitado, setHabilitado] = useState(false);
+  // const [mensajeTurno, setMensajeTurno] = useState('');
   const [habilitado, setHabilitado] = useState(false);
-  const [mensajeTurno, setMensajeTurno] = useState('');
+  const [mensajes, setMensajes] = useState({ activo: null, futuros: null });
   const [turnosDeHoy, setTurnosDeHoy] = useState([]); 
 
   const [estadoHardware, setEstadoHardware] = useState({
@@ -720,7 +722,7 @@ const ExperimentChooser = () => {
     const verificarHora = () => {
       if (turnosDeHoy.length === 0) {
         setHabilitado(false);
-        setMensajeTurno('');
+        setMensajes({ activo: null, futuros: null });
         return;
       }
 
@@ -753,14 +755,18 @@ const ExperimentChooser = () => {
         // Evaluamos si el turno está activo usando la hora AJUSTADA
         if (horaRealEcuador >= horaInicioObj && horaRealEcuador < finAjustadoObj) {
           turnoActivo = true;
-          mensajesActivos.push(`🟢 Turno activo: ${turno.horaInicio} - ${horaFinDisplay}`);
+          mensajesActivos.push(`🟢 Active appointment: ${turno.horaInicio} - ${horaFinDisplay}`);
         } else if (horaRealEcuador < horaInicioObj) {
-          mensajesFuturos.push(`📅 Turno agendado: ${turno.horaInicio} - ${horaFinDisplay}`);
+          mensajesFuturos.push(`📅 Scheduled appointment: ${turno.horaInicio} - ${horaFinDisplay}`);
         }
       });
 
       setHabilitado(turnoActivo);
-      setMensajeTurno([...mensajesActivos, ...mensajesFuturos].join(' | '));
+      // Guardamos el primer turno activo, y si hay futuros, los unimos (si es que hay varios)
+      setMensajes({
+        activo: mensajesActivos.length > 0 ? mensajesActivos[0] : null,
+        futuros: mensajesFuturos.length > 0 ? mensajesFuturos.join(' | ') : null
+      });
     };
 
     verificarHora(); 
@@ -821,10 +827,10 @@ const ExperimentChooser = () => {
           }}
         >
           
-          {habilitado ? (
+          {/* {habilitado ? (
             // 🟢 MENSAJE ÉXITO (TURNO ACTIVO)
             <Typography variant="body1" sx={{ color: '#2e7d32', fontWeight: 600, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: 1, fontFamily: '"Poppins", sans-serif' }}>
-              <span style={{ fontSize: '1.2rem' }}>●</span> {mensajeTurno}
+              <span style={{ fontSize: '1.2rem' }}></span> {mensajeTurno}
             </Typography>
           ) : (
             // 🔴 MENSAJE ERROR (SIN TURNO)
@@ -842,6 +848,39 @@ const ExperimentChooser = () => {
                 </Typography>
               )}
             </>
+          )} */}
+
+{habilitado ? (
+            // 🟢 MENSAJE ÉXITO (TURNO ACTIVO)
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="body1" sx={{ color: '#2e7d32', fontWeight: 600, fontSize: '1.1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1, fontFamily: '"Poppins", sans-serif' }}>
+                {mensajes.activo}
+              </Typography>
+              
+              {/* Si tiene un turno activo PERO también tiene turnos futuros agendados */}
+              {mensajes.futuros && (
+                <Typography variant="body2" sx={{ color: '#2e7d32', fontWeight: 400, mt: 1, borderTop: '1px solid rgba(46, 125, 50, 0.2)', pt: 1, width: '100%', fontFamily: '"Poppins", sans-serif' }}>
+                  {mensajes.futuros}
+                </Typography>
+              )}
+            </Box>
+          ) : (
+            // 🔴 MENSAJE ERROR (SIN TURNO)
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="body1" sx={{ color: '#d32f2f', fontWeight: 600, mb: 0.5, fontFamily: '"Poppins", sans-serif' }}>
+                ⚠ Access Restricted
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#c62828', fontWeight: 220, fontFamily: '"Poppins", sans-serif' }}>
+                You must be logged in and have an active scheduled appointment to access the experiments.
+              </Typography>
+              
+              {/* Si NO tiene turno activo, pero SÍ tiene turnos futuros agendados */}
+              {mensajes.futuros && (
+                <Typography variant="body2" sx={{ color: '#ed6c02', fontWeight: 500, mt: 1, borderTop: '1px solid rgba(237, 108, 2, 0.2)', pt: 1, width: '100%', fontFamily: '"Poppins", sans-serif' }}>
+                  {mensajes.futuros}
+                </Typography>
+              )}
+            </Box>
           )}
 
         </Box>

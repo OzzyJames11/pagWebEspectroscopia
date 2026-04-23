@@ -845,10 +845,12 @@ const HORA_INICIO = 0;
 const HORA_FIN = 23;    
 const maxDuration = 2;  
 const MAX_TURNOS_POR_DIA = 2;
+const DIAS_A_MOSTRAR = 7;
 
 const totalHours = HORA_FIN - HORA_INICIO + 1;
 const times = Array.from({ length: totalHours }, (_, i) => `${HORA_INICIO + i}:00`);
-const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+// Aqui se modifica la cantidad de días.
+const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].slice(0, DIAS_A_MOSTRAR);
 
 const getCurrentMonday = () => {
   const today = new Date();
@@ -922,7 +924,9 @@ const Calendarizacion = () => {
 
   // ✅ EFECTO 1: ESCUCHAR DISPONIBILIDAD EN TIEMPO REAL
   useEffect(() => {
-    const week = Array.from({ length: 5 }, (_, i) => {
+    // Modificacion para permitir fines de semana
+    // const week = Array.from({ length: 5 }, (_, i) => {
+    const week = Array.from({ length: DIAS_A_MOSTRAR }, (_, i) => {
       const date = new Date(currentMonday);
       date.setDate(currentMonday.getDate() + i);
       return date;
@@ -937,7 +941,7 @@ const Calendarizacion = () => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < DIAS_A_MOSTRAR; i++) {
         const dateStr = dateStrings[i];
         newAvailability[dateStr] = {};
 

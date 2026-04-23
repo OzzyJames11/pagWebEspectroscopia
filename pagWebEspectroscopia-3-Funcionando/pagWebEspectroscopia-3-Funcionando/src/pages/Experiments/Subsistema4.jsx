@@ -927,6 +927,7 @@ import Button from '../../components/Elements/Button.jsx';
 // Importación de imágenes e iconos
 import graficoSpectroscopia from '../../assets/img/experimentos/espectro_completo.png';
 import placeholderCamara from '../../assets/img/experimentos/camaraPanelesSolares.png';
+import { panelAmarillo, panelAzul, panelRojo, panelBlanco } from '../../assets/img/experimentos/panelesS4';
 import { Download, PlayArrow, CropFree, ArrowDropDown, Save, CloudDone, Refresh } from '@mui/icons-material';
 
 // Strings y Estilos
@@ -1582,16 +1583,16 @@ const Subsistema4 = () => {
                 <Grid container spacing={2}>
                     {/* ... (aquí sigue tu código del map para los 4 paneles) ... */}
                     {[
-                        { label: 'Reference', key: 'referencia', color: '#9e9e9e' },
-                        { label: 'Yellow Filter', key: 'filtroAmarillo', color: '#fbc02d' },
-                        { label: 'Blue Filter', key: 'filtroAzul', color: '#1976d2' },
-                        { label: 'Red Filter', key: 'filtroRojo', color: '#d32f2f' }
+                        { label: 'Reference', key: 'referencia', color: '#9e9e9e', imagen: panelBlanco },
+                        { label: 'Yellow Filter', key: 'filtroAmarillo', color: '#fbc02d', imagen: panelAmarillo },
+                        { label: 'Blue Filter', key: 'filtroAzul', color: '#1976d2', imagen: panelAzul },
+                        { label: 'Red Filter', key: 'filtroRojo', color: '#d32f2f', imagen: panelRojo }
                     ].map((panel) => (
                         <Grid item xs={12} sm={6} md={3} key={panel.key}>
                             <Paper elevation={3} sx={{ p: 3, textAlign: 'center', borderRadius: '15px', border: '1px solid #eee' }}>
                                 {/* Imagen Vertical del Panel */}
                                 <img 
-                                    src={placeholderCamara} 
+                                    src={panel.imagen} 
                                     alt={panel.label}
                                     style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '8px', marginBottom: '15px' }}
                                 />

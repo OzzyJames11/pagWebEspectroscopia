@@ -48,6 +48,15 @@ console.log("[Firebase] Conectado correctamente al servidor.");
 
 const db = getDatabase(); // Sacamos la referencia de la base de datos
 
+// SEGURO DE ARRANQUE
+// Forzamos la base de datos a estado de calibración en el milisegundo cero.
+db.ref('estado_general').update({
+  'Exp1/hardwareStatus': 'CALIBRATING',
+  'Exp2/hardwareStatus': 'CALIBRATING',
+  'Exp3/hardwareStatus': 'CALIBRATING'
+});
+console.log("🔒 [Seguridad] Interfaces bloqueadas preventivamente (CALIBRATING).");
+
 // 3. ARRANCAR LOS SUBSISTEMAS
 // Aquí le "entregamos" la base de datos conectada a tu subsistema
 iniciarSubsistema1(db);
