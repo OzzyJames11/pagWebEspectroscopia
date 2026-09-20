@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { AppBar, Toolbar, Container, Box, Drawer, useScrollTrigger } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { Dehaze } from '@mui/icons-material';
-import headerLogo from '../../assets/img/header_logo.png';
 import epnLogo from '../../assets/img/logo-epn-white.png';
 import euGPLogo from '../../assets/img/EU-BEGP_BN.png';
 import HeaderLinks from './Header.links'; // Importa el componente de enlaces
@@ -32,9 +31,9 @@ const Header = (props) => {
                 <Container className={styles.container}>
                     <Box display="flex" alignItems="center">
                         {/* <img src={epnLogo} alt="Logotipo EPN" style={{ height: '50px', maxWidth: '75px' }} /> */}
-                        <Link to="/" style={{ textDecoration: 'none' }}>
+                        {/* <Link to="/" style={{ textDecoration: 'none' }}> */}
                             <img src={euGPLogo} alt="Logotipo EU-GP" style={{ width: '70%', maxWidth: '500px', minWidth: '45px', maxHeight: '64px' }} />
-                        </Link>
+                        {/* </Link> */}
                     </Box>
                     {/* Enlaces (versión escritorio) */}
                     <Box sx={{ display: { xs: 'none', sm: 'block' } }}>

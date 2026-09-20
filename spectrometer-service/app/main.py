@@ -256,7 +256,7 @@ from firebase_admin import credentials, db
 
 # ==== CONFIGURACIÓN MODO SIMULACIÓN ====
 # Cámbialo a "False" cuando el espectrómetro esté conectado físicamente
-SIMULATION_MODE = "Falso" 
+SIMULATION_MODE = "False" 
 
 # ==== CONFIGURACIÓN FIREBASE ====
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -277,13 +277,27 @@ filtros_data = {
 
 app = FastAPI()
 
+# Whitelist DE DOMINIOS PERMITIDOS PARA CORS
+DOMINIOS_PERMITIDOS = [
+    "http://localhost",                    # Para pruebas locales con Nginx
+    "https://remotesolarlabec.epn.edu.ec"  # El dominio oficial de producción
+    # OJO: Si tu frontend se conecta usando un dominio de Ngrok, 
+    # DEBES agregarlo aquí también. Por ejemplo:
+    "https://tactilely-furrowless-liane.ngrok-free.dev"
+]
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
+    # allow_origins=["*"],
+    allow_origins=DOMINIOS_PERMITIDOS,
+    # allow_credentials=False,
+    allow_credentials=True,
+    # allow_methods=["*"],
+    allow_methods=["GET"], # solo get porque solo hay rutas de descarga
     allow_headers=["*"],
-    expose_headers=["*"]
+    # expose_headers=["*"]
+    expose_headers=["Content-Disposition"] # para que el navegador lea el nombre del archivo ZIP
 )
 
 SCRIPT_PATH = os.path.join(os.path.dirname(__file__), "UV_NIR_codeSpectrometer.py")

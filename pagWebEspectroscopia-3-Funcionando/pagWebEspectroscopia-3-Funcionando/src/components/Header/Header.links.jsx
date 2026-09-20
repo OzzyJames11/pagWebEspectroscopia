@@ -24,46 +24,6 @@ const HeaderLinks = ({ divider, closeDrawer }) => {
     return 'U';
   };
 
-  // const handleLogout = () => {
-  // dispatch(logout());
-  // closeDrawer?.();
-  // navigate('/'); // Redirige al Home
-  // };
-  // const handleLogout = () => {
-  //   // Si hay datos en peligro, advertimos antes de cerrar sesión
-  //   if (window.datosEnPeligro) {
-  //     const confirmar = window.confirm(
-  //       "⚠️ TIENES DATOS SIN GUARDAR.\n\nSi cierras sesión ahora, los datos se borrarán permanentemente.\n¿Estás seguro de salir?"
-  //     );
-  //     if (!confirmar) return; // Si cancela, detenemos el logout
-      
-  //     window.datosEnPeligro = false; // Liberamos la variable
-  //   }
-
-  //   // Si todo está bien o aceptó, cerramos sesión normalmente
-  //   dispatch(logout());
-  //   closeDrawer?.();
-  //   navigate('/'); 
-  // };
-
-  // const interceptarNavegacion = (e) => {
-  //   // Revisamos si el Subsistema1 dejó la advertencia activada
-  //   if (window.datosEnPeligro) {
-  //     const confirmar = window.confirm(
-  //       "⚠️ TIENES DATOS SIN GUARDAR.\n\nSi sales ahora, los datos se borrarán permanentemente.\n¿Estás seguro de salir?"
-  //     );
-  
-  //     if (!confirmar) {
-  //       e.preventDefault(); // Magia: Esto cancela el clic y evita que React Router cambie la página
-  //       return;
-  //     }
-  //     // Si el usuario acepta perder los datos, limpiamos la variable para dejarlo salir
-  //     window.datosEnPeligro = false;
-  //   }
-  
-  //   // Si no hay peligro o el usuario aceptó, cerramos el menú lateral (tu código original)
-  //   closeDrawer?.();
-  // };
   const handleLogout = () => {
     // 🛑 PRIORIDAD 1: BARRIDO EN PROGRESO (Bloqueo Total)
     if (window.barridoEnProgreso) {

@@ -935,17 +935,19 @@ import { PAGE_TITLES } from '../../assets/Strings/Experiments/Subsistema4Strings
 import '../../assets/css/Elements/PaperStyles.css';
 
 
-// ==========================================
-// 🧠 INTERRUPTOR DE ENTORNO
-// Ponlo en 'true' ÚNICAMENTE en la PC física del laboratorio.
-// Ponlo en 'false' cuando estés programando/probando desde tu casa.
-const ESTOY_EN_EL_LAB = true;
+// // ==========================================
+// // 🧠 INTERRUPTOR DE ENTORNO
+// // Ponlo en 'true' ÚNICAMENTE en la PC física del laboratorio.
+// // Ponlo en 'false' cuando estés programando/probando desde tu casa.
+// const ESTOY_EN_EL_LAB = true;
 
-const API_BASE_URL = ESTOY_EN_EL_LAB 
-    ? "http://127.0.0.1:8000" // Ruta directa y ultrarrápida (Sin Ngrok)
-    : "https://tactilely-furrowless-liane.ngrok-free.dev"; // Túnel para acceder desde tu casa
-// ==========================================
+// const API_BASE_URL = ESTOY_EN_EL_LAB 
+//     ? "http://127.0.0.1:8000" // Ruta directa y ultrarrápida (Sin Ngrok)
+//     : "https://tactilely-furrowless-liane.ngrok-free.dev"; // Túnel para acceder desde tu casa
+// // ==========================================
 
+// API BASE URL: funciona via Nginx Proxy
+const API_BASE_URL = "/api-python";
 
 
 
@@ -1128,7 +1130,7 @@ const Subsistema4 = () => {
                         // Esperamos a descargar la imagen correcta antes de mostrarla
                         const response = await fetch(savedImageUrl, {
                             method: "GET",
-                            headers: { "ngrok-skip-browser-warning": "69420" }
+                            // headers: { "ngrok-skip-browser-warning": "69420" }
                         });
 
                         if (response.ok) {
@@ -1162,7 +1164,7 @@ const Subsistema4 = () => {
                 
                 fetch(nuevaUrlImagen, {
                     method: "GET",
-                    headers: { "ngrok-skip-browser-warning": "69420" }
+                    // headers: { "ngrok-skip-browser-warning": "69420" }
                 })
                 .then(response => {
                     if (!response.ok) throw new Error("Error en la descarga de la imagen");
@@ -1500,7 +1502,7 @@ const Subsistema4 = () => {
                 </Grid>
             </Grid>
 
-            {/* MENÚ FLOTANTE PARA IMÁGENES */}
+            {/* MENÚ FLOTANTE PARA IMÁGENES. */}
             <Menu 
                 anchorEl={anchorEl} 
                 open={Boolean(anchorEl)} 

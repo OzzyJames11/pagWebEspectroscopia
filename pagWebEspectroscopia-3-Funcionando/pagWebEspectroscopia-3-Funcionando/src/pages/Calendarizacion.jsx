@@ -836,7 +836,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import EventIcon from '@mui/icons-material/Event';
 import ScienceIcon from '@mui/icons-material/Science';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import { SECRET_WORD } from '../assets/Strings/CalendarStrings';
+import { SECRET_WORD, ADMIN_EMAILS } from '../assets/Strings/CalendarStrings';
 
 // =========================================================================
 // ⚙️ CONFIGURACIÓN GLOBAL DE HORARIOS (FORMATO 24 HORAS)
@@ -910,6 +910,7 @@ const RelojRealTime = () => {
 // =========================================================================
 const Calendarizacion = () => {
   const user = useSelector(state => state.auth.user);
+  const isAdmin = user && ADMIN_EMAILS.includes(user.email);
   const [availability, setAvailability] = useState({});
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -919,6 +920,10 @@ const Calendarizacion = () => {
   const [userTurnos, setUserTurnos] = useState([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false); 
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [appointmentToDelete, setAppointmentToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const currentMonday = getCurrentMonday();
 
@@ -990,7 +995,9 @@ const Calendarizacion = () => {
     if (!user) return;
     setFormData(prev => ({ ...prev, name: user.displayName || '', email: user.email || '' }));
 
-    const q = query(collection(db, 'turnos'), where('uid', '==', user.uid));
+    const turnosRef = collection(db, 'turnos');
+    // const q = query(collection(db, 'turnos'), where('uid', '==', user.uid));
+    const q = isAdmin ? query(turnosRef) : query(turnosRef, where('uid', '==', user.uid));
     const unsubscribe = onSnapshot(q, (snap) => {
       const results = snap.docs.map(doc => {
         const data = doc.data();
@@ -1118,12 +1125,36 @@ const Calendarizacion = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  // const handleDelete = async (id) => {
+  //   try { 
+  //     await deleteDoc(doc(db, 'turnos', id)); 
+  //     setSnackbarOpen(true); 
+  //   } 
+  //   catch (error) { console.error("Error deleting appointment: ", error); }
+  // };
+
+  // Esta función solo abre la ventana y guarda qué turno queremos borrar
+  const handleDelete = (id) => {
+    setAppointmentToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  // Esta función hace el trabajo duro cuando confirmamos en la ventana
+  const executeDelete = async () => {
+    if (!appointmentToDelete || isDeleting) return;
+    setIsDeleting(true);
+
     try { 
-      await deleteDoc(doc(db, 'turnos', id)); 
+      await deleteDoc(doc(db, 'turnos', appointmentToDelete)); 
       setSnackbarOpen(true); 
-    } 
-    catch (error) { console.error("Error deleting appointment: ", error); }
+    } catch (error) { 
+      console.error("Error deleting appointment: ", error); 
+      alert("There was an error deleting the appointment.");
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setAppointmentToDelete(null);
+    }
   };
 
   return (
@@ -1202,7 +1233,8 @@ const Calendarizacion = () => {
 
         <Grid item xs={12} md={4}>
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: '#333333', borderBottom: '2px solid #e0e0e0', pb: 1, mb: 2 }}>
-            My Scheduled Appointments
+            {/* My Scheduled Appointments */}
+            {isAdmin ? "All Scheduled Appointments (Admin)" : "My Scheduled Appointments"}
           </Typography>
           <Paper sx={{ maxHeight: '550px', overflowY: 'auto', boxShadow: 3 }}>
             <List>
@@ -1218,6 +1250,12 @@ const Calendarizacion = () => {
                         <span style={{ color: '#ccc', margin: '0 4px' }}>|</span>
                         <AccessTimeIcon fontSize="small" color="action" />
                         <span>{turno.horaInicio} - {turno.horaFin}</span>
+                        {isAdmin && (
+                          <>
+                            <span style={{ color: '#ccc', margin: '0 4px' }}>|</span>
+                            <span style={{ fontWeight: 600, color: '#d32f2f' }}>{turno.name}</span>
+                          </>
+                        )}
                       </Box>
                     }
                     secondary={
@@ -1308,6 +1346,41 @@ const Calendarizacion = () => {
         </DialogActions>
       </Dialog>
 
+
+      {/* DIÁLOGO DE CONFIRMACIÓN DE BORRADO */}
+      <Dialog open={deleteDialogOpen} onClose={() => !isDeleting && setDeleteDialogOpen(false)}>
+        <DialogTitle sx={{ fontFamily: '"Poppins", sans-serif' }}>
+          Confirm Deletion
+        </DialogTitle>
+        <DialogContent dividers>
+          <Typography gutterBottom sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 500 }}>
+            {isAdmin 
+              ? "⚠️ ADMIN ACTION: Are you sure you want to delete this user's appointment?" 
+              : "Are you sure you want to cancel your appointment?"}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+            This action cannot be undone and the time slot will become available for others.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button 
+            onClick={() => setDeleteDialogOpen(false)} 
+            color="inherit" 
+            disabled={isDeleting}
+          >
+            Cancel
+          </Button>
+          <Button 
+            variant="contained" 
+            color="error" 
+            onClick={executeDelete} 
+            disabled={isDeleting} 
+            startIcon={isDeleting ? <CircularProgress size={20} color="inherit" /> : null}
+          >
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={() => setSnackbarOpen(false)} message="Operation successful" anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} />
     </Box>
   );

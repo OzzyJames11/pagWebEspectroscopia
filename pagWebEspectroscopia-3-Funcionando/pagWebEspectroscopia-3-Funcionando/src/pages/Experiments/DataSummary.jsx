@@ -10521,9 +10521,12 @@ const menuProps = {
 
 const ESTOY_EN_EL_LAB = true;
 
-const API_BASE_URL = ESTOY_EN_EL_LAB
-  ? "http://127.0.0.1:8000"
-  : "https://tactilely-furrowless-liane.ngrok-free.dev";
+//const API_BASE_URL = ESTOY_EN_EL_LAB
+  //? "http://127.0.0.1:8000"
+  //: "https://tactilely-furrowless-liane.ngrok-free.dev";
+
+  // API BASE URL: funciona via Nginx Proxy
+const API_BASE_URL = "/api-python";
 
 const DataSummary = () => {
   const navigate = useNavigate();
@@ -11300,6 +11303,7 @@ const handleDeleteMeasurementS2 = async (sweepId, timestamp) => {
             p: 2,
             borderRadius: 2,
             height: "calc(100vh - 180px)",
+            minHeight: "600px",
             overflow: "auto",
           }}
         >
@@ -11388,7 +11392,7 @@ const handleDeleteMeasurementS2 = async (sweepId, timestamp) => {
                     <DataTable
                       columns={SUBSISTEMA1_COLUMNS}
                       disableTooltips={true}
-                      maxHeight="calc(100vh - 470px)"
+                      maxHeight="500px"
                       data={(selectedS1Obj.datos || []).map((d) => ({
                         [SUBSISTEMA1_COLUMNS[0]]: d.angle ?? 0,
                         [SUBSISTEMA1_COLUMNS[1]]: d.voltage?.toFixed(2) ?? "0.00",
@@ -11495,7 +11499,7 @@ const handleDeleteMeasurementS2 = async (sweepId, timestamp) => {
                     <DataTable
                       columns={SUBSYSTEM2_COLUMNS}
                       disableTooltips={true}
-                      maxHeight="calc(100vh - 385px)" //limitar el tamanio de la tabla
+                      maxHeight="500px"
                       data={(selectedS2Obj.datos || []).map((d) => ({
                         [SUBSYSTEM2_COLUMNS[0]]: getExp2PitchMeasurement(d),
                         [SUBSYSTEM2_COLUMNS[1]]: getExp2RollMeasurement(d),

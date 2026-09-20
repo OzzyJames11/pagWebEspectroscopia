@@ -7615,30 +7615,81 @@ const Subsistema3 = () => {
     return () => unsubscribe();
   }, [user, db, BASE_PATH]);
 
+
+  const initialMeasurementsCount = useRef(null);
+  // useEffect(() => {
+  //   if (!user) return;
+  //   const dbRef = ref(db, `${BASE_PATH}/measurements`);
+
+  //   // 🚨 Eliminamos el "get" inicial para que no cargue el historial antiguo.
+  //   // Solo escuchamos los cambios en tiempo real y filtramos los nuevos.
+  //   const unsubscribe = onValue(dbRef, (snapshot) => {
+  //     if (snapshot.exists()) {
+  //       const rawData = snapshot.val();
+        
+  //       // 🚨 FILTRO CLAVE: Solo mostramos mediciones creadas DESPUÉS de entrar a la página
+  //       console.log("🕒 TIEMPO DEL CELULAR (sessionStart):", sessionStartTime.current);
+  //       Object.values(rawData).forEach(d => {
+  //          console.log(`📊 Dato de Firebase (TS: ${d.timestamp}) | ¿Es mayor?: ${d.timestamp >= sessionStartTime.current}`);
+  //       });
+  //       // filtro clave
+  //       const loadedData = Object.values(rawData).filter(
+  //         (d) => d.timestamp >= sessionStartTime.current
+  //       );
+        
+  //       loadedData.sort((a, b) => a.timestamp - b.timestamp);
+  //       setDatosTemporales(loadedData);
+  //     } else {
+  //       setDatosTemporales([]);
+  //     }
+  //   });
+
+  //   return () => unsubscribe();
+  // }, [user, db, BASE_PATH]);
+
   useEffect(() => {
     if (!user) return;
     const dbRef = ref(db, `${BASE_PATH}/measurements`);
 
-    // 🚨 Eliminamos el "get" inicial para que no cargue el historial antiguo.
-    // Solo escuchamos los cambios en tiempo real y filtramos los nuevos.
     const unsubscribe = onValue(dbRef, (snapshot) => {
       if (snapshot.exists()) {
         const rawData = snapshot.val();
         
-        // 🚨 FILTRO CLAVE: Solo mostramos mediciones creadas DESPUÉS de entrar a la página
-        const loadedData = Object.values(rawData).filter(
-          (d) => d.timestamp >= sessionStartTime.current
-        );
-        
-        loadedData.sort((a, b) => a.timestamp - b.timestamp);
-        setDatosTemporales(loadedData);
+        // Convertimos el objeto en un array y lo ordenamos cronológicamente
+        const allData = Object.values(rawData).sort((a, b) => a.timestamp - b.timestamp);
+
+        // 1. Si es la PRIMERA VEZ que leemos los datos al entrar a la página
+        if (initialMeasurementsCount.current === null) {
+          // Guardamos la cuenta exacta de mediciones que ya existían
+          initialMeasurementsCount.current = allData.length;
+          // Dejamos la tabla vacía para la nueva sesión
+          setDatosTemporales([]);
+          return;
+        }
+
+        // 2. Si hay datos NUEVOS (se agregaron mediciones tras hacer clic en Clean)
+        if (allData.length > initialMeasurementsCount.current) {
+          // Cortamos la historia antigua y nos quedamos solo con lo nuevo de esta sesión
+          const newDataOnly = allData.slice(initialMeasurementsCount.current);
+          setDatosTemporales(newDataOnly);
+        } else {
+          // Por seguridad, si los datos bajan o se mantienen igual, mostramos vacío
+          setDatosTemporales([]);
+        }
+
       } else {
+        // Base de datos vacía
+        initialMeasurementsCount.current = 0;
         setDatosTemporales([]);
       }
     });
 
     return () => unsubscribe();
   }, [user, db, BASE_PATH]);
+
+
+
+  
 
   // =========================================================================
   // 4. PROTECCIÓN F5, CERRAR PESTAÑA Y FLECHA ATRÁS
