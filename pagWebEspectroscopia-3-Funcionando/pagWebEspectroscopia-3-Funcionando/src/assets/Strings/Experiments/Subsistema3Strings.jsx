@@ -34,7 +34,7 @@
 export const SUBSISTEMA3_COLUMNS = [
     "Angle \n(deg)",
     "Voltage \n(V)",
-    "Current \n(I)",
+    "Current \n(A)",
     "Efficiency \n(%)",
     "Fill Factor"
 ];

@@ -1,80 +1,3 @@
-// CODIGO QUE FUNCIONA BIEN
-
-// import { SerialPort } from 'serialport';
-// import { ReadlineParser } from '@serialport/parser-readline';
-// import readline from 'readline';
-
-// // Configura aquí tus puertos. El número de la izquierda es el ID que usarás al escribir.
-// const configPuertos = {
-//     '1': 'COM5', 
-//     '2': 'COM6',
-//     '3': 'COM7'
-// };
-
-// const puertosActivos = {};
-
-// // 1. Inicializar los puertos seriales
-// for (const [id, path] of Object.entries(configPuertos)) {
-//     const port = new SerialPort({ 
-//         path: path, 
-//         baudRate: 9600 // Asegúrate de que coincida con el Serial.begin() de tus Arduinos
-//     }, (err) => {
-//         if (err) {
-//             console.error(`[Error] No se pudo abrir ${path}: ${err.message}`);
-//         } else {
-//             console.log(`[Éxito] Conectado a Arduino ${id} en ${path}`);
-//         }
-//     });
-
-//     // Usar un parser para leer las líneas completas (hasta que el Arduino envíe un salto de línea)
-//     const parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
-
-//     // Escuchar los datos que entran
-//     parser.on('data', (data) => {
-//         console.log(`[Arduino ${id} - ${path}] dice: ${data}`);
-//     });
-
-//     puertosActivos[id] = port;
-// }
-
-// // 2. Interfaz para leer lo que escribes en la consola de Node.js
-// const rl = readline.createInterface({
-//     input: process.stdin,
-//     output: process.stdout
-// });
-
-// console.log("\nEscribe un comando (ej. '1n' para enviar 'n' al COM1):");
-
-// rl.on('line', (input) => {
-//     // Validar que el input tenga al menos 2 caracteres
-//     if (input.length < 2) {
-//         console.log("Comando muy corto. Usa el formato: [ID del puerto][Mensaje]");
-//         return;
-//     }
-
-//     const id = input.charAt(0); // El primer carácter es el ID (1, 2 o 3)
-//     const mensaje = input.substring(1); // El resto es el mensaje (ej. 'n', 'encender', etc.)
-
-//     if (puertosActivos[id] && puertosActivos[id].isOpen) {
-//         // Enviar el mensaje al Arduino correspondiente
-//         puertosActivos[id].write(mensaje + '\n', (err) => {
-//             if (err) {
-//                 console.error(`Error enviando a Arduino ${id}:`, err.message);
-//             } else {
-//                 console.log(`-> Mensaje '${mensaje}' enviado correctamente a Arduino ${id}`);
-//             }
-//         });
-//     } else {
-//         console.log(`El puerto con ID '${id}' no está disponible o no existe.`);
-//     }
-// });
-
-
-
-
-// PARA PROBAR: 
-// CODIGO ANTERIOR MODIFICADO
-
 import { SerialPort } from 'serialport';
 import { ReadlineParser } from '@serialport/parser-readline';
 import readline from 'readline';
@@ -130,24 +53,6 @@ export function enviarComandoAArduino(id, mensaje) {
     return false;
 }
 
-// 3. Interfaz de consola manual (Para tus pruebas en VSCode)
-// const rl = readline.createInterface({
-//     input: process.stdin,
-//     output: process.stdout
-// });
-
-// console.log("\nEscribe un comando (ej. '1n' para enviar 'n' al COM1):");
-// rl.on('line', (input) => {
-//     if (input.length < 2) return console.log("Formato incorrecto. Usa: [ID][Mensaje]");
-//     const id = input.charAt(0);
-//     const mensaje = input.substring(1);
-
-//     if(enviarComandoAArduino(id, mensaje)) {
-//         console.log(`-> Mensaje manual '${mensaje}' enviado a Arduino ${id}`);
-//     } else {
-//         console.log(`El puerto '${id}' no está disponible.`);
-//     }
-// });
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -157,7 +62,7 @@ console.log("\nEscribe un comando (ej. '1n' para enviar 'n' al COM1):");
 rl.on('line', (input) => {
     const comando = input.trim();
     
-    // 🚀 NUEVO: Interceptar la orden de apagado del Watchdog
+    // Interceptar la orden de apagado del Watchdog
     if (comando === "APAGAR_SISTEMA") {
         console.log("\n[Backend] Orden de Watchdog recibida. Ejecutando rutina de seguridad...");
         process.emit('SIGINT'); // 👈 ¡MAGIA! Esto simula exactamente tu Ctrl+C
