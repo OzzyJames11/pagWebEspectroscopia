@@ -58,37 +58,6 @@ const Login = () => {
                     </div>
                 )}
 
-                {/* <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="login-input"
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="login-input"
-                /> */}
-                {/* <button type="submit" className="login-button" onClick={handleLogin}>
-                    Login
-                </button>
-
-                <div className="forgot-password">
-                    <button className="forgot-password-button" onClick={handleResetPassword}>
-                        Forgot Password?
-                    </button>
-                </div> */}
-
-                {/* <div className="create-account">
-                    <span style={{ color: '#007bff' }}>Don't you have an account? </span>
-                    <Link to="/register">Create an account</Link>
-                </div> */}
-
                 <div className="social-login">
                     <button className="google-button" onClick={handleGoogleLogin}>
                         Sign in with Google
